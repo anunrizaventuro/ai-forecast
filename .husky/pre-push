@@ -1,0 +1,2 @@
+# Type-check sebelum push — gate utama repo ini (tidak ada test runner)
+yarn tsc:check

@@ -1,0 +1,27 @@
+# Artefak build & dependency — di-install/di-build ulang di dalam image
+node_modules
+.next
+out
+dist
+build
+
+# VCS, tooling repo, CI — tidak dibutuhkan di image
+.git
+.github
+.husky
+.vscode
+Jenkinsfile
+docs
+
+# Env lokal TIDAK boleh bocor ke image — build hanya memakai .env.prod
+.env
+.env.local
+.env.development
+.env*.local
+
+# Lain-lain
+.DS_Store
+*.log
+Dockerfile
+docker-compose.yml
+.dockerignore
