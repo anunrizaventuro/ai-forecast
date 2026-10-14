@@ -4,6 +4,7 @@
 // `import { useArticlesQuery } from 'src/lib/api/use-articles';`.
 export * from './faq';
 export * from './client';
+export * from './forecast';
 export * from './articles';
 export * from './endpoints';
 export * from './site-content';

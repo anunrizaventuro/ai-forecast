@@ -50,6 +50,8 @@ export type MasterStore = {
   nit: string;
   nama: string;
   kec: number;
+  /** false = kode toko muncul di transaksi tetapi tidak ada di MToko. */
+  inMaster?: boolean;
 };
 
 /** Baris BS / STOCK: satu per (tgl, nit, nik) dengan 21 kolom produk. */
@@ -114,4 +116,64 @@ export type Recommendation = {
   observations: number;
   nextVisit: string;
   excluded: boolean;
+};
+
+// ---------------------------------------------------------------------- Dashboard
+// Bentuk data yang dikonsumsi UI — sama untuk sumber simulasi maupun API
+// (lihat src/lib/api/forecast.ts untuk pemetaan dari JSON backend).
+
+export type ForecastFilters = {
+  from: string;
+  to: string;
+  nit: string | null;
+  product: ProductCode | null;
+};
+
+export type CellSummary = {
+  kirim: number;
+  bs: number;
+  stock: number;
+  /** Σ estimasi terjual pada sel yang layak (reliable). */
+  estSold: number;
+  /** Σ kiriman sebelumnya pada sel yang sama — penyebut rasio. */
+  basis: number;
+  returnRate: number | null;
+  sellThrough: number | null;
+  /** Σ estimasi terjual × harga jual MRoti (asumsi harga tetap). */
+  salesValue: number;
+  visits: number;
+  stores: number;
+};
+
+export type SeriesPoint = {
+  key: string;
+  label: string;
+  kirim: number;
+  estSold: number;
+  bs: number;
+};
+
+export type Granularity = 'harian' | 'mingguan';
+
+export type ProductSummary = CellSummary & { product: MasterProduct };
+
+export type KecSummary = CellSummary & { kec: number };
+
+export type StoreSummary = CellSummary & {
+  store: MasterStore;
+  lastVisit: string | null;
+  lastSales: string | null;
+  avgInterval: number | null;
+  productCount: number;
+};
+
+export type ForecastSource = 'simulasi' | 'api';
+
+/** Master & konteks data yang dipakai seluruh halaman dashboard. */
+export type ForecastMeta = {
+  source: ForecastSource;
+  period: { start: string; end: string };
+  products: MasterProduct[];
+  stores: MasterStore[];
+  sales: string[];
 };

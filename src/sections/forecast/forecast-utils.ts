@@ -2,11 +2,18 @@ import 'dayjs/locale/id';
 
 import type {
   VisitCell,
+  KecSummary,
   Confidence,
+  CellSummary,
+  Granularity,
+  SeriesPoint,
   ProductCode,
   MasterStore,
+  StoreSummary,
   MasterProduct,
+  ProductSummary,
   Recommendation,
+  ForecastFilters,
   ProductQuantities,
   RecommendationSignal,
 } from 'src/types/forecast';
@@ -16,6 +23,7 @@ import dayjs from 'dayjs';
 import {
   _forecastBs,
   _forecastStock,
+  _forecastSales,
   FORECAST_PERIOD,
   _forecastStores,
   _forecastKiriman,
@@ -24,6 +32,16 @@ import {
 } from 'src/_mock/_forecast';
 
 import { PRODUCT_CODES } from 'src/types/forecast';
+
+export type {
+  KecSummary,
+  CellSummary,
+  Granularity,
+  SeriesPoint,
+  StoreSummary,
+  ProductSummary,
+  ForecastFilters,
+} from 'src/types/forecast';
 
 // ----------------------------------------------------------------------
 // Lapisan olah data dashboard (sementara di client, di atas data simulasi).
@@ -37,6 +55,7 @@ export const PERIOD = FORECAST_PERIOD;
 
 export const products = _forecastProducts;
 export const stores = _forecastStores;
+export const salesCodes = _forecastSales;
 
 export const productMap = new Map<ProductCode, MasterProduct>(products.map((p) => [p.code, p]));
 export const storeMap = new Map<string, MasterStore>(stores.map((s) => [s.nit, s]));
@@ -62,6 +81,10 @@ export const REC_PARAMS = {
 export const fDate = (tgl: string) => dayjs(tgl).locale('id').format('D MMM YYYY');
 export const fDateShort = (tgl: string) => dayjs(tgl).locale('id').format('D MMM');
 export const fWeekday = (tgl: string) => dayjs(tgl).locale('id').format('dddd');
+
+/** Label sumbu X: tanggal (harian) atau "Mg <Senin>" (mingguan). */
+export const seriesLabel = (key: string, granularity: Granularity) =>
+  granularity === 'harian' ? fDateShort(key) : `Mg ${fDateShort(key)}`;
 
 export const addDays = (tgl: string, days: number) =>
   dayjs(tgl).add(days, 'day').format('YYYY-MM-DD');
@@ -122,11 +145,12 @@ function buildCells(): VisitCell[] {
   addRows(_forecastBs, 'bs');
   addRows(_forecastStock, 'stock');
 
-  // Ambang pencilan per produk: > max(30, 10 × median kiriman positif).
+  // Ambang pencilan per produk: > max(250, 30 × median kiriman positif) — sama
+  // dengan backend; hanya menangkap salah input yang jelas (analisis §5.4).
   const outlierLimit = new Map<ProductCode, number>();
   PRODUCT_CODES.forEach((code) => {
     const positives = _forecastKiriman.map((r) => r.qty[code]).filter((v) => v > 0);
-    outlierLimit.set(code, Math.max(30, (median(positives) ?? 0) * 10));
+    outlierLimit.set(code, Math.max(250, (median(positives) ?? 0) * 30));
   });
 
   const byStore = new Map<string, { tgl: string; row: DayRow }[]>();
@@ -179,13 +203,6 @@ export const forecastCells = buildCells();
 
 // ---------------------------------------------------------------------- Filter
 
-export type ForecastFilters = {
-  from: string;
-  to: string;
-  nit: string | null;
-  product: ProductCode | null;
-};
-
 export const DEFAULT_FILTERS: ForecastFilters = {
   from: PERIOD.start,
   to: PERIOD.end,
@@ -204,22 +221,6 @@ export function filterCells(cells: VisitCell[], filters: Partial<ForecastFilters
 }
 
 // ---------------------------------------------------------------------- Ringkasan
-
-export type CellSummary = {
-  kirim: number;
-  bs: number;
-  stock: number;
-  /** Σ estimasi terjual pada sel yang layak (reliable). */
-  estSold: number;
-  /** Σ kiriman sebelumnya pada sel yang sama — penyebut rasio. */
-  basis: number;
-  returnRate: number | null;
-  sellThrough: number | null;
-  /** Σ estimasi terjual × harga jual MRoti (asumsi harga tetap). */
-  salesValue: number;
-  visits: number;
-  stores: number;
-};
 
 export function summarize(cells: VisitCell[]): CellSummary {
   const visits = new Set<string>();
@@ -260,17 +261,10 @@ export function summarize(cells: VisitCell[]): CellSummary {
   };
 }
 
+/** Ringkasan kosong — placeholder selama data API pertama kali dimuat. */
+export const EMPTY_SUMMARY: CellSummary = summarize([]);
+
 // ---------------------------------------------------------------------- Deret waktu
-
-export type SeriesPoint = {
-  key: string;
-  label: string;
-  kirim: number;
-  estSold: number;
-  bs: number;
-};
-
-export type Granularity = 'harian' | 'mingguan';
 
 export function timeSeries(
   cells: VisitCell[],
@@ -294,8 +288,7 @@ export function timeSeries(
     const key = bucketOf(d.format('YYYY-MM-DD'));
     workdays.set(key, (workdays.get(key) ?? 0) + 1);
     if (!buckets.has(key)) {
-      const label = granularity === 'harian' ? fDateShort(key) : `Mg ${fDateShort(key)}`;
-      buckets.set(key, { key, label, kirim: 0, estSold: 0, bs: 0 });
+      buckets.set(key, { key, label: seriesLabel(key, granularity), kirim: 0, estSold: 0, bs: 0 });
     }
   }
 
@@ -319,8 +312,6 @@ export function timeSeries(
 
 // ---------------------------------------------------------------------- Kelompok
 
-export type ProductSummary = CellSummary & { product: MasterProduct };
-
 export function groupByProduct(cells: VisitCell[]): ProductSummary[] {
   return products.map((product) => ({
     product,
@@ -328,22 +319,12 @@ export function groupByProduct(cells: VisitCell[]): ProductSummary[] {
   }));
 }
 
-export type KecSummary = CellSummary & { kec: number };
-
 export function groupByKec(cells: VisitCell[]): KecSummary[] {
   return [1, 2, 3, 4, 5, 6, 7].map((kec) => ({
     kec,
     ...summarize(cells.filter((cell) => storeMap.get(cell.nit)?.kec === kec)),
   }));
 }
-
-export type StoreSummary = CellSummary & {
-  store: MasterStore;
-  lastVisit: string | null;
-  lastSales: string | null;
-  avgInterval: number | null;
-  productCount: number;
-};
 
 export function groupByStore(cells: VisitCell[]): StoreSummary[] {
   const byNit = new Map<string, VisitCell[]>();

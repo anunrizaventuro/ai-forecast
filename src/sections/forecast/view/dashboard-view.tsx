@@ -2,31 +2,30 @@
 
 import type { Granularity, ForecastFilters } from '../forecast-utils';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import Grid from '@mui/material/Grid';
 
 import { ForecastKpiGrid } from '../forecast-kpi-grid';
 import { ForecastTrendCard } from '../forecast-trend-card';
 import { ForecastFilterBar } from '../forecast-filter-bar';
+import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
 import { DashboardTopProducts } from '../dashboard-top-products';
+import { EMPTY_SUMMARY, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
 import { DashboardRecommendationSummary } from '../dashboard-recommendation-summary';
 import {
-  summarize,
-  timeSeries,
-  filterCells,
-  forecastCells,
-  groupByProduct,
-  DEFAULT_FILTERS,
-  computeRecommendations,
-} from '../forecast-utils';
+  useForecastSeries,
+  useForecastSummary,
+  useForecastProducts,
+  useForecastRecommendations,
+} from '../use-forecast-data';
 
 // ----------------------------------------------------------------------
-// Data: simulasi client-side (src/_mock/_forecast.ts) — belum ada backend.
-// Filter tanggal/toko/produk mencakup semua kartu di bawahnya; ringkasan
-// rekomendasi memakai data s.d. tanggal akhir rentang.
+// Data: use-forecast-data (simulasi atau ai-forecast-be, lihat
+// NEXT_PUBLIC_FORECAST_SOURCE). Filter tanggal/toko/produk mencakup semua
+// kartu di bawahnya; ringkasan rekomendasi memakai data s.d. tanggal akhir.
 
 export function DashboardView() {
   const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
@@ -37,21 +36,17 @@ export function DashboardView() {
     []
   );
 
-  const cells = useMemo(() => filterCells(forecastCells, filters), [filters]);
+  const summary = useForecastSummary(filters);
+  const series = useForecastSeries(filters, granularity);
+  const productRows = useForecastProducts(filters);
+  const recommendations = useForecastRecommendations({
+    asOf: filters.to,
+    nit: filters.nit,
+    product: filters.product,
+  });
 
-  const summary = useMemo(() => summarize(cells), [cells]);
-
-  const points = useMemo(
-    () => timeSeries(cells, filters.from, filters.to, granularity),
-    [cells, filters.from, filters.to, granularity]
-  );
-
-  const productRows = useMemo(() => groupByProduct(cells), [cells]);
-
-  const recommendations = useMemo(() => {
-    const scoped = filterCells(forecastCells, { nit: filters.nit, product: filters.product });
-    return computeRecommendations(scoped, filters.to);
-  }, [filters.nit, filters.product, filters.to]);
+  const states = [summary, series, productRows, recommendations];
+  const error = states.find((s) => s.error)?.error ?? null;
 
   return (
     <>
@@ -64,14 +59,20 @@ export function DashboardView() {
 
       <ForecastFilterBar filters={filters} onChange={handleChange} />
 
-      <ForecastKpiGrid summary={summary} />
+      <ForecastDataState
+        error={error}
+        fetching={states.some((s) => s.fetching)}
+        onRetry={() => states.forEach((s) => s.refetch())}
+      />
+
+      <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <ForecastTrendCard
             title="Tren kiriman & estimasi terjual"
             subheader="Estimasi terjual dicatat pada tanggal penarikan retur; kunjungan pertama tiap toko belum punya pembanding"
-            points={points}
+            points={series.data ?? []}
             seriesKeys={['kirim', 'estSold']}
             granularity={granularity}
             onGranularityChange={setGranularity}
@@ -80,11 +81,14 @@ export function DashboardView() {
         </Grid>
 
         <Grid size={{ xs: 12, lg: 4 }}>
-          <DashboardTopProducts rows={productRows} sx={{ height: 1 }} />
+          <DashboardTopProducts rows={productRows.data ?? []} sx={{ height: 1 }} />
         </Grid>
 
         <Grid size={12}>
-          <DashboardRecommendationSummary recommendations={recommendations} asOf={filters.to} />
+          <DashboardRecommendationSummary
+            recommendations={recommendations.data ?? []}
+            asOf={filters.to}
+          />
         </Grid>
       </Grid>
     </>

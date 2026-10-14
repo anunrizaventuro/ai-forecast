@@ -1,7 +1,7 @@
 'use client';
 
 import type { ForecastFilters } from '../forecast-utils';
-import type { Confidence, Recommendation } from 'src/types/forecast';
+import type { Confidence, MasterStore, Recommendation } from 'src/types/forecast';
 
 import { useMemo, useState, useCallback } from 'react';
 
@@ -17,23 +17,21 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
 import { ForecastFilterBar } from '../forecast-filter-bar';
+import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
 import { RecommendationTable } from '../recommendation-table';
 import { RecommendationMethod } from '../recommendation-method';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
+import { IS_API, useForecastMeta, useForecastRecommendations } from '../use-forecast-data';
 import {
   fDate,
-  storeMap,
-  filterCells,
-  forecastCells,
   DEFAULT_FILTERS,
   CONFIDENCE_LABEL,
-  computeRecommendations,
   summarizeRecommendations,
 } from '../forecast-utils';
 
 // ----------------------------------------------------------------------
-// Data: simulasi client-side. Tanggal = "data s.d." (walk-forward): rekomendasi
+// Data: use-forecast-data (simulasi atau ai-forecast-be). Tanggal = "data s.d." (walk-forward): rekomendasi
 // hanya memakai kunjungan sampai tanggal itu.
 
 type Status = 'all' | 'naik' | 'turun' | 'tetap' | 'dikecualikan';
@@ -55,7 +53,7 @@ const matchStatus = (row: Recommendation, status: Status) => {
   return row.delta === 0;
 };
 
-function downloadCsv(rows: Recommendation[], asOf: string) {
+function downloadCsv(rows: Recommendation[], asOf: string, storeMap: Map<string, MasterStore>) {
   const header = [
     'nit',
     'toko',
@@ -91,7 +89,10 @@ function downloadCsv(rows: Recommendation[], asOf: string) {
       .map(escape)
       .join(',')
   );
-  const csv = [`# SIMULASI - bukan hasil prediksi (data s.d. ${asOf})`, header.join(','), ...lines];
+  const note = IS_API
+    ? `# Rekomendasi aturan baseline (parameter contoh, belum divalidasi) - data s.d. ${asOf}`
+    : `# SIMULASI - bukan hasil prediksi (data s.d. ${asOf})`;
+  const csv = [note, header.join(','), ...lines];
   const url = URL.createObjectURL(new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url;
@@ -110,10 +111,13 @@ export function RecommendationView() {
     []
   );
 
-  const recommendations = useMemo(() => {
-    const scoped = filterCells(forecastCells, { nit: filters.nit, product: filters.product });
-    return computeRecommendations(scoped, filters.to);
-  }, [filters.nit, filters.product, filters.to]);
+  const { storeMap } = useForecastMeta();
+  const query = useForecastRecommendations({
+    asOf: filters.to,
+    nit: filters.nit,
+    product: filters.product,
+  });
+  const recommendations = useMemo(() => query.data ?? [], [query.data]);
 
   const rows = useMemo(
     () =>
@@ -137,7 +141,7 @@ export function RecommendationView() {
             variant="outlined"
             color="inherit"
             disabled={!rows.length}
-            onClick={() => downloadCsv(rows, filters.to)}
+            onClick={() => downloadCsv(rows, filters.to, storeMap)}
             startIcon={<Iconify icon="solar:file-download-outline" />}
           >
             Unduh CSV
@@ -181,6 +185,8 @@ export function RecommendationView() {
           ))}
         </TextField>
       </ForecastFilterBar>
+
+      <ForecastDataState error={query.error} fetching={query.fetching} onRetry={query.refetch} />
 
       <Box sx={{ mb: 2, gap: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
         <Typography variant="body2" sx={{ mr: 1, color: 'text.secondary' }}>

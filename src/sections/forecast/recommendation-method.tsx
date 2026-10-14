@@ -12,7 +12,8 @@ import { REC_PARAMS } from './forecast-utils';
 
 // ----------------------------------------------------------------------
 // Penjelasan aturan baseline (studi kelayakan §4.2) agar rekomendasi bisa
-// dijelaskan ke sales. Parameter adalah contoh — dipilih lewat backtest nanti.
+// dijelaskan ke sales. Parameter adalah contoh (sama dengan backend) — belum
+// dioptimasi lewat backtest.
 
 const STEPS = [
   `Dasar: median estimasi terjual (rumus B: kiriman kunjungan sebelumnya − BS hari ini) dari ${REC_PARAMS.window} kunjungan terakhir.`,
@@ -37,7 +38,7 @@ export function RecommendationMethod() {
       <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
         <Box sx={{ gap: 1, display: 'flex', alignItems: 'center' }}>
           <Iconify icon="solar:question-circle-outline" sx={{ color: 'text.secondary' }} />
-          <Typography variant="subtitle2">Cara rekomendasi simulasi dihitung</Typography>
+          <Typography variant="subtitle2">Cara rekomendasi dihitung</Typography>
         </Box>
       </AccordionSummary>
       <AccordionDetails>
@@ -49,8 +50,9 @@ export function RecommendationMethod() {
           ))}
         </Box>
         <Typography variant="caption" sx={{ mt: 2, display: 'block', color: 'text.disabled' }}>
-          Aturan baseline mengikuti studi kelayakan §4.2. Parameternya contoh dan belum di-backtest.
-          Arti BS dan STOCK juga belum dikonfirmasi klien.
+          Aturan baseline mengikuti studi kelayakan §4.2. Parameternya contoh dan belum dioptimasi;
+          hasil backtest awal ada di README ai-forecast-be. Arti BS dan STOCK juga belum
+          dikonfirmasi klien.
         </Typography>
       </AccordionDetails>
     </Accordion>

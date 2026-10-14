@@ -2,7 +2,7 @@
 
 import type { Granularity, ForecastFilters } from '../forecast-utils';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
@@ -16,21 +16,21 @@ import { ForecastKpiGrid } from '../forecast-kpi-grid';
 import { ForecastBarList } from '../forecast-bar-list';
 import { ForecastTrendCard } from '../forecast-trend-card';
 import { ForecastFilterBar } from '../forecast-filter-bar';
+import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
 import { AnalysisProductTable } from '../analysis-product-table';
+import { EMPTY_SUMMARY, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
 import {
-  summarize,
-  groupByKec,
-  timeSeries,
-  filterCells,
-  forecastCells,
-  groupByProduct,
-  DEFAULT_FILTERS,
-} from '../forecast-utils';
+  useForecastSeries,
+  useForecastRegions,
+  useForecastSummary,
+  useForecastProducts,
+} from '../use-forecast-data';
 
 // ----------------------------------------------------------------------
-// Data: simulasi client-side. Semua kartu mengikuti filter yang sama.
+// Data: use-forecast-data (simulasi atau ai-forecast-be). Semua kartu
+// mengikuti filter yang sama.
 
 export function SalesAnalysisView() {
   const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
@@ -41,20 +41,19 @@ export function SalesAnalysisView() {
     []
   );
 
-  const cells = useMemo(() => filterCells(forecastCells, filters), [filters]);
-  const summary = useMemo(() => summarize(cells), [cells]);
-  const points = useMemo(
-    () => timeSeries(cells, filters.from, filters.to, granularity),
-    [cells, filters.from, filters.to, granularity]
-  );
-  const productRows = useMemo(() => groupByProduct(cells), [cells]);
-  const kecRows = useMemo(() => groupByKec(cells), [cells]);
+  const summary = useForecastSummary(filters);
+  const series = useForecastSeries(filters, granularity);
+  const productRows = useForecastProducts(filters);
+  const regions = useForecastRegions(filters);
 
-  const kecItems = kecRows
+  const states = [summary, series, productRows, regions];
+  const points = series.data ?? [];
+
+  const kecItems = (regions.data ?? [])
     .filter((row) => row.estSold > 0)
     .map((row) => ({
       key: String(row.kec),
-      label: `Kec. ${row.kec}`,
+      label: row.kec ? `Kec. ${row.kec}` : 'Di luar master',
       caption: `${fNumber(row.stores)} toko`,
       value: row.estSold,
       detail: `Kiriman ${fNumber(row.kirim)} pcs · retur ${fPercent(row.returnRate)}`,
@@ -71,7 +70,13 @@ export function SalesAnalysisView() {
 
       <ForecastFilterBar filters={filters} onChange={handleChange} />
 
-      <ForecastKpiGrid summary={summary} />
+      <ForecastDataState
+        error={states.find((s) => s.error)?.error ?? null}
+        fetching={states.some((s) => s.fetching)}
+        onRetry={() => states.forEach((s) => s.refetch())}
+      />
+
+      <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
@@ -122,7 +127,7 @@ export function SalesAnalysisView() {
         </Grid>
 
         <Grid size={12}>
-          <AnalysisProductTable rows={productRows} />
+          <AnalysisProductTable rows={productRows.data ?? []} />
         </Grid>
       </Grid>
     </>

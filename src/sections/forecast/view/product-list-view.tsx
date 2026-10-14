@@ -21,22 +21,16 @@ import { fNumber, fPercent, fCurrency } from 'src/utils/format-number';
 import { Label } from 'src/components/label';
 
 import { ForecastFilterBar } from '../forecast-filter-bar';
+import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
+import { useForecastMeta, useForecastProducts } from '../use-forecast-data';
+import { productGroup, DEFAULT_FILTERS, isExcludedProduct } from '../forecast-utils';
 import { sortRows, TableEmptyRow, useTableState, ForecastTableHead } from '../forecast-table';
-import {
-  products,
-  filterCells,
-  productGroup,
-  forecastCells,
-  groupByProduct,
-  DEFAULT_FILTERS,
-  isExcludedProduct,
-} from '../forecast-utils';
 
 // ----------------------------------------------------------------------
 // Master produk (kode, nama, harga) sama dengan tabel MRoti di database
-// sumber. Kolom volume berasal dari data simulasi.
+// sumber. Kolom volume dari use-forecast-data (simulasi atau ai-forecast-be).
 
 type ColumnId =
   | 'nir'
@@ -62,8 +56,6 @@ const HEAD: HeadCell<ColumnId>[] = [
   { id: 'returnRate', label: 'Rasio retur', align: 'right', minWidth: 110 },
   { id: 'status', label: 'Rekomendasi', minWidth: 150 },
 ];
-
-const GROUPS = [...new Set(products.map(productGroup))];
 
 const margin = (row: ProductSummary) =>
   (row.product.hargaJual - row.product.hargaBeli) / row.product.hargaJual;
@@ -98,7 +90,10 @@ export function ProductListView() {
     []
   );
 
-  const productRows = useMemo(() => groupByProduct(filterCells(forecastCells, filters)), [filters]);
+  const { meta } = useForecastMeta();
+  const groups = useMemo(() => [...new Set(meta.products.map(productGroup))], [meta.products]);
+  const productQuery = useForecastProducts(filters);
+  const productRows = useMemo(() => productQuery.data ?? [], [productQuery.data]);
 
   const rows = useMemo(() => {
     const filtered = productRows.filter((row) => {
@@ -135,7 +130,7 @@ export function ProductListView() {
           sx={FIELD_SX}
         >
           <MenuItem value="all">Semua kelompok</MenuItem>
-          {GROUPS.map((value) => (
+          {groups.map((value) => (
             <MenuItem key={value} value={value}>
               {value}
             </MenuItem>
@@ -154,6 +149,12 @@ export function ProductListView() {
           <MenuItem value="dikecualikan">Dikecualikan</MenuItem>
         </TextField>
       </ForecastFilterBar>
+
+      <ForecastDataState
+        error={productQuery.error}
+        fetching={productQuery.fetching}
+        onRetry={productQuery.refetch}
+      />
 
       <Card sx={{ mb: 3 }}>
         <TableContainer>

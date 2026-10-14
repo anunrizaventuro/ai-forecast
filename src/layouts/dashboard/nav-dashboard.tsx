@@ -23,6 +23,8 @@ import { NavSectionVertical } from 'src/components/nav-section';
 
 // ----------------------------------------------------------------------
 
+const IS_SIMULATION = CONFIG.forecastSource === 'simulasi';
+
 type NavContentProps = {
   data: NavSectionProps['data'];
 };
@@ -84,10 +86,12 @@ function NavContent({ data }: NavContentProps) {
           sx={{ mb: 0.5, gap: 0.75, display: 'flex', alignItems: 'center' }}
         >
           <Iconify icon="solar:info-circle-outline" width={18} sx={{ color: 'warning.main' }} />
-          Mode simulasi
+          {IS_SIMULATION ? 'Mode simulasi' : 'Data asli (read-only)'}
         </Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-          Data dan rekomendasi adalah simulasi. Backend belum terhubung.
+          {IS_SIMULATION
+            ? 'Data dan rekomendasi adalah simulasi. Backend belum terhubung.'
+            : 'Rekomendasi masih aturan baseline — belum divalidasi lapangan.'}
         </Typography>
       </Box>
     </>

@@ -1,7 +1,7 @@
 'use client';
 
 import type { HeadCell } from './forecast-table';
-import type { Confidence, Recommendation } from 'src/types/forecast';
+import type { Confidence, MasterStore, Recommendation } from 'src/types/forecast';
 
 import { useMemo, useEffect } from 'react';
 
@@ -19,8 +19,9 @@ import { fNumber, fPercent } from 'src/utils/format-number';
 
 import { Label } from 'src/components/label';
 
+import { useForecastMeta } from './use-forecast-data';
 import { RecommendationDelta } from './recommendation-delta';
-import { fDate, storeMap, SIGNAL_LABEL, CONFIDENCE_LABEL } from './forecast-utils';
+import { fDate, SIGNAL_LABEL, CONFIDENCE_LABEL } from './forecast-utils';
 import {
   sortRows,
   TableEmptyRow,
@@ -56,7 +57,7 @@ const CONFIDENCE_ORDER: Record<Confidence, number> = { tinggi: 3, sedang: 2, ren
 
 const CONFIDENCE_COLOR = { tinggi: 'success', sedang: 'info', rendah: 'default' } as const;
 
-const getSortValue = (row: Recommendation, id: ColumnId) => {
+const getSortValue = (row: Recommendation, id: ColumnId, storeMap: Map<string, MasterStore>) => {
   switch (id) {
     case 'store':
       return storeMap.get(row.nit)?.nama ?? row.nit;
@@ -76,6 +77,7 @@ type Props = {
 };
 
 export function RecommendationTable({ rows, resetKey }: Props) {
+  const { storeMap } = useForecastMeta();
   const table = useTableState<ColumnId>('store', 'asc');
   const { resetPage } = table;
 
@@ -84,8 +86,8 @@ export function RecommendationTable({ rows, resetKey }: Props) {
   }, [resetKey, resetPage]);
 
   const sorted = useMemo(
-    () => sortRows(rows, (row) => getSortValue(row, table.orderBy), table.order),
-    [rows, table.order, table.orderBy]
+    () => sortRows(rows, (row) => getSortValue(row, table.orderBy, storeMap), table.order),
+    [rows, table.order, table.orderBy, storeMap]
   );
 
   const pageRows = sorted.slice(
@@ -114,7 +116,7 @@ export function RecommendationTable({ rows, resetKey }: Props) {
                       {store?.nama ?? 'Di luar master'}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {row.nit} · Kec. {store?.kec ?? '–'}
+                      {row.nit} · {store?.kec ? `Kec. ${store.kec}` : 'kec tidak diketahui'}
                     </Typography>
                   </TableCell>
 

@@ -2,8 +2,6 @@
 
 import type { StoreSummary } from './forecast-utils';
 
-import { useMemo } from 'react';
-
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import Drawer from '@mui/material/Drawer';
@@ -21,14 +19,9 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 
+import { fDate, CONFIDENCE_LABEL } from './forecast-utils';
 import { RecommendationDelta } from './recommendation-delta';
-import {
-  fDate,
-  filterCells,
-  forecastCells,
-  CONFIDENCE_LABEL,
-  computeRecommendations,
-} from './forecast-utils';
+import { IS_API, useForecastRecommendations } from './use-forecast-data';
 
 // ----------------------------------------------------------------------
 
@@ -39,11 +32,8 @@ type Props = {
 };
 
 export function StoreDetailDrawer({ row, asOf, onClose }: Props) {
-  const recommendations = useMemo(
-    () =>
-      row ? computeRecommendations(filterCells(forecastCells, { nit: row.store.nit }), asOf) : [],
-    [row, asOf]
-  );
+  const query = useForecastRecommendations({ asOf, nit: row?.store.nit ?? null }, !!row);
+  const recommendations = query.data ?? [];
 
   const stats = row
     ? [
@@ -105,8 +95,8 @@ export function StoreDetailDrawer({ row, asOf, onClose }: Props) {
 
               <Box sx={{ mt: 4, mb: 1, gap: 1, display: 'flex', alignItems: 'center' }}>
                 <Typography variant="subtitle1">Rekomendasi kunjungan berikutnya</Typography>
-                <Label color="warning" variant="soft">
-                  Simulasi
+                <Label color={IS_API ? 'info' : 'warning'} variant="soft">
+                  {IS_API ? 'Baseline' : 'Simulasi'}
                 </Label>
               </Box>
               <Typography
@@ -152,7 +142,9 @@ export function StoreDetailDrawer({ row, asOf, onClose }: Props) {
                         colSpan={5}
                         sx={{ py: 3, textAlign: 'center', color: 'text.secondary' }}
                       >
-                        Belum ada kunjungan sebelum tanggal ini.
+                        {query.loading
+                          ? 'Memuat rekomendasi…'
+                          : 'Belum ada kunjungan sebelum tanggal ini.'}
                       </TableCell>
                     </TableRow>
                   )}

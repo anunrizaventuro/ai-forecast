@@ -13,8 +13,10 @@ export const CONFIG = {
   assetsDir: env.NEXT_PUBLIC_ASSETS_DIR,
   /** Tampilkan galeri referensi /components di build production (dev selalu tampil). */
   showComponents: env.NEXT_PUBLIC_SHOW_COMPONENTS,
-  /** Go backend base URL (marketplace-be). */
+  /** Base URL backend Go (ai-forecast-be). */
   apiUrl: env.NEXT_PUBLIC_API_URL,
+  /** Sumber data dashboard: 'simulasi' (dummy) atau 'api' (ai-forecast-be). */
+  forecastSource: env.NEXT_PUBLIC_FORECAST_SOURCE,
   /** Tenant slug sent as X-Company-Slug on every public API call. */
   companySlug: env.NEXT_PUBLIC_COMPANY_SLUG,
   /**

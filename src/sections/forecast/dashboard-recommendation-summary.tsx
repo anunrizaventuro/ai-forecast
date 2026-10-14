@@ -1,3 +1,5 @@
+'use client';
+
 import type { CardProps } from '@mui/material/Card';
 import type { Recommendation } from 'src/types/forecast';
 import type { IconifyName } from 'src/components/iconify';
@@ -25,7 +27,8 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
 import { RecommendationDelta } from './recommendation-delta';
-import { fDate, storeMap, CONFIDENCE_LABEL, summarizeRecommendations } from './forecast-utils';
+import { IS_API, useForecastMeta } from './use-forecast-data';
+import { fDate, CONFIDENCE_LABEL, summarizeRecommendations } from './forecast-utils';
 
 // ----------------------------------------------------------------------
 
@@ -60,6 +63,7 @@ function Stat({ label, value, icon, color }: StatProps) {
 }
 
 export function DashboardRecommendationSummary({ recommendations, asOf, ...other }: Props) {
+  const { storeMap } = useForecastMeta();
   const summary = summarizeRecommendations(recommendations);
 
   const biggestChanges = recommendations
@@ -73,8 +77,8 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
         title="Ringkasan rekomendasi stok"
         subheader={`Untuk kunjungan berikutnya · data s.d. ${fDate(asOf)} · ${fNumber(summary.stores)} toko`}
         action={
-          <Label color="warning" variant="soft">
-            Simulasi
+          <Label color={IS_API ? 'info' : 'warning'} variant="soft">
+            {IS_API ? 'Baseline' : 'Simulasi'}
           </Label>
         }
       />

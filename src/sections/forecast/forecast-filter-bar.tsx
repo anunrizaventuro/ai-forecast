@@ -16,7 +16,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { Iconify } from 'src/components/iconify';
 
-import { PERIOD, stores, addDays, products, storeMap, DEFAULT_FILTERS } from './forecast-utils';
+import { useForecastMeta } from './use-forecast-data';
+import { PERIOD, addDays, DEFAULT_FILTERS } from './forecast-utils';
 
 // ----------------------------------------------------------------------
 // Satu baris filter di atas konten yang dicakupnya. Mode tanggal:
@@ -58,6 +59,8 @@ export function ForecastFilterBar({
   showProduct = true,
   children,
 }: Props) {
+  const { meta, storeMap } = useForecastMeta();
+
   const preset =
     PRESETS.find((p) => p.from === filters.from && p.to === filters.to)?.value ?? 'custom';
 
@@ -138,7 +141,7 @@ export function ForecastFilterBar({
         {showStore && (
           <Autocomplete
             size="small"
-            options={stores.map((s) => s.nit)}
+            options={meta.stores.map((s) => s.nit)}
             value={filters.nit}
             onChange={(_, value) => onChange({ nit: value })}
             getOptionLabel={(nit) => `${nit} · ${storeMap.get(nit)?.nama ?? ''}`}
@@ -163,7 +166,7 @@ export function ForecastFilterBar({
             sx={FIELD_SX}
           >
             <MenuItem value="">Semua produk</MenuItem>
-            {products.map((p) => (
+            {meta.products.map((p) => (
               <MenuItem key={p.code} value={p.code}>
                 {p.code}
                 {p.nama !== p.code && (

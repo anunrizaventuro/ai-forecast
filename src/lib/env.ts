@@ -23,6 +23,7 @@ const rawEnv = {
   NEXT_PUBLIC_SITE_URL: emptyToUndefined(process.env.NEXT_PUBLIC_SITE_URL),
   NEXT_PUBLIC_ASSETS_DIR: emptyToUndefined(process.env.NEXT_PUBLIC_ASSETS_DIR),
   NEXT_PUBLIC_SHOW_COMPONENTS: emptyToUndefined(process.env.NEXT_PUBLIC_SHOW_COMPONENTS),
+  NEXT_PUBLIC_FORECAST_SOURCE: emptyToUndefined(process.env.NEXT_PUBLIC_FORECAST_SOURCE),
   // Server-only: override URL API internal (mis. DNS service k8s) untuk
   // fetch RSC/sitemap. Tidak pernah masuk bundle client.
   API_URL: typeof window === 'undefined' ? emptyToUndefined(process.env.API_URL) : undefined,
@@ -40,6 +41,9 @@ const schema = z.object({
   NEXT_PUBLIC_SITE_URL: isProd ? z.url() : z.url().default('http://localhost:8002'),
   NEXT_PUBLIC_ASSETS_DIR: z.string().default(''),
   NEXT_PUBLIC_SHOW_COMPONENTS: z.string().default(''),
+  // Sumber data dashboard: 'simulasi' (generator dummy, tanpa backend) atau
+  // 'api' (ai-forecast-be di NEXT_PUBLIC_API_URL).
+  NEXT_PUBLIC_FORECAST_SOURCE: z.enum(['simulasi', 'api']).default('simulasi'),
   API_URL: z.url().optional(),
   REVALIDATE_TOKEN: z.string().min(16).optional(),
 });

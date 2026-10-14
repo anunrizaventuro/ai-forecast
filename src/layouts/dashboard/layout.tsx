@@ -15,6 +15,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 import { usePathname } from 'src/routes/hooks';
 
+import { CONFIG } from 'src/global-config';
+
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
@@ -26,6 +28,8 @@ import { navDashboardData } from '../nav-config-dashboard';
 import { NavDashboardMobile, NavDashboardDesktop } from './nav-dashboard';
 
 // ----------------------------------------------------------------------
+
+const IS_SIMULATION = CONFIG.forecastSource === 'simulasi';
 
 export type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -72,11 +76,11 @@ export function DashboardLayout({ children, layoutQuery = 'lg' }: DashboardLayou
               Periode inti 19 Agt – 30 Sep 2026
             </Typography>
             <Label
-              color="warning"
+              color={IS_SIMULATION ? 'warning' : 'info'}
               variant="soft"
               startIcon={<Iconify icon="solar:info-circle-bold" />}
             >
-              Simulasi
+              {IS_SIMULATION ? 'Simulasi' : 'Data asli · baseline'}
             </Label>
           </Box>
         ),

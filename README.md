@@ -2,7 +2,11 @@
 
 Dashboard analisis distribusi roti dan rekomendasi stok: memantau kiriman, estimasi penjualan, retur (BS), dan menyarankan jumlah roti yang sebaiknya dibawa sales ke setiap toko pada kunjungan berikutnya.
 
-> **Status:** seluruh data dan rekomendasi masih **simulasi** (generator dummy di [src/_mock/_forecast.ts](src/_mock/_forecast.ts)) — backend belum terintegrasi dan model belum dibuat. Dasar analisisnya ada di `../ai-forecast-be/docs/` (`database-analysis.md`, `forecast-feasibility.md`).
+> **Sumber data** dipilih lewat `NEXT_PUBLIC_FORECAST_SOURCE`:
+> - `simulasi` (default) — generator dummy di [src/_mock/_forecast.ts](src/_mock/_forecast.ts), tanpa backend.
+> - `api` — data asli dari [ai-forecast-be](https://github.com/venturo-id/ai-forecast-be) (SQLite klien, read-only) di `NEXT_PUBLIC_API_URL`.
+>
+> Di kedua mode rekomendasi masih **aturan baseline dengan parameter contoh** — belum dioptimasi dan belum divalidasi lapangan; UI menampilkan penandanya. Dasar analisis: `ai-forecast-be/docs/`.
 
 **Stack:** Next.js 16 (App Router) · React 19 · MUI 9 (theme CSS variables) · TypeScript strict · TanStack Query 5 · ky + zod · react-hook-form + zod. Dibangun di atas skeleton internal (basis Zone UI v4.6.0).
 
@@ -30,6 +34,8 @@ cp .env.example .env   # wajib — env divalidasi zod saat start/build
 yarn install
 yarn dev               # http://localhost:8002 → /dashboard
 ```
+
+Mode data asli: jalankan backend (`make run` di ai-forecast-be, port 8080), set `NEXT_PUBLIC_FORECAST_SOURCE=api` di `.env`, lalu restart `yarn dev` (nilai `NEXT_PUBLIC_*` dibaca saat start/build).
 
 ## Commands
 
@@ -69,9 +75,10 @@ Production via Docker: `docker compose up -d --build` (env dari `.env.prod`, sit
 │   │   └── _examples/       # sumber galeri /components
 │   │
 │   ├── _mock/_forecast.ts   # generator data SIMULASI (struktur tabel KIRIMAN/BS/STOCK)
+│   ├── sections/forecast/use-forecast-data.ts  # hook data: simulasi ↔ API
 │   ├── types/forecast.ts    # tipe sumber (MRoti, MToko, transaksi) + turunan
 │   ├── lib/
-│   │   ├── api/             # lapisan data standar (pola referensi untuk backend nanti)
+│   │   ├── api/             # lapisan data: forecast.ts (ai-forecast-be) + pola referensi
 │   │   ├── query/           # TanStack Query: QueryClient + provider
 │   │   ├── env.ts           # SATU-SATUNYA pembaca env — zod, fail-fast
 │   │   └── seo.ts           # helper JSON-LD
@@ -94,7 +101,7 @@ Setiap halaman mengikuti lapisan **page → view → section**:
 2. `src/sections/<vertical>/view/<nama>-view.tsx` — `'use client'`, merangkai section.
 3. `src/sections/<vertical>/<nama>-section.tsx` — blok presentasional.
 
-Saat backend tersedia, sumber data dashboard dipindah dari `_mock/_forecast.ts` ke `src/lib/api` (zod di batas fetch) dengan tipe yang sama di `src/types/forecast.ts`. Aturan lengkap ada di [CLAUDE.md](CLAUDE.md).
+Semua view mengambil data lewat hook di `src/sections/forecast/use-forecast-data.ts`; mode `api` memanggil `src/lib/api/forecast.ts` (zod di batas fetch, snake_case → tipe `src/types/forecast.ts`), mode `simulasi` menghitung di client. Aturan lengkap ada di [CLAUDE.md](CLAUDE.md).
 
 ## Dokumentasi tim
 

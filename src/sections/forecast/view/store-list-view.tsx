@@ -22,15 +22,11 @@ import { Iconify } from 'src/components/iconify';
 
 import { ForecastFilterBar } from '../forecast-filter-bar';
 import { StoreDetailDrawer } from '../store-detail-drawer';
+import { ForecastDataState } from '../forecast-data-state';
+import { fDate, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastPageHeader } from '../forecast-page-header';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
-import {
-  fDate,
-  filterCells,
-  groupByStore,
-  forecastCells,
-  DEFAULT_FILTERS,
-} from '../forecast-utils';
+import { IS_API, useForecastMeta, useForecastStores } from '../use-forecast-data';
 import {
   sortRows,
   TableEmptyRow,
@@ -40,9 +36,9 @@ import {
 } from '../forecast-table';
 
 // ----------------------------------------------------------------------
-// Data: simulasi client-side. MToko dari database sumber berisi 529 toko;
-// simulasi ini memakai 72 toko fiktif dengan pola kode nit yang sama
-// (digit pertama = kec).
+// Data: use-forecast-data. Mode simulasi memakai 72 toko fiktif dengan pola
+// kode nit yang sama dengan MToko (digit pertama = kec); mode API memakai
+// MToko asli (tanpa pemilik/HP/koordinat). Hanya toko aktif di rentang.
 
 type ColumnId =
   | 'nit'
@@ -74,8 +70,6 @@ const getSortValue = (row: StoreSummary, id: ColumnId) => {
   return row[id];
 };
 
-const SALES_OPTIONS = ['S-A', 'S-B', 'S-H', 'S-J'];
-
 const FIELD_SX = { minWidth: { xs: 1, sm: 140 }, flex: { xs: '1 1 100%', sm: '0 1 auto' } };
 
 export function StoreListView() {
@@ -93,14 +87,20 @@ export function StoreListView() {
     []
   );
 
-  const storeRows = useMemo(() => groupByStore(filterCells(forecastCells, filters)), [filters]);
+  const { meta } = useForecastMeta();
+  const storeQuery = useForecastStores(filters);
+  const storeRows = useMemo(() => storeQuery.data ?? [], [storeQuery.data]);
+  const kecOptions = useMemo(
+    () => [...new Set(meta.stores.map((s) => s.kec))].sort((a, b) => a - b),
+    [meta.stores]
+  );
 
   const rows = useMemo(() => {
     const keyword = query.trim().toLowerCase();
     const filtered = storeRows.filter(
       (row) =>
         (kec === 'all' || row.store.kec === kec) &&
-        (sales === 'all' || (row.lastSales ?? '').includes(sales)) &&
+        (sales === 'all' || (row.lastSales ?? '').split(', ').includes(sales)) &&
         (!keyword ||
           row.store.nama.toLowerCase().includes(keyword) ||
           row.store.nit.includes(keyword))
@@ -155,9 +155,9 @@ export function StoreListView() {
           sx={FIELD_SX}
         >
           <MenuItem value="all">Semua kec</MenuItem>
-          {[1, 2, 3, 4, 5, 6, 7].map((value) => (
+          {kecOptions.map((value) => (
             <MenuItem key={value} value={value}>
-              Kec. {value}
+              {value ? `Kec. ${value}` : 'Di luar master'}
             </MenuItem>
           ))}
         </TextField>
@@ -170,7 +170,7 @@ export function StoreListView() {
           sx={FIELD_SX}
         >
           <MenuItem value="all">Semua sales</MenuItem>
-          {SALES_OPTIONS.map((value) => (
+          {meta.sales.map((value) => (
             <MenuItem key={value} value={value}>
               {value}
             </MenuItem>
@@ -178,8 +178,15 @@ export function StoreListView() {
         </TextField>
       </ForecastFilterBar>
 
+      <ForecastDataState
+        error={storeQuery.error}
+        fetching={storeQuery.fetching}
+        onRetry={storeQuery.refetch}
+      />
+
       <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-        {fNumber(rows.length)} toko · kode sales disamarkan (S-A … S-J) sesuai dokumen analisis
+        {fNumber(rows.length)} toko aktif · nama sales disamarkan{' '}
+        {IS_API ? '(Sales-NN)' : '(S-A … S-J)'} sesuai dokumen analisis
       </Typography>
 
       <Card>
