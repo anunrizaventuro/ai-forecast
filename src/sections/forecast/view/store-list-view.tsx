@@ -5,6 +5,7 @@ import type { StoreSummary, ForecastFilters } from '../forecast-utils';
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import MenuItem from '@mui/material/MenuItem';
@@ -12,20 +13,25 @@ import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import TableContainer from '@mui/material/TableContainer';
 
 import { fNumber, fPercent } from 'src/utils/format-number';
 
+import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import { SERIES } from '../forecast-chart-colors';
 import { ForecastFilterBar } from '../forecast-filter-bar';
 import { StoreDetailDrawer } from '../store-detail-drawer';
 import { ForecastDataState } from '../forecast-data-state';
-import { fDate, DEFAULT_FILTERS } from '../forecast-utils';
+import { ForecastStatStrip } from '../forecast-stat-strip';
 import { ForecastPageHeader } from '../forecast-page-header';
+import { fDate, REC_PARAMS, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
+import { NameAvatar, InlineBarCell, ReturnRateCell } from '../forecast-cells';
 import { IS_API, useForecastMeta, useForecastStores } from '../use-forecast-data';
 import {
   sortRows,
@@ -78,6 +84,7 @@ export function StoreListView() {
   const [kec, setKec] = useState<number | 'all'>('all');
   const [sales, setSales] = useState('all');
   const [selected, setSelected] = useState<StoreSummary | null>(null);
+  const theme = useTheme();
 
   const table = useTableState<ColumnId>('nit', 'asc');
   const { resetPage } = table;
@@ -108,6 +115,21 @@ export function StoreListView() {
     return sortRows(filtered, (row) => getSortValue(row, table.orderBy), table.order);
   }, [storeRows, query, kec, sales, table.order, table.orderBy]);
 
+  const stats = useMemo(() => {
+    const intervals = rows.flatMap((row) => (row.avgInterval === null ? [] : [row.avgInterval]));
+    return {
+      kirim: rows.reduce((acc, row) => acc + row.kirim, 0),
+      visits: rows.reduce((acc, row) => acc + row.visits, 0),
+      maxKirim: Math.max(0, ...rows.map((row) => row.kirim)),
+      interval: intervals.length
+        ? intervals.reduce((acc, value) => acc + value, 0) / intervals.length
+        : null,
+      highReturn: rows.filter(
+        (row) => row.returnRate !== null && row.returnRate > REC_PARAMS.returnThreshold
+      ).length,
+    };
+  }, [rows]);
+
   useEffect(() => {
     resetPage();
   }, [filters, query, kec, sales, resetPage]);
@@ -121,6 +143,7 @@ export function StoreListView() {
     <>
       <ForecastPageHeader
         title="Data Toko"
+        icon="carbon:location"
         description="Daftar toko beserta pola kunjungan, volume kiriman, dan retur. Klik baris untuk melihat detail dan rekomendasi."
       />
 
@@ -184,10 +207,38 @@ export function StoreListView() {
         onRetry={storeQuery.refetch}
       />
 
-      <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-        {fNumber(rows.length)} toko aktif · nama sales disamarkan{' '}
-        {IS_API ? '(Sales-NN)' : '(S-A … S-J)'} sesuai dokumen analisis
-      </Typography>
+      <ForecastStatStrip
+        items={[
+          {
+            label: 'Toko aktif',
+            value: fNumber(rows.length),
+            caption: `Sales disamarkan ${IS_API ? '(Sales-NN)' : '(S-A … S-J)'}`,
+            icon: 'carbon:location',
+            color: theme.vars.palette.primary.main,
+          },
+          {
+            label: 'Total kiriman',
+            value: `${fNumber(stats.kirim)} pcs`,
+            caption: `${fNumber(stats.visits)} kunjungan`,
+            icon: 'carbon:delivery',
+            color: SERIES.kirim.color,
+          },
+          {
+            label: 'Rata-rata interval kunjungan',
+            value: stats.interval === null ? '–' : `${fNumber(stats.interval, 1)} hari`,
+            caption: 'Jarak antar kunjungan per toko',
+            icon: 'solar:calendar-date-linear',
+            color: SERIES.estSold.color,
+          },
+          {
+            label: 'Toko retur tinggi',
+            value: fNumber(stats.highReturn),
+            caption: `Rasio retur > ${fPercent(REC_PARAMS.returnThreshold, 0)}`,
+            icon: 'solar:info-circle-outline',
+            color: theme.vars.palette.error.main,
+          },
+        ]}
+      />
 
       <Card>
         <TableContainer>
@@ -210,20 +261,35 @@ export function StoreListView() {
                 >
                   <TableCell>{row.store.nit}</TableCell>
                   <TableCell>
-                    <Typography variant="subtitle2" noWrap sx={{ maxWidth: 240 }}>
-                      {row.store.nama}
-                    </Typography>
+                    <Box sx={{ gap: 1.5, display: 'flex', alignItems: 'center' }}>
+                      <NameAvatar name={row.store.nama} />
+                      <Typography variant="subtitle2" noWrap sx={{ maxWidth: 220 }}>
+                        {row.store.nama}
+                      </Typography>
+                    </Box>
                   </TableCell>
                   <TableCell>{row.store.kec}</TableCell>
-                  <TableCell>{row.lastSales ?? '–'}</TableCell>
+                  <TableCell>
+                    {row.lastSales ? (
+                      <Label variant="soft" color="default">
+                        {row.lastSales}
+                      </Label>
+                    ) : (
+                      '–'
+                    )}
+                  </TableCell>
                   <TableCell align="right">{fNumber(row.visits)}</TableCell>
                   <TableCell align="right">
                     {row.avgInterval === null ? '–' : `${fNumber(row.avgInterval, 1)} hr`}
                   </TableCell>
                   <TableCell>{row.lastVisit ? fDate(row.lastVisit) : '–'}</TableCell>
                   <TableCell align="right">{fNumber(row.productCount)}</TableCell>
-                  <TableCell align="right">{fNumber(row.kirim)}</TableCell>
-                  <TableCell align="right">{fPercent(row.returnRate)}</TableCell>
+                  <TableCell align="right">
+                    <InlineBarCell value={row.kirim} max={stats.maxKirim} />
+                  </TableCell>
+                  <TableCell align="right">
+                    <ReturnRateCell value={row.returnRate} />
+                  </TableCell>
                 </TableRow>
               ))}
               {!pageRows.length && <TableEmptyRow colSpan={HEAD.length} />}

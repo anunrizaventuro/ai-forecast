@@ -1,11 +1,13 @@
 'use client';
 
+import type { RecStatus } from '../recommendation-mix';
 import type { ForecastFilters } from '../forecast-utils';
 import type { Confidence, MasterStore, Recommendation } from 'src/types/forecast';
 
 import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -13,9 +15,9 @@ import Typography from '@mui/material/Typography';
 
 import { fNumber } from 'src/utils/format-number';
 
-import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import { RecommendationMix } from '../recommendation-mix';
 import { ForecastFilterBar } from '../forecast-filter-bar';
 import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
@@ -34,7 +36,7 @@ import {
 // Data: use-forecast-data (simulasi atau ai-forecast-be). Tanggal = "data s.d." (walk-forward): rekomendasi
 // hanya memakai kunjungan sampai tanggal itu.
 
-type Status = 'all' | 'naik' | 'turun' | 'tetap' | 'dikecualikan';
+type Status = 'all' | RecStatus;
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
   { value: 'all', label: 'Semua status' },
@@ -135,6 +137,7 @@ export function RecommendationView() {
     <>
       <ForecastPageHeader
         title="Rekomendasi Stok"
+        icon="carbon:delivery"
         description="Jumlah roti yang disarankan dibawa sales ke setiap toko pada kunjungan berikutnya, per produk."
         action={
           <Button
@@ -188,26 +191,36 @@ export function RecommendationView() {
 
       <ForecastDataState error={query.error} fetching={query.fetching} onRetry={query.refetch} />
 
-      <Box sx={{ mb: 2, gap: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-        <Typography variant="body2" sx={{ mr: 1, color: 'text.secondary' }}>
-          {fNumber(rows.length)} dari {fNumber(summary.total)} baris · data s.d. {fDate(filters.to)}
-        </Typography>
-        <Label variant="soft" color="success">
-          Naik {summary.increase}
-        </Label>
-        <Label variant="soft" color="warning">
-          Turun {summary.decrease}
-        </Label>
-        <Label variant="soft" color="info">
-          Tetap {summary.same}
-        </Label>
-        <Label variant="soft" color="default">
-          Dikecualikan {summary.excluded}
-        </Label>
-        <Label variant="soft" color="default">
-          Total rekomendasi {fNumber(summary.totalRecommended)} pcs
-        </Label>
-      </Box>
+      <Card sx={{ p: 3, mb: 3 }}>
+        <Box
+          sx={{
+            mb: 2.5,
+            gap: 2,
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Box>
+            <Typography variant="h6">
+              {fNumber(summary.totalRecommended)} pcs disarankan untuk kunjungan berikutnya
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Kiriman terakhir {fNumber(summary.totalLast)} pcs · data s.d. {fDate(filters.to)} ·
+              klik status untuk memfilter tabel
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Menampilkan {fNumber(rows.length)} dari {fNumber(summary.total)} baris
+          </Typography>
+        </Box>
+        <RecommendationMix
+          summary={summary}
+          selected={status === 'all' ? null : status}
+          onSelect={(next) => setStatus((prev) => (prev === next ? 'all' : next))}
+        />
+      </Card>
 
       <RecommendationTable rows={rows} resetKey={resetKey} />
     </>

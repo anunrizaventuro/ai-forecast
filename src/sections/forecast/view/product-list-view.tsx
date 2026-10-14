@@ -5,6 +5,7 @@ import type { ProductSummary, ForecastFilters } from '../forecast-utils';
 
 import { useMemo, useState, useCallback } from 'react';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Alert from '@mui/material/Alert';
@@ -13,16 +14,21 @@ import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
+import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 
 import { fNumber, fPercent, fCurrency } from 'src/utils/format-number';
 
 import { Label } from 'src/components/label';
+import { Iconify } from 'src/components/iconify';
 
+import { SERIES } from '../forecast-chart-colors';
 import { ForecastFilterBar } from '../forecast-filter-bar';
+import { ForecastStatStrip } from '../forecast-stat-strip';
 import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
+import { InlineBarCell, ReturnRateCell } from '../forecast-cells';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
 import { useForecastMeta, useForecastProducts } from '../use-forecast-data';
 import { productGroup, DEFAULT_FILTERS, isExcludedProduct } from '../forecast-utils';
@@ -46,7 +52,7 @@ type ColumnId =
 
 const HEAD: HeadCell<ColumnId>[] = [
   { id: 'nir', label: 'NIR' },
-  { id: 'code', label: 'Produk', minWidth: 160 },
+  { id: 'code', label: 'Produk', minWidth: 200 },
   { id: 'hargaBeli', label: 'Harga beli', align: 'right' },
   { id: 'hargaJual', label: 'Harga jual', align: 'right' },
   { id: 'margin', label: 'Margin', align: 'right' },
@@ -84,6 +90,7 @@ export function ProductListView() {
   const [status, setStatus] = useState<'all' | 'otomatis' | 'dikecualikan'>('all');
 
   const table = useTableState<ColumnId>('nir', 'asc');
+  const theme = useTheme();
 
   const handleChange = useCallback(
     (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
@@ -106,10 +113,22 @@ export function ProductListView() {
     return sortRows(filtered, (row) => getSortValue(row, table.orderBy), table.order);
   }, [productRows, group, status, table.order, table.orderBy]);
 
+  const stats = useMemo(
+    () => ({
+      active: rows.filter((row) => row.kirim > 0).length,
+      estSold: rows.reduce((acc, row) => acc + row.estSold, 0),
+      maxEstSold: Math.max(0, ...rows.map((row) => row.estSold)),
+      excluded: rows.filter((row) => isExcludedProduct(row.product.code)).length,
+      top: [...rows].sort((a, b) => b.estSold - a.estSold)[0],
+    }),
+    [rows]
+  );
+
   return (
     <>
       <ForecastPageHeader
         title="Data Produk"
+        icon="carbon:list-boxes"
         description="21 produk dari master MRoti dengan harga per pcs, volume, dan status rekomendasi otomatis."
       />
 
@@ -156,6 +175,39 @@ export function ProductListView() {
         onRetry={productQuery.refetch}
       />
 
+      <ForecastStatStrip
+        items={[
+          {
+            label: 'Produk terkirim',
+            value: `${fNumber(stats.active)} / ${fNumber(rows.length)}`,
+            caption: 'Produk dengan kiriman di rentang ini',
+            icon: 'carbon:list-boxes',
+            color: theme.vars.palette.primary.main,
+          },
+          {
+            label: 'Estimasi terjual',
+            value: `${fNumber(stats.estSold)} pcs`,
+            caption: 'Total semua produk (estimasi)',
+            icon: 'carbon:chart-average',
+            color: SERIES.estSold.color,
+          },
+          {
+            label: 'Paling laku',
+            value: stats.top?.product.code ?? '–',
+            caption: stats.top ? `${fNumber(stats.top.estSold)} pcs estimasi terjual` : undefined,
+            icon: 'carbon:trophy',
+            color: theme.vars.palette.warning.main,
+          },
+          {
+            label: 'Dikecualikan',
+            value: fNumber(stats.excluded),
+            caption: 'Volume terlalu kecil',
+            icon: 'solar:info-circle-outline',
+            color: theme.vars.palette.grey[500],
+          },
+        ]}
+      />
+
       <Card sx={{ mb: 3 }}>
         <TableContainer>
           <Table sx={{ minWidth: 1100 }}>
@@ -173,22 +225,60 @@ export function ProductListView() {
                   <TableRow key={row.product.code} hover>
                     <TableCell>{row.product.nir}</TableCell>
                     <TableCell>
-                      <Typography variant="subtitle2">{row.product.code}</Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        {productGroup(row.product)}
-                        {row.product.nama !== row.product.code &&
-                          ` · nama master "${row.product.nama}"`}
-                      </Typography>
+                      <Box sx={{ gap: 1.5, display: 'flex', alignItems: 'center' }}>
+                        <Box
+                          sx={{
+                            px: 1,
+                            height: 36,
+                            minWidth: 56,
+                            flexShrink: 0,
+                            display: 'flex',
+                            borderRadius: 1,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            typography: 'subtitle2',
+                            color: excluded ? 'text.disabled' : 'primary.dark',
+                            bgcolor: excluded ? 'action.hover' : 'background.neutral',
+                          }}
+                        >
+                          {row.product.code}
+                        </Box>
+                        <Typography
+                          variant="caption"
+                          sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}
+                        >
+                          {productGroup(row.product)}
+                          {row.product.nama !== row.product.code && (
+                            <Box component="span" sx={{ display: 'block' }}>
+                              master: &quot;{row.product.nama}&quot;
+                            </Box>
+                          )}
+                        </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell align="right">{fCurrency(row.product.hargaBeli)}</TableCell>
                     <TableCell align="right">{fCurrency(row.product.hargaJual)}</TableCell>
                     <TableCell align="right">{fPercent(margin(row))}</TableCell>
                     <TableCell align="right">{fNumber(row.stores)}</TableCell>
                     <TableCell align="right">{fNumber(row.kirim)}</TableCell>
-                    <TableCell align="right">{fNumber(row.estSold)}</TableCell>
-                    <TableCell align="right">{fPercent(row.returnRate)}</TableCell>
+                    <TableCell align="right">
+                      <InlineBarCell value={row.estSold} max={stats.maxEstSold} series="estSold" />
+                    </TableCell>
+                    <TableCell align="right">
+                      <ReturnRateCell value={row.returnRate} />
+                    </TableCell>
                     <TableCell>
-                      <Label variant="soft" color={excluded ? 'default' : 'success'}>
+                      <Label
+                        variant="soft"
+                        color={excluded ? 'default' : 'success'}
+                        startIcon={
+                          <Iconify
+                            icon={
+                              excluded ? 'solar:info-circle-outline' : 'solar:check-circle-bold'
+                            }
+                          />
+                        }
+                      >
                         {excluded ? 'Dikecualikan' : 'Otomatis'}
                       </Label>
                     </TableCell>

@@ -13,6 +13,10 @@ export const SERIES = {
 
 export type SeriesKey = keyof typeof SERIES;
 
+/** Warna yang sama dengan transparansi — untuk latar ikon, area grafik, dll. */
+export const tint = (color: string, percent: number) =>
+  `color-mix(in srgb, ${color} ${percent}%, transparent)`;
+
 export function chartColorVars(theme: Theme): CSSObject {
   return {
     '--series-1': '#2a78d6',

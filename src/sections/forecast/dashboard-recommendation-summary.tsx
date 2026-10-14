@@ -2,30 +2,25 @@
 
 import type { CardProps } from '@mui/material/Card';
 import type { Recommendation } from 'src/types/forecast';
-import type { IconifyName } from 'src/components/iconify';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
-import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import TableRow from '@mui/material/TableRow';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
+import { useTheme } from '@mui/material/styles';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
-import TableContainer from '@mui/material/TableContainer';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { fNumber } from 'src/utils/format-number';
+import { fNumber, fPercent } from 'src/utils/format-number';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 
+import { RecommendationMix } from './recommendation-mix';
+import { ForecastSegmentBar } from './forecast-segment-bar';
 import { RecommendationDelta } from './recommendation-delta';
 import { IS_API, useForecastMeta } from './use-forecast-data';
 import { fDate, CONFIDENCE_LABEL, summarizeRecommendations } from './forecast-utils';
@@ -37,45 +32,34 @@ type Props = CardProps & {
   asOf: string;
 };
 
-type StatProps = {
-  label: string;
-  value: number;
-  icon: IconifyName;
-  color: 'success' | 'warning' | 'info' | 'default';
-};
-
-function Stat({ label, value, icon, color }: StatProps) {
+function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Box sx={{ gap: 1.5, display: 'flex', alignItems: 'center' }}>
-      <Label color={color} variant="soft" sx={{ width: 36, height: 36, p: 0 }}>
-        <Iconify icon={icon} width={18} />
-      </Label>
-      <Box>
-        <Typography variant="h5" component="p">
-          {fNumber(value)}
-        </Typography>
-        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {label}
-        </Typography>
-      </Box>
-    </Box>
+    <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary' }}>
+      {children}
+    </Typography>
   );
 }
 
 export function DashboardRecommendationSummary({ recommendations, asOf, ...other }: Props) {
+  const theme = useTheme();
   const { storeMap } = useForecastMeta();
   const summary = summarizeRecommendations(recommendations);
+
+  const totalDelta = summary.totalRecommended - summary.totalLast;
+  const totalRatio = summary.totalLast ? totalDelta / summary.totalLast : null;
 
   const biggestChanges = recommendations
     .filter((r) => !r.excluded && r.delta && !r.signals.includes('pencilan'))
     .sort((a, b) => Math.abs(b.delta ?? 0) - Math.abs(a.delta ?? 0))
     .slice(0, 6);
 
+  const { palette } = theme.vars;
+
   return (
     <Card {...other}>
       <CardHeader
-        title="Ringkasan rekomendasi stok"
-        subheader={`Untuk kunjungan berikutnya · data s.d. ${fDate(asOf)} · ${fNumber(summary.stores)} toko`}
+        title="Rekomendasi stok kunjungan berikutnya"
+        subheader={`Data s.d. ${fDate(asOf)} · ${fNumber(summary.stores)} toko · ${fNumber(summary.total)} kombinasi toko × produk`}
         action={
           <Label color={IS_API ? 'info' : 'warning'} variant="soft">
             {IS_API ? 'Baseline' : 'Simulasi'}
@@ -83,99 +67,148 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
         }
       />
 
-      <Grid container spacing={3} sx={{ p: 3 }}>
-        <Grid size={{ xs: 12, md: 5 }}>
-          <Box sx={{ gap: 2.5, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            <Stat
-              label="Naik"
-              value={summary.increase}
-              icon="carbon:increase-level"
-              color="success"
+      <Grid container spacing={{ xs: 3, md: 4 }} sx={{ p: 3 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <SectionTitle>Total roti yang dibawa</SectionTitle>
+          <Box sx={{ gap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Kiriman terakhir
+              </Typography>
+              <Typography variant="h4" component="p">
+                {fNumber(summary.totalLast)}
+              </Typography>
+            </Box>
+            <Iconify
+              icon="eva:arrow-forward-fill"
+              width={24}
+              sx={{ color: 'text.disabled', mt: 2 }}
             />
-            <Stat label="Turun" value={summary.decrease} icon="carbon:arrow-down" color="warning" />
-            <Stat label="Tetap" value={summary.same} icon="eva:checkmark-fill" color="info" />
-            <Stat
-              label="Dikecualikan"
-              value={summary.excluded}
-              icon="solar:info-circle-outline"
-              color="default"
-            />
+            <Box>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Rekomendasi
+              </Typography>
+              <Typography variant="h4" component="p" sx={{ color: 'primary.main' }}>
+                {fNumber(summary.totalRecommended)}
+                <Box
+                  component="span"
+                  sx={{ ml: 0.5, typography: 'body2', color: 'text.secondary' }}
+                >
+                  pcs
+                </Box>
+              </Typography>
+            </Box>
+            <Label
+              variant="soft"
+              color={totalDelta > 0 ? 'success' : totalDelta < 0 ? 'warning' : 'default'}
+              sx={{ mt: 2 }}
+            >
+              {totalDelta > 0 ? '+' : totalDelta < 0 ? '−' : '±'}
+              {fNumber(Math.abs(totalDelta))} pcs ({fPercent(totalRatio && Math.abs(totalRatio))})
+            </Label>
           </Box>
 
-          <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
+          <Box sx={{ mt: 4 }}>
+            <SectionTitle>Arah perubahan per toko × produk</SectionTitle>
+            <RecommendationMix summary={summary} />
+          </Box>
 
-          <Box sx={{ gap: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Total kiriman terakhir
-              </Typography>
-              <Typography variant="subtitle2">{fNumber(summary.totalLast)} pcs</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Total rekomendasi berikutnya
-              </Typography>
-              <Typography variant="subtitle2">{fNumber(summary.totalRecommended)} pcs</Typography>
-            </Box>
-            <Box sx={{ mt: 1, gap: 1, display: 'flex', flexWrap: 'wrap' }}>
-              {(['tinggi', 'sedang', 'rendah'] as const).map((level) => (
-                <Label
-                  key={level}
-                  variant="soft"
-                  color={level === 'tinggi' ? 'success' : level === 'sedang' ? 'info' : 'default'}
-                >
-                  Kepercayaan {CONFIDENCE_LABEL[level].toLowerCase()}: {summary.confidence[level]}
-                </Label>
-              ))}
-            </Box>
+          <Box sx={{ mt: 4 }}>
+            <SectionTitle>Tingkat kepercayaan</SectionTitle>
+            <ForecastSegmentBar
+              height={8}
+              unit="item"
+              segments={(['tinggi', 'sedang', 'rendah'] as const).map((level) => ({
+                key: level,
+                label: CONFIDENCE_LABEL[level],
+                value: summary.confidence[level],
+                color:
+                  level === 'tinggi'
+                    ? palette.primary.main
+                    : level === 'sedang'
+                      ? palette.primary.light
+                      : palette.grey[400],
+              }))}
+            />
           </Box>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Perubahan terbesar dibanding kiriman terakhir
-          </Typography>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Toko</TableCell>
-                  <TableCell>Produk</TableCell>
-                  <TableCell align="right">Terakhir</TableCell>
-                  <TableCell align="right">Rekomendasi</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {biggestChanges.map((row) => (
-                  <TableRow key={`${row.nit}-${row.product}`}>
-                    <TableCell sx={{ maxWidth: 200 }}>
-                      <Typography variant="body2" noWrap>
-                        {storeMap.get(row.nit)?.nama}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.disabled' }}>
-                        {row.nit}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{row.product}</TableCell>
-                    <TableCell align="right">{fNumber(row.lastKirim)}</TableCell>
-                    <TableCell align="right">
-                      <RecommendationDelta value={row.recommended} delta={row.delta} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {!biggestChanges.length && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      sx={{ py: 4, textAlign: 'center', color: 'text.secondary' }}
-                    >
-                      Tidak ada perubahan untuk filter ini.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <SectionTitle>Perubahan terbesar dibanding kiriman terakhir</SectionTitle>
+
+          <Box component="ul" sx={{ gap: 1, display: 'flex', flexDirection: 'column' }}>
+            {biggestChanges.map((row) => {
+              const store = storeMap.get(row.nit);
+              const up = (row.delta ?? 0) > 0;
+
+              return (
+                <Box
+                  component="li"
+                  key={`${row.nit}-${row.product}`}
+                  sx={{
+                    p: 1.5,
+                    gap: 1.5,
+                    display: 'flex',
+                    borderRadius: 1.5,
+                    alignItems: 'center',
+                    bgcolor: 'background.neutral',
+                  }}
+                >
+                  <Box
+                    sx={{
+                      px: 1,
+                      minWidth: 56,
+                      height: 40,
+                      flexShrink: 0,
+                      display: 'flex',
+                      borderRadius: 1.25,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      typography: 'subtitle2',
+                      color: up ? 'success.dark' : 'warning.dark',
+                      bgcolor: 'background.paper',
+                    }}
+                  >
+                    {row.product}
+                  </Box>
+
+                  <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
+                    <Typography variant="subtitle2" noWrap>
+                      {store?.nama ?? row.nit}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }} noWrap>
+                      {row.nit}
+                      {store?.kec ? ` · Kec. ${store.kec}` : ''} ·{' '}
+                      {CONFIDENCE_LABEL[row.confidence]}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ gap: 0.75, flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {fNumber(row.lastKirim)}
+                    </Typography>
+                    <Iconify
+                      icon="eva:arrow-forward-fill"
+                      width={14}
+                      sx={{ color: 'text.disabled' }}
+                    />
+                    <RecommendationDelta value={row.recommended} delta={row.delta} />
+                  </Box>
+                </Box>
+              );
+            })}
+
+            {!biggestChanges.length && (
+              <Typography
+                component="li"
+                variant="body2"
+                sx={{ py: 4, textAlign: 'center', color: 'text.secondary' }}
+              >
+                Tidak ada perubahan untuk filter ini.
+              </Typography>
+            )}
+          </Box>
+
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               component={RouterLink}

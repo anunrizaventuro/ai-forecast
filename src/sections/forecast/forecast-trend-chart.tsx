@@ -2,7 +2,7 @@
 
 import type { SeriesKey } from './forecast-chart-colors';
 
-import { useRef, useState, useEffect } from 'react';
+import { useId, useRef, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
@@ -59,6 +59,7 @@ export function ForecastTrendChart({ categories, series, height = 320, ariaLabel
   const theme = useTheme();
   const { ref, width } = useElementWidth<HTMLDivElement>();
   const [active, setActive] = useState<number | null>(null);
+  const gradientPrefix = `trend${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
 
   const count = categories.length;
   const innerWidth = Math.max(0, width - MARGIN.left - MARGIN.right);
@@ -91,16 +92,38 @@ export function ForecastTrendChart({ categories, series, height = 320, ariaLabel
   return (
     <Box sx={{ ...chartColorVars(theme), position: 'relative' }}>
       {series.length > 1 && (
-        <Box component="ul" sx={{ mb: 2, gap: 2.5, display: 'flex', flexWrap: 'wrap' }}>
+        <Box
+          component="ul"
+          sx={{ mb: 2.5, gap: { xs: 2, sm: 4 }, display: 'flex', flexWrap: 'wrap' }}
+        >
           {series.map((s) => (
             <Box
               key={s.key}
               component="li"
-              sx={{ gap: 1, display: 'flex', alignItems: 'center', typography: 'body2' }}
+              sx={{ gap: 1, display: 'flex', alignItems: 'flex-start' }}
             >
-              <Box sx={{ width: 16, height: 2, borderRadius: 1, bgcolor: SERIES[s.key].color }} />
-              <Box component="span" sx={{ color: 'text.secondary' }}>
-                {SERIES[s.key].label}
+              <Box
+                sx={{
+                  mt: 0.75,
+                  width: 12,
+                  height: 12,
+                  borderRadius: 0.5,
+                  bgcolor: SERIES[s.key].color,
+                }}
+              />
+              <Box>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {SERIES[s.key].label}
+                </Typography>
+                <Typography variant="h6" component="p">
+                  {fNumber(s.values.reduce((acc, value) => acc + value, 0))}
+                  <Box
+                    component="span"
+                    sx={{ ml: 0.5, typography: 'caption', color: 'text.secondary' }}
+                  >
+                    pcs di grafik
+                  </Box>
+                </Typography>
               </Box>
             </Box>
           ))}
@@ -160,12 +183,40 @@ export function ForecastTrendChart({ categories, series, height = 320, ariaLabel
               ) : null
             )}
 
+            <defs>
+              {series.map((s) => (
+                <linearGradient
+                  key={s.key}
+                  id={`${gradientPrefix}-${s.key}`}
+                  x1="0"
+                  x2="0"
+                  y1="0"
+                  y2="1"
+                >
+                  <stop offset="0%" style={{ stopColor: SERIES[s.key].color, stopOpacity: 0.2 }} />
+                  <stop offset="100%" style={{ stopColor: SERIES[s.key].color, stopOpacity: 0 }} />
+                </linearGradient>
+              ))}
+            </defs>
+
+            {series.map((s) => (
+              <polygon
+                key={`${s.key}-area`}
+                fill={`url(#${gradientPrefix}-${s.key})`}
+                points={[
+                  `${x(0)},${y(0)}`,
+                  ...s.values.map((value, index) => `${x(index)},${y(value)}`),
+                  `${x(s.values.length - 1)},${y(0)}`,
+                ].join(' ')}
+              />
+            ))}
+
             {series.map((s) => (
               <polyline
                 key={s.key}
                 fill="none"
                 stroke={SERIES[s.key].color}
-                strokeWidth={2}
+                strokeWidth={2.5}
                 strokeLinejoin="round"
                 strokeLinecap="round"
                 points={s.values.map((value, index) => `${x(index)},${y(value)}`).join(' ')}

@@ -49,7 +49,7 @@ const MAX_DATE = dayjs(PERIOD.end);
 const toValue = (value: Dayjs | null) =>
   value && value.isValid() ? value.format('YYYY-MM-DD') : null;
 
-const FIELD_SX = { minWidth: { xs: 1, sm: 180 }, flex: { xs: '1 1 100%', sm: '0 1 auto' } };
+const FIELD_SX = { minWidth: { xs: 1, sm: 150 }, flex: { xs: '1 1 100%', sm: '1 1 150px' } };
 
 export function ForecastFilterBar({
   filters,
@@ -146,10 +146,15 @@ export function ForecastFilterBar({
             onChange={(_, value) => onChange({ nit: value })}
             getOptionLabel={(nit) => `${nit} · ${storeMap.get(nit)?.nama ?? ''}`}
             renderInput={(params) => (
-              <TextField {...params} label="Toko" placeholder="Semua toko" />
+              <TextField
+                {...params}
+                label="Toko"
+                placeholder="Semua toko"
+                slotProps={{ ...params.slotProps, inputLabel: { shrink: true } }}
+              />
             )}
             noOptionsText="Toko tidak ditemukan"
-            sx={{ ...FIELD_SX, minWidth: { xs: 1, sm: 240 } }}
+            sx={{ ...FIELD_SX, flex: { xs: '1 1 100%', sm: '2 1 220px' } }}
           />
         )}
 

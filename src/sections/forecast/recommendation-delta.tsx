@@ -1,3 +1,5 @@
+import { varAlpha } from 'minimal-shared/utils';
+
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
@@ -34,12 +36,20 @@ export function RecommendationDelta({ value, delta }: Props) {
         <Box
           component="span"
           sx={{
+            px: 0.75,
+            py: 0.25,
             gap: 0.25,
+            borderRadius: 1,
             display: 'inline-flex',
             alignItems: 'center',
             typography: 'caption',
             fontWeight: 'fontWeightSemiBold',
             color: direction === 'up' ? 'success.dark' : 'warning.dark',
+            bgcolor: (theme) =>
+              varAlpha(
+                theme.vars.palette[direction === 'up' ? 'success' : 'warning'].mainChannel,
+                0.16
+              ),
           }}
         >
           <Iconify

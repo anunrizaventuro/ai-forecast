@@ -37,7 +37,7 @@ export function DashboardTopProducts({ rows, limit = 7, ...other }: Props) {
         subheader="Estimasi terjual (pcs) pada rentang terpilih"
       />
       <CardContent>
-        <ForecastBarList items={items} series="estSold" />
+        <ForecastBarList ranked items={items} series="estSold" />
       </CardContent>
     </Card>
   );

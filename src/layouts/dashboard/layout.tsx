@@ -94,7 +94,9 @@ export function DashboardLayout({ children, layoutQuery = 'lg' }: DashboardLayou
         headerSection={renderHeader()}
         cssVars={{ '--layout-dashboard-nav-width': '280px' }}
         sx={(theme) => ({
-          bgcolor: 'background.default',
+          // Latar abu-abu muda agar kartu putih terbaca sebagai lapisan.
+          bgcolor: 'background.neutral',
+          ...theme.applyStyles('dark', { bgcolor: 'background.default' }),
           [theme.breakpoints.up(layoutQuery)]: { pl: 'var(--layout-dashboard-nav-width)' },
         })}
       >

@@ -1,16 +1,21 @@
 'use client';
 
+import type { IconifyName } from 'src/components/iconify';
 import type { Granularity, ForecastFilters } from '../forecast-utils';
 
 import { useState, useCallback } from 'react';
+import { varAlpha } from 'minimal-shared/utils';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
-import Alert from '@mui/material/Alert';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 
 import { fNumber, fPercent } from 'src/utils/format-number';
+
+import { Iconify } from 'src/components/iconify';
 
 import { ForecastKpiGrid } from '../forecast-kpi-grid';
 import { ForecastBarList } from '../forecast-bar-list';
@@ -32,6 +37,24 @@ import {
 // Data: use-forecast-data (simulasi atau ai-forecast-be). Semua kartu
 // mengikuti filter yang sama.
 
+const METHOD_NOTES: { icon: IconifyName; title: string; text: string }[] = [
+  {
+    icon: 'carbon:chart-average',
+    title: 'Estimasi terjual = kiriman sebelumnya − BS hari ini',
+    text: 'Rumus B dari studi kelayakan. Dicatat pada tanggal penarikan retur.',
+  },
+  {
+    icon: 'solar:info-circle-outline',
+    title: 'Permintaan riil kemungkinan lebih besar',
+    text: 'Sekitar 90% kiriman tidak punya retur maupun sisa stok — roti habis, jadi permintaan tidak teramati penuh (censored demand).',
+  },
+  {
+    icon: 'solar:filter-outline',
+    title: 'Yang tidak dihitung',
+    text: 'Kunjungan pertama tiap toko (belum ada pembanding) dan kiriman pencilan.',
+  },
+];
+
 export function SalesAnalysisView() {
   const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
   const [granularity, setGranularity] = useState<Granularity>('mingguan');
@@ -51,6 +74,7 @@ export function SalesAnalysisView() {
 
   const kecItems = (regions.data ?? [])
     .filter((row) => row.estSold > 0)
+    .sort((a, b) => b.estSold - a.estSold)
     .map((row) => ({
       key: String(row.kec),
       label: row.kec ? `Kec. ${row.kec}` : 'Di luar master',
@@ -63,6 +87,7 @@ export function SalesAnalysisView() {
     <>
       <ForecastPageHeader
         title="Analisis Penjualan"
+        icon="solar:presentation-graph-outline"
         description="Bandingkan kiriman, estimasi terjual, dan retur per periode, produk, serta wilayah."
       />
 
@@ -76,7 +101,7 @@ export function SalesAnalysisView() {
         onRetry={() => states.forEach((s) => s.refetch())}
       />
 
-      <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} />
+      <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} points={points} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
@@ -98,7 +123,7 @@ export function SalesAnalysisView() {
               subheader="Arti kode kec masih perlu dikonfirmasi klien"
             />
             <CardContent>
-              <ForecastBarList items={kecItems} series="estSold" />
+              <ForecastBarList ranked items={kecItems} series="estSold" />
             </CardContent>
           </Card>
         </Grid>
@@ -116,14 +141,41 @@ export function SalesAnalysisView() {
         </Grid>
 
         <Grid size={{ xs: 12, lg: 6 }}>
-          <Alert severity="info" variant="outlined" sx={{ height: 1 }}>
-            <strong>Catatan metode.</strong> Estimasi terjual memakai rumus B: kiriman kunjungan
-            sebelumnya dikurangi BS hari ini. Di studi kelayakan, sekitar 90% kiriman tidak punya
-            retur maupun sisa stok, jadi permintaan riil kemungkinan lebih besar dari angka ini (
-            <em>censored demand</em>). Kunjungan pertama setiap toko tidak punya pembanding sehingga
-            tidak dihitung, begitu juga kiriman pencilan. Rumus akhir menunggu konfirmasi arti BS
-            dan STOCK dari klien.
-          </Alert>
+          <Card sx={{ height: 1 }}>
+            <CardHeader
+              title="Cara membaca angka ini"
+              subheader="Rumus akhir menunggu konfirmasi arti BS dan STOCK dari klien"
+            />
+            <CardContent>
+              <Box component="ul" sx={{ gap: 2.5, display: 'flex', flexDirection: 'column' }}>
+                {METHOD_NOTES.map((note) => (
+                  <Box key={note.title} component="li" sx={{ gap: 2, display: 'flex' }}>
+                    <Box
+                      sx={(theme) => ({
+                        width: 40,
+                        height: 40,
+                        flexShrink: 0,
+                        display: 'flex',
+                        borderRadius: 1.25,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'info.dark',
+                        bgcolor: varAlpha(theme.vars.palette.info.mainChannel, 0.12),
+                      })}
+                    >
+                      <Iconify icon={note.icon} width={22} />
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle2">{note.title}</Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {note.text}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid size={12}>
