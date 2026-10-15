@@ -42,4 +42,14 @@ export const navDashboardData: NavSectionProps['data'] = [
       },
     ],
   },
+  {
+    subheader: 'Sistem',
+    items: [
+      {
+        title: 'Pengaturan',
+        path: paths.dashboard.settings,
+        icon: <Iconify icon="carbon:settings-adjust" />,
+      },
+    ],
+  },
 ];
