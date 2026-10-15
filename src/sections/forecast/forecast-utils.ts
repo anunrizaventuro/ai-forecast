@@ -4,6 +4,7 @@ import type {
   VisitCell,
   KecSummary,
   Confidence,
+  AdjustUnit,
   CellSummary,
   Granularity,
   SeriesPoint,
@@ -69,11 +70,15 @@ export const productGroup = (product: MasterProduct) => `Kelompok ${product.nir[
 export const DEFAULT_REC_PARAMS: RecommendationParams = {
   window: 4,
   minObservations: 3,
+  returnSignalEnabled: true,
   returnThreshold: 0.15,
   returnWindow: 3,
   returnStreak: 1,
   returnCutUnit: 'pcs',
   returnCut: 1,
+  stockoutEnabled: true,
+  stockoutStreak: 2,
+  stockoutBonusUnit: 'pcs',
   stockoutBonus: 1,
   maxStepRatio: 0.3,
   minStep: 2,
@@ -358,11 +363,17 @@ const returnStreakOk = (retObs: VisitCell[], params: RecommendationParams) =>
   (retObs.length >= params.returnStreak &&
     retObs.slice(-params.returnStreak).every((c) => c.bs / c.prevKirim! > params.returnThreshold));
 
-/** Pengurangan saat retur tinggi; persen dari dasar, minimal 1 pcs. */
-const returnCut = (base: number, params: RecommendationParams) =>
-  params.returnCutUnit === 'persen'
-    ? Math.max(1, Math.round(base * params.returnCut))
-    : params.returnCut;
+/**
+ * Besar perubahan: pcs apa adanya, atau persen dari dasar dibulatkan ke ATAS
+ * (minimal 1 pcs). Epsilon menahan galat float, mis. 100 × 0.07 = 7.000…01.
+ */
+const adjustAmount = (base: number, unit: AdjustUnit, value: number) =>
+  unit === 'persen' ? Math.max(1, Math.ceil(base * value - 1e-9)) : value;
+
+/** `stockoutStreak` observasi terakhir semuanya habis (BS = 0 dan STOCK = 0). */
+const stockoutStreakOk = (allObs: VisitCell[], params: RecommendationParams) =>
+  allObs.length >= params.stockoutStreak &&
+  allObs.slice(-params.stockoutStreak).every((c) => c.bs === 0 && c.stock === 0);
 
 /**
  * Aturan baseline (studi kelayakan §4.2) untuk kunjungan berikutnya, memakai
@@ -486,17 +497,17 @@ export function computeRecommendations(
     }
 
     let adjustment = 0;
-    const lastTwo = obs.slice(-2);
-    if (lastTwo.length === 2 && lastTwo.every((c) => c.bs === 0 && c.stock === 0)) {
-      adjustment += params.stockoutBonus;
+    if (params.stockoutEnabled && stockoutStreakOk(allObs, params)) {
+      adjustment += adjustAmount(base, params.stockoutBonusUnit, params.stockoutBonus);
       signals.push('habis');
     }
     if (
+      params.returnSignalEnabled &&
       returnRate !== null &&
       returnRate > params.returnThreshold &&
       returnStreakOk(retObs, params)
     ) {
-      adjustment -= returnCut(base, params);
+      adjustment -= adjustAmount(base, params.returnCutUnit, params.returnCut);
       signals.push('retur-tinggi');
     }
 
@@ -562,7 +573,7 @@ export const CONFIDENCE_LABEL: Record<Confidence, string> = {
 };
 
 export const SIGNAL_LABEL: Record<RecommendationSignal, string> = {
-  habis: 'Sinyal habis (+1)',
+  habis: 'Stok habis (+)',
   'retur-tinggi': 'Retur tinggi (−1)',
   dibatasi: 'Perubahan dibatasi',
   fallback: 'Riwayat pendek',
@@ -570,14 +581,14 @@ export const SIGNAL_LABEL: Record<RecommendationSignal, string> = {
 };
 
 /** "1 pcs" / "10%" */
-export const fReturnCut = (params: RecommendationParams) =>
-  params.returnCutUnit === 'persen'
-    ? `${Math.round(params.returnCut * 100)}%`
-    : `${params.returnCut} pcs`;
+export const fAdjust = (unit: AdjustUnit, value: number) =>
+  unit === 'persen' ? `${Math.round(value * 100)}%` : `${value} pcs`;
 
 /** Label sinyal dengan besaran dari params aktif. */
 export function signalLabel(signal: RecommendationSignal, params: RecommendationParams) {
-  if (signal === 'habis') return `Sinyal habis (+${params.stockoutBonus})`;
-  if (signal === 'retur-tinggi') return `Retur tinggi (−${fReturnCut(params)})`;
+  if (signal === 'habis')
+    return `Stok habis (+${fAdjust(params.stockoutBonusUnit, params.stockoutBonus)})`;
+  if (signal === 'retur-tinggi')
+    return `Retur tinggi (−${fAdjust(params.returnCutUnit, params.returnCut)})`;
   return SIGNAL_LABEL[signal];
 }

@@ -37,6 +37,13 @@
 > selesai, mode `api` memakai `DefaultParams` server dan halaman Pengaturan menampilkan
 > pemberitahuan "backend belum mendukung". Saat mengerjakan backend, ikuti Task 1–3 apa adanya;
 > kontraknya sudah dipakai FE di `src/lib/api/forecast.ts` (`forecastSettingsSchema`, `toRawParams`).
+>
+> **REVISI (b):** sebelum mengerjakan Task 1–3, terapkan "Revisi 2026-10-15 (b)" di spec — field
+> `return_signal_enabled`, `stockout_enabled`, `stockout_streak`, `stockout_bonus_unit`, rentang baru
+> `stockout_bonus`, dan pembulatan persen ke atas (`max(1, ceil(base*rasio - 1e-9))`). Kode Go di Task 1
+> di bawah masih versi awal; acuan akhirnya `adjustAmount`/`stockoutStreakOk` di
+> `src/sections/forecast/forecast-utils.ts`. Tambahkan tes: habis 3 kunjungan +2% (kirim 10 → 11,
+> kirim 50 → 51), +7% dari 100 → 107 (bukan 108), sinyal dimatikan → tanpa penyesuaian.
 
 ### Task 1: Params baru + aturan retur yang bisa diatur
 

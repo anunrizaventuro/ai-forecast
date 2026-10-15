@@ -36,7 +36,7 @@ export function SettingsView() {
       <ForecastPageHeader
         title="Pengaturan Rekomendasi"
         icon="carbon:settings-adjust"
-        description="Atur kapan dan seberapa besar rekomendasi stok diturunkan saat retur (BS) tinggi."
+        description="Atur kapan dan seberapa besar rekomendasi stok diturunkan (retur/BS) atau ditambah (stok habis)."
       />
 
       <ForecastSimulationAlert />

@@ -6,15 +6,14 @@ import { useState, useCallback } from 'react';
 
 import Grid from '@mui/material/Grid';
 
-import { DashboardHero } from '../dashboard-hero';
 import { ForecastKpiGrid } from '../forecast-kpi-grid';
 import { ForecastTrendCard } from '../forecast-trend-card';
 import { ForecastFilterBar } from '../forecast-filter-bar';
 import { ForecastDataState } from '../forecast-data-state';
 import { DashboardTopProducts } from '../dashboard-top-products';
+import { EMPTY_SUMMARY, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
 import { DashboardRecommendationSummary } from '../dashboard-recommendation-summary';
-import { EMPTY_SUMMARY, DEFAULT_FILTERS, summarizeRecommendations } from '../forecast-utils';
 import {
   useForecastSeries,
   useForecastSummary,
@@ -60,14 +59,13 @@ export function DashboardView() {
         onRetry={() => states.forEach((s) => s.refetch())}
       />
 
-      <DashboardHero
+      {/* Hero ringkasan distribusi (dashboard-hero.tsx) dan kartu nilai estimasi terjual
+          sengaja tidak ditampilkan dulu — kebutuhannya belum dipastikan. */}
+      <ForecastKpiGrid
         summary={summary.data ?? EMPTY_SUMMARY}
-        recommendation={summarizeRecommendations(recommendations.data ?? [])}
-        from={filters.from}
-        to={filters.to}
+        points={series.data}
+        hideSalesValue
       />
-
-      <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} points={series.data} />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>

@@ -16,12 +16,16 @@ const int = (min: number, max: number) =>
 
 export const recParamsFormSchema = z
   .object({
+    returnSignalEnabled: z.boolean(),
     returnThresholdPct: int(1, 100),
     returnWindow: int(1, 8),
     returnStreak: int(1, 8),
     returnCutUnit: z.enum(['pcs', 'persen']),
     returnCut: int(1, 90),
-    stockoutBonus: int(0, 20),
+    stockoutEnabled: z.boolean(),
+    stockoutStreak: int(1, 8),
+    stockoutBonusUnit: z.enum(['pcs', 'persen']),
+    stockoutBonus: int(1, 90),
     window: int(1, 12),
     minObservations: int(1, 12),
     maxStepPct: int(5, 100),
@@ -45,6 +49,9 @@ export const recParamsFormSchema = z
     if (v.returnCutUnit === 'pcs' && v.returnCut > 50) {
       ctx.addIssue({ code: 'custom', path: ['returnCut'], message: 'Maksimal 50 pcs.' });
     }
+    if (v.stockoutBonusUnit === 'pcs' && v.stockoutBonus > 20) {
+      ctx.addIssue({ code: 'custom', path: ['stockoutBonus'], message: 'Maksimal 20 pcs.' });
+    }
   });
 
 export type RecParamsFormValues = z.infer<typeof recParamsFormSchema>;
@@ -52,12 +59,16 @@ export type RecParamsFormValues = z.infer<typeof recParamsFormSchema>;
 const pct = (ratio: number) => Math.round(ratio * 100);
 
 export const toFormValues = (p: RecommendationParams): RecParamsFormValues => ({
+  returnSignalEnabled: p.returnSignalEnabled,
   returnThresholdPct: pct(p.returnThreshold),
   returnWindow: p.returnWindow,
   returnStreak: p.returnStreak,
   returnCutUnit: p.returnCutUnit,
   returnCut: p.returnCutUnit === 'persen' ? pct(p.returnCut) : p.returnCut,
-  stockoutBonus: p.stockoutBonus,
+  stockoutEnabled: p.stockoutEnabled,
+  stockoutStreak: p.stockoutStreak,
+  stockoutBonusUnit: p.stockoutBonusUnit,
+  stockoutBonus: p.stockoutBonusUnit === 'persen' ? pct(p.stockoutBonus) : p.stockoutBonus,
   window: p.window,
   minObservations: p.minObservations,
   maxStepPct: pct(p.maxStepRatio),
@@ -67,12 +78,16 @@ export const toFormValues = (p: RecommendationParams): RecParamsFormValues => ({
 export const toParams = (v: RecParamsFormValues): RecommendationParams => ({
   window: v.window,
   minObservations: v.minObservations,
+  returnSignalEnabled: v.returnSignalEnabled,
   returnThreshold: v.returnThresholdPct / 100,
   returnWindow: v.returnWindow,
   returnStreak: v.returnStreak,
   returnCutUnit: v.returnCutUnit,
   returnCut: v.returnCutUnit === 'persen' ? v.returnCut / 100 : v.returnCut,
-  stockoutBonus: v.stockoutBonus,
+  stockoutEnabled: v.stockoutEnabled,
+  stockoutStreak: v.stockoutStreak,
+  stockoutBonusUnit: v.stockoutBonusUnit,
+  stockoutBonus: v.stockoutBonusUnit === 'persen' ? v.stockoutBonus / 100 : v.stockoutBonus,
   maxStepRatio: v.maxStepPct / 100,
   minStep: v.minStep,
 });
@@ -81,11 +96,15 @@ export const toParams = (v: RecParamsFormValues): RecommendationParams => ({
 export const API_FIELD_TO_FORM: Record<string, keyof RecParamsFormValues> = {
   window: 'window',
   min_observations: 'minObservations',
+  return_signal_enabled: 'returnSignalEnabled',
   return_threshold: 'returnThresholdPct',
   return_window: 'returnWindow',
   return_streak: 'returnStreak',
   return_cut_unit: 'returnCutUnit',
   return_cut: 'returnCut',
+  stockout_enabled: 'stockoutEnabled',
+  stockout_streak: 'stockoutStreak',
+  stockout_bonus_unit: 'stockoutBonusUnit',
   stockout_bonus: 'stockoutBonus',
   max_step_ratio: 'maxStepPct',
   min_step: 'minStep',
@@ -95,11 +114,15 @@ const storedSchema = z.object({
   params: z.object({
     window: z.number(),
     minObservations: z.number(),
+    returnSignalEnabled: z.boolean(),
     returnThreshold: z.number(),
     returnWindow: z.number(),
     returnStreak: z.number(),
     returnCutUnit: z.enum(['pcs', 'persen']),
     returnCut: z.number(),
+    stockoutEnabled: z.boolean(),
+    stockoutStreak: z.number(),
+    stockoutBonusUnit: z.enum(['pcs', 'persen']),
     stockoutBonus: z.number(),
     maxStepRatio: z.number(),
     minStep: z.number(),

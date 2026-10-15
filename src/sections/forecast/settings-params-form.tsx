@@ -1,5 +1,5 @@
-import type { RecommendationParams } from 'src/types/forecast';
 import type { RecParamsFormValues } from './recommendation-params-schema';
+import type { AdjustUnit, RecommendationParams } from 'src/types/forecast';
 
 import { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -47,7 +47,6 @@ const IS_API = CONFIG.forecastSource === 'api';
 const ADVANCED_FIELDS: (keyof RecParamsFormValues)[] = [
   'window',
   'minObservations',
-  'stockoutBonus',
   'maxStepPct',
   'minStep',
 ];
@@ -64,11 +63,12 @@ type ParamFieldProps = {
   unit?: string;
   min: number;
   max: number;
+  disabled?: boolean;
   helperText?: React.ReactNode;
 };
 
 /** Label di atas + input angka dengan satuan (NumberInput tidak punya label sendiri). */
-function ParamField({ name, label, unit, min, max, helperText }: ParamFieldProps) {
+function ParamField({ name, label, unit, min, max, disabled, helperText }: ParamFieldProps) {
   return (
     <Box>
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -78,6 +78,7 @@ function ParamField({ name, label, unit, min, max, helperText }: ParamFieldProps
         name={name}
         min={min}
         max={max}
+        disabled={disabled}
         captionText={unit}
         helperText={helperText}
         sx={{ maxWidth: 280 }}
@@ -86,18 +87,69 @@ function ParamField({ name, label, unit, min, max, helperText }: ParamFieldProps
   );
 }
 
-/** Kalimat aturan retur dari nilai form (pratinjau). */
-function rulePreview(v: RecParamsFormValues, avgInterval: number | null) {
-  const days = avgInterval ? ` (≈ ${fNumber(v.returnWindow * avgInterval)} hari)` : '';
+type AmountFieldProps = {
+  label: string;
+  name: 'returnCut' | 'stockoutBonus';
+  unitName: 'returnCutUnit' | 'stockoutBonusUnit';
+  unit: AdjustUnit;
+  maxPcs: number;
+  disabled?: boolean;
+};
+
+/** Besar perubahan + pilihan satuan pcs / persen. */
+function AmountField({ label, name, unitName, unit, maxPcs, disabled }: AmountFieldProps) {
+  return (
+    <Box>
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        {label}
+      </Typography>
+      <Box sx={{ gap: 2, display: 'flex', alignItems: 'flex-start' }}>
+        <Field.NumberInput
+          name={name}
+          min={1}
+          max={unit === 'persen' ? 90 : maxPcs}
+          disabled={disabled}
+          captionText={unit === 'persen' ? '%' : 'pcs'}
+          helperText={
+            unit === 'persen' ? 'Dari dasar, dibulatkan ke atas (min. 1 pcs).' : undefined
+          }
+        />
+        <Field.Select
+          name={unitName}
+          label="Satuan"
+          size="small"
+          disabled={disabled}
+          sx={{ minWidth: 110 }}
+        >
+          <MenuItem value="pcs">pcs</MenuItem>
+          <MenuItem value="persen">persen</MenuItem>
+        </Field.Select>
+      </Box>
+    </Box>
+  );
+}
+
+const fAmount = (unit: AdjustUnit, value: number) =>
+  unit === 'persen' ? `${value}% dari dasar (dibulatkan ke atas, minimal 1 pcs)` : `${value} pcs`;
+
+const fDays = (visits: number, avgInterval: number | null) =>
+  avgInterval ? ` (≈ ${fNumber(visits * avgInterval)} hari)` : '';
+
+/** Kalimat aturan retur tambahan dari nilai form (pratinjau). */
+function returnPreview(v: RecParamsFormValues, avgInterval: number | null) {
+  if (!v.returnSignalEnabled)
+    return 'Tidak ada pengurangan tambahan — hanya penurunan otomatis sebesar BS.';
   const streak =
     v.returnStreak > 1
       ? `, dan ${v.returnStreak} kunjungan terakhir berturut-turut masing-masing di atas batas`
       : '';
-  const cut =
-    v.returnCutUnit === 'persen'
-      ? `${v.returnCut}% dari dasar (minimal 1 pcs)`
-      : `${v.returnCut} pcs`;
-  return `Jika retur lebih dari ${v.returnThresholdPct}% kiriman pada ${v.returnWindow} kunjungan terakhir${days}${streak}, rekomendasi dikurangi ${cut}.`;
+  return `Jika retur lebih dari ${v.returnThresholdPct}% kiriman pada ${v.returnWindow} kunjungan terakhir${fDays(v.returnWindow, avgInterval)}${streak}, rekomendasi dikurangi lagi ${fAmount(v.returnCutUnit, v.returnCut)}.`;
+}
+
+/** Kalimat aturan penambahan stok habis dari nilai form (pratinjau). */
+function stockoutPreview(v: RecParamsFormValues, avgInterval: number | null) {
+  if (!v.stockoutEnabled) return 'Tidak ada penambahan saat stok habis.';
+  return `Jika stok habis (BS = 0 dan STOCK = 0) pada ${v.stockoutStreak} kunjungan terakhir berturut-turut${fDays(v.stockoutStreak, avgInterval)}, rekomendasi ditambah ${fAmount(v.stockoutBonusUnit, v.stockoutBonus)}.`;
 }
 
 type Props = {
@@ -184,10 +236,16 @@ export function SettingsParamsForm({
       <Stack spacing={3}>
         <Card>
           <CardHeader
-            title="Sinyal Retur (BS)"
-            subheader="Kapan rekomendasi diturunkan karena barang banyak kembali."
+            title="Penurunan karena BS (retur)"
+            subheader="Rekomendasi otomatis turun sebesar BS: dasar = estimasi terjual = kiriman − BS. Jika BS konsisten 2%, rekomendasi ikut turun ±2% agar BS menuju 0."
           />
           <CardContent>
+            <Field.Switch
+              name="returnSignalEnabled"
+              label="Pengurangan tambahan saat retur tinggi"
+              helperText="Di atas penurunan otomatis, untuk toko yang retur-nya melewati batas."
+              slotProps={{ wrapper: { sx: { mb: 3 } } }}
+            />
             <Box sx={gridSx}>
               <ParamField
                 name="returnThresholdPct"
@@ -195,6 +253,7 @@ export function SettingsParamsForm({
                 unit="%"
                 min={1}
                 max={100}
+                disabled={!values.returnSignalEnabled}
                 helperText="Rasio BS ÷ kiriman kunjungan sebelumnya."
               />
               <ParamField
@@ -203,6 +262,7 @@ export function SettingsParamsForm({
                 unit="kunjungan"
                 min={1}
                 max={8}
+                disabled={!values.returnSignalEnabled}
                 helperText={
                   avgInterval
                     ? `≈ ${fNumber(values.returnWindow * avgInterval)} hari (interval rata-rata ${fNumber(avgInterval, 1)} hari).`
@@ -215,39 +275,58 @@ export function SettingsParamsForm({
                 unit="kunjungan"
                 min={1}
                 max={8}
+                disabled={!values.returnSignalEnabled}
                 helperText="1 = cukup rasio gabungan di atas batas."
               />
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Besar pengurangan
-                </Typography>
-                <Box sx={{ gap: 2, display: 'flex', alignItems: 'flex-start' }}>
-                  <Field.NumberInput
-                    name="returnCut"
-                    min={1}
-                    max={values.returnCutUnit === 'persen' ? 90 : 50}
-                    captionText={values.returnCutUnit === 'persen' ? '%' : 'pcs'}
-                    helperText={
-                      values.returnCutUnit === 'persen'
-                        ? 'Dari dasar median, minimal 1 pcs.'
-                        : undefined
-                    }
-                  />
-                  <Field.Select
-                    name="returnCutUnit"
-                    label="Satuan"
-                    size="small"
-                    sx={{ minWidth: 110 }}
-                  >
-                    <MenuItem value="pcs">pcs</MenuItem>
-                    <MenuItem value="persen">persen</MenuItem>
-                  </Field.Select>
-                </Box>
-              </Box>
+              <AmountField
+                label="Besar pengurangan tambahan"
+                name="returnCut"
+                unitName="returnCutUnit"
+                unit={values.returnCutUnit}
+                maxPcs={50}
+                disabled={!values.returnSignalEnabled}
+              />
             </Box>
 
             <Alert severity="info" variant="outlined" sx={{ mt: 3 }}>
-              {rulePreview(values, avgInterval)}
+              {returnPreview(values, avgInterval)}
+            </Alert>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="Penambahan karena stok habis"
+            subheader="Stok habis berarti permintaan mungkin lebih besar dari yang terlihat — tambah sedikit untuk mengujinya."
+          />
+          <CardContent>
+            <Field.Switch
+              name="stockoutEnabled"
+              label="Tambah rekomendasi saat stok habis berturut-turut"
+              slotProps={{ wrapper: { sx: { mb: 3 } } }}
+            />
+            <Box sx={gridSx}>
+              <ParamField
+                name="stockoutStreak"
+                label="Minimal kunjungan habis berturut-turut"
+                unit="kunjungan"
+                min={1}
+                max={8}
+                disabled={!values.stockoutEnabled}
+                helperText="BS = 0 dan STOCK = 0 pada setiap kunjungan tersebut."
+              />
+              <AmountField
+                label="Besar penambahan"
+                name="stockoutBonus"
+                unitName="stockoutBonusUnit"
+                unit={values.stockoutBonusUnit}
+                maxPcs={20}
+                disabled={!values.stockoutEnabled}
+              />
+            </Box>
+
+            <Alert severity="info" variant="outlined" sx={{ mt: 3 }}>
+              {stockoutPreview(values, avgInterval)}
             </Alert>
           </CardContent>
         </Card>
@@ -262,7 +341,7 @@ export function SettingsParamsForm({
               <Box>
                 <Typography variant="subtitle2">Lanjutan</Typography>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                  Dasar median, sinyal habis, dan batas perubahan per kunjungan.
+                  Dasar median dan batas perubahan per kunjungan.
                 </Typography>
               </Box>
             </AccordionSummary>
@@ -282,14 +361,6 @@ export function SettingsParamsForm({
                   min={1}
                   max={12}
                   helperText="Di bawah ini memakai median wilayah (kepercayaan rendah)."
-                />
-                <ParamField
-                  name="stockoutBonus"
-                  label="Tambahan saat sinyal habis"
-                  unit="pcs"
-                  min={0}
-                  max={20}
-                  helperText="BS = 0 dan STOCK = 0 pada 2 kunjungan terakhir."
                 />
                 <ParamField
                   name="maxStepPct"

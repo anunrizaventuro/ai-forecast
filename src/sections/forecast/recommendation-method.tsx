@@ -14,7 +14,7 @@ import { fPercent } from 'src/utils/format-number';
 
 import { Iconify } from 'src/components/iconify';
 
-import { fReturnCut } from './forecast-utils';
+import { fAdjust } from './forecast-utils';
 import { useRecommendationParams } from './use-recommendation-params';
 
 // ----------------------------------------------------------------------
@@ -25,12 +25,17 @@ import { useRecommendationParams } from './use-recommendation-params';
 const steps = (p: RecommendationParams) => [
   `Dasar: median estimasi terjual (rumus B: kiriman kunjungan sebelumnya − BS hari ini) dari ${p.window} kunjungan terakhir.`,
   `Riwayat < ${p.minObservations} observasi → fallback ke median produk di wilayah (kec) yang sama, lalu median semua wilayah. Kepercayaan rendah.`,
-  `Sinyal habis: BS = 0 dan STOCK = 0 pada 2 kunjungan terakhir → +${p.stockoutBonus} pcs untuk menguji permintaan yang tersensor.`,
-  `Sinyal retur: rasio BS > ${fPercent(p.returnThreshold, 0)} pada ${p.returnWindow} kunjungan terakhir${
-    p.returnStreak > 1
-      ? ` dan ${p.returnStreak} kunjungan terakhir berturut-turut masing-masing di atas batas`
-      : ''
-  } → −${fReturnCut(p)}${p.returnCutUnit === 'persen' ? ' dari dasar (min. 1 pcs)' : ''}.`,
+  'Penurunan karena BS otomatis lewat dasar: estimasi terjual = kiriman − BS, jadi bila BS konsisten 2%, rekomendasi ikut turun ±2%.',
+  p.stockoutEnabled
+    ? `Stok habis: BS = 0 dan STOCK = 0 pada ${p.stockoutStreak} kunjungan terakhir berturut-turut → +${fAdjust(p.stockoutBonusUnit, p.stockoutBonus)}${p.stockoutBonusUnit === 'persen' ? ' dari dasar (dibulatkan ke atas, min. 1 pcs)' : ''} untuk menguji permintaan yang tersensor.`
+    : 'Penambahan karena stok habis: nonaktif.',
+  p.returnSignalEnabled
+    ? `Retur tinggi (tambahan): rasio BS > ${fPercent(p.returnThreshold, 0)} pada ${p.returnWindow} kunjungan terakhir${
+        p.returnStreak > 1
+          ? ` dan ${p.returnStreak} kunjungan terakhir berturut-turut masing-masing di atas batas`
+          : ''
+      } → −${fAdjust(p.returnCutUnit, p.returnCut)}${p.returnCutUnit === 'persen' ? ' dari dasar (dibulatkan ke atas, min. 1 pcs)' : ''}.`
+    : 'Pengurangan tambahan saat retur tinggi: nonaktif.',
   `Batas perubahan per kunjungan: maks. ±${p.minStep} pcs atau ±${fPercent(p.maxStepRatio, 0)} dari kiriman terakhir (mana yang lebih besar).`,
   'Produk volume sangat kecil (mpkt, np, tf, jasuke, sisir2) dan kiriman pencilan tidak direkomendasikan otomatis.',
 ];

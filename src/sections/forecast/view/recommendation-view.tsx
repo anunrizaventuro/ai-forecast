@@ -7,7 +7,9 @@ import type { Confidence, MasterStore, Recommendation } from 'src/types/forecast
 import { useMemo, useState, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
+import Tabs from '@mui/material/Tabs';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
@@ -21,22 +23,30 @@ import { RecommendationMix } from '../recommendation-mix';
 import { ForecastFilterBar } from '../forecast-filter-bar';
 import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
-import { RecommendationTable } from '../recommendation-table';
 import { RecommendationMethod } from '../recommendation-method';
+import { RecommendationStoreList } from '../recommendation-store-list';
+import { RecommendationSalesList } from '../recommendation-sales-list';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
-import { IS_API, useForecastMeta, useForecastRecommendations } from '../use-forecast-data';
 import {
   fDate,
   DEFAULT_FILTERS,
   CONFIDENCE_LABEL,
   summarizeRecommendations,
 } from '../forecast-utils';
+import {
+  IS_API,
+  useStoreSales,
+  useForecastMeta,
+  useForecastRecommendations,
+} from '../use-forecast-data';
 
 // ----------------------------------------------------------------------
 // Data: use-forecast-data (simulasi atau ai-forecast-be). Tanggal = "data s.d." (walk-forward): rekomendasi
 // hanya memakai kunjungan sampai tanggal itu.
 
 type Status = 'all' | RecStatus;
+
+type Pov = 'toko' | 'sales';
 
 const STATUS_OPTIONS: { value: Status; label: string }[] = [
   { value: 'all', label: 'Semua status' },
@@ -55,11 +65,17 @@ const matchStatus = (row: Recommendation, status: Status) => {
   return row.delta === 0;
 };
 
-function downloadCsv(rows: Recommendation[], asOf: string, storeMap: Map<string, MasterStore>) {
+function downloadCsv(
+  rows: Recommendation[],
+  asOf: string,
+  storeMap: Map<string, MasterStore>,
+  salesMap: Map<string, string>
+) {
   const header = [
     'nit',
     'toko',
     'kec',
+    'sales',
     'produk',
     'tgl_kiriman_terakhir',
     'kiriman_terakhir',
@@ -77,6 +93,7 @@ function downloadCsv(rows: Recommendation[], asOf: string, storeMap: Map<string,
       row.nit,
       storeMap.get(row.nit)?.nama,
       storeMap.get(row.nit)?.kec,
+      salesMap.get(row.nit),
       row.product,
       row.lastTgl,
       row.lastKirim,
@@ -107,6 +124,7 @@ export function RecommendationView() {
   const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
   const [status, setStatus] = useState<Status>('all');
   const [confidence, setConfidence] = useState<Confidence | 'all'>('all');
+  const [pov, setPov] = useState<Pov>('toko');
 
   const handleChange = useCallback(
     (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
@@ -120,6 +138,7 @@ export function RecommendationView() {
     product: filters.product,
   });
   const recommendations = useMemo(() => query.data ?? [], [query.data]);
+  const { salesMap } = useStoreSales(filters.to);
 
   const rows = useMemo(
     () =>
@@ -138,13 +157,13 @@ export function RecommendationView() {
       <ForecastPageHeader
         title="Rekomendasi Stok"
         icon="carbon:delivery"
-        description="Jumlah roti yang disarankan dibawa sales ke setiap toko pada kunjungan berikutnya, per produk."
+        description="Jumlah roti yang disarankan dibawa sales ke setiap toko pada kunjungan berikutnya — lihat per toko atau per sales."
         action={
           <Button
             variant="outlined"
             color="inherit"
             disabled={!rows.length}
-            onClick={() => downloadCsv(rows, filters.to, storeMap)}
+            onClick={() => downloadCsv(rows, filters.to, storeMap, salesMap)}
             startIcon={<Iconify icon="solar:file-download-outline" />}
           >
             Unduh CSV
@@ -222,7 +241,26 @@ export function RecommendationView() {
         />
       </Card>
 
-      <RecommendationTable rows={rows} resetKey={resetKey} />
+      <Tabs value={pov} onChange={(_, value: Pov) => setPov(value)} sx={{ mb: 2 }}>
+        <Tab
+          value="toko"
+          label="Per toko"
+          icon={<Iconify icon="carbon:location" width={20} />}
+          iconPosition="start"
+        />
+        <Tab
+          value="sales"
+          label="Per sales"
+          icon={<Iconify icon="solar:user-rounded-outline" width={20} />}
+          iconPosition="start"
+        />
+      </Tabs>
+
+      {pov === 'toko' ? (
+        <RecommendationStoreList rows={rows} salesMap={salesMap} resetKey={resetKey} />
+      ) : (
+        <RecommendationSalesList rows={rows} salesMap={salesMap} />
+      )}
     </>
   );
 }

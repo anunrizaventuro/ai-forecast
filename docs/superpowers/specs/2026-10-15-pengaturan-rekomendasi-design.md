@@ -111,3 +111,21 @@ Langkah lain (fallback, batas langkah, floor) tidak berubah.
 - FE: `yarn lint`, `yarn tsc:check`, `yarn build`; cek manual halaman Pengaturan di kedua mode.
 - Paritas: default params menghasilkan rekomendasi identik dengan sebelum perubahan (tes BE
   dengan fixture yang ada; FE dibandingkan sebelum/sesudah pada data simulasi).
+
+## Revisi 2026-10-15 (b) — penambahan & pengurangan simetris
+
+Permintaan user: penurunan "sesuai persen BS" dan penambahan saat stok habis N kunjungan, keduanya dinamis.
+
+- Penurunan sebesar BS **sudah otomatis** lewat dasar (estimasi terjual = kiriman − BS); UI menjelaskannya.
+  Sinyal retur menjadi pengurangan **tambahan** yang bisa dimatikan.
+- Field baru (FE camelCase / BE json):
+  - `returnSignalEnabled` / `return_signal_enabled` (bool, default `true`)
+  - `stockoutEnabled` / `stockout_enabled` (bool, default `true`)
+  - `stockoutStreak` / `stockout_streak` (1–8, default 2)
+  - `stockoutBonusUnit` / `stockout_bonus_unit` (`pcs` | `persen`, default `pcs`)
+  - `stockoutBonus` / `stockout_bonus`: pcs 1–20 (bulat) atau persen 0.01–0.9 (sebelumnya pcs 0–20)
+- Persen (pengurangan maupun penambahan) = `max(1, ceil(base × rasio − 1e-9))` — **dibulatkan ke atas**,
+  minimal 1 pcs (sebelumnya pengurangan persen memakai round).
+- Sinyal habis: `stockoutEnabled` dan `stockoutStreak` observasi andal terakhir semuanya BS = 0 dan STOCK = 0
+  (diambil dari semua observasi andal, bukan hanya `window`). Default (2, +1 pcs) = perilaku lama.
+- Sinyal retur hanya bila `returnSignalEnabled`.

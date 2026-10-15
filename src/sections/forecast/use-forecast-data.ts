@@ -210,6 +210,32 @@ export function useForecastStores(filters: ForecastFilters) {
   );
 }
 
+/**
+ * Sales tiap toko = sales pada kunjungan terakhir s.d. `asOf` (rekomendasi
+ * sendiri tidak membawa `nik`). Pergantian sales terbaru ikut ke sales baru.
+ */
+export function useStoreSales(asOf: string) {
+  const { meta } = useForecastMeta();
+  const query = useForecastStores({
+    from: meta.period.start,
+    to: asOf,
+    nit: null,
+    product: null,
+  });
+
+  const salesMap = useMemo(
+    () =>
+      new Map(
+        (query.data ?? []).flatMap((row) =>
+          row.lastSales ? [[row.store.nit, row.lastSales] as const] : []
+        )
+      ),
+    [query.data]
+  );
+
+  return { ...query, salesMap };
+}
+
 export function useForecastRecommendations(
   params: { asOf: string; nit?: string | null; product?: string | null },
   enabled = true

@@ -118,7 +118,8 @@ export type Recommendation = {
   excluded: boolean;
 };
 
-export type ReturnCutUnit = 'pcs' | 'persen';
+/** Satuan besar perubahan: pcs tetap, atau persen dari dasar (dibulatkan ke atas, min. 1 pcs). */
+export type AdjustUnit = 'pcs' | 'persen';
 
 /** Parameter aturan baseline — cermin `Params` di ai-forecast-be. */
 export type RecommendationParams = {
@@ -126,16 +127,26 @@ export type RecommendationParams = {
   window: number;
   /** Minimum observasi sebelum memakai riwayat toko × produk sendiri. */
   minObservations: number;
+  /**
+   * Pengurangan TAMBAHAN saat retur tinggi. Penurunan sebesar BS sendiri
+   * sudah otomatis lewat dasar (estimasi terjual = kiriman − BS).
+   */
+  returnSignalEnabled: boolean;
   /** Ambang rasio retur (0–1) yang memicu penurunan. */
   returnThreshold: number;
   /** Observasi andal terakhir untuk menghitung rasio retur. */
   returnWindow: number;
   /** Kunjungan terakhir beruntun yang masing-masing harus di atas ambang. */
   returnStreak: number;
-  returnCutUnit: ReturnCutUnit;
+  returnCutUnit: AdjustUnit;
   /** pcs (bulat) atau rasio dari dasar (0–1) sesuai `returnCutUnit`. */
   returnCut: number;
-  /** Tambahan pcs saat sinyal habis. */
+  /** Penambahan saat stok habis (BS = 0 dan STOCK = 0) beberapa kunjungan berturut-turut. */
+  stockoutEnabled: boolean;
+  /** Kunjungan terakhir berturut-turut yang harus habis. */
+  stockoutStreak: number;
+  stockoutBonusUnit: AdjustUnit;
+  /** pcs (bulat) atau rasio dari dasar (0–1) sesuai `stockoutBonusUnit`. */
   stockoutBonus: number;
   /** Batas perubahan per kunjungan: max(minStep, rasio × kiriman terakhir). */
   maxStepRatio: number;
