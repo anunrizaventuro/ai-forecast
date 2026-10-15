@@ -10,7 +10,6 @@ import { fNumber, fPercent } from 'src/utils/format-number';
 
 import { Iconify } from 'src/components/iconify';
 
-import { REC_PARAMS } from './forecast-utils';
 import { SERIES, chartColorVars } from './forecast-chart-colors';
 
 // ----------------------------------------------------------------------
@@ -47,11 +46,11 @@ export function InlineBarCell({
 }
 
 /**
- * Rasio retur; di atas ambang aturan rekomendasi (REC_PARAMS.returnThreshold)
- * ditandai pill + ikon, bukan warna saja.
+ * Rasio retur; di atas ambang aturan rekomendasi (`threshold`, dari
+ * pengaturan aktif) ditandai pill + ikon, bukan warna saja.
  */
-export function ReturnRateCell({ value }: { value: number | null }) {
-  const high = value !== null && value > REC_PARAMS.returnThreshold;
+export function ReturnRateCell({ value, threshold }: { value: number | null; threshold: number }) {
+  const high = value !== null && value > threshold;
 
   if (!high) {
     return <Typography variant="body2">{fPercent(value)}</Typography>;

@@ -5,6 +5,8 @@ import type {
   StoreSummary,
   ProductSummary,
   Recommendation,
+  RecommendationParams,
+  RecommendationSettings,
 } from 'src/types/forecast';
 
 import { z } from 'zod';
@@ -167,6 +169,57 @@ export const forecastRecommendationsSchema = list(
     )
 );
 
+const recParamsSchema = z
+  .object({
+    window: z.number(),
+    min_observations: z.number(),
+    return_threshold: z.number(),
+    return_window: z.number(),
+    return_streak: z.number(),
+    return_cut_unit: z.enum(['pcs', 'persen']),
+    return_cut: z.number(),
+    stockout_bonus: z.number(),
+    max_step_ratio: z.number(),
+    min_step: z.number(),
+  })
+  .transform(
+    (p): RecommendationParams => ({
+      window: p.window,
+      minObservations: p.min_observations,
+      returnThreshold: p.return_threshold,
+      returnWindow: p.return_window,
+      returnStreak: p.return_streak,
+      returnCutUnit: p.return_cut_unit,
+      returnCut: p.return_cut,
+      stockoutBonus: p.stockout_bonus,
+      maxStepRatio: p.max_step_ratio,
+      minStep: p.min_step,
+    })
+  );
+
+export const forecastSettingsSchema = z
+  .object({ params: recParamsSchema, defaults: recParamsSchema, updated_at: z.string().nullable() })
+  .transform(
+    (s): RecommendationSettings => ({
+      params: s.params,
+      defaults: s.defaults,
+      updatedAt: s.updated_at,
+    })
+  );
+
+const toRawParams = (p: RecommendationParams) => ({
+  window: p.window,
+  min_observations: p.minObservations,
+  return_threshold: p.returnThreshold,
+  return_window: p.returnWindow,
+  return_streak: p.returnStreak,
+  return_cut_unit: p.returnCutUnit,
+  return_cut: p.returnCut,
+  stockout_bonus: p.stockoutBonus,
+  max_step_ratio: p.maxStepRatio,
+  min_step: p.minStep,
+});
+
 // ----------------------------------------------------------------------
 // Query params & keys — setiap filter yang sampai ke request WAJIB ada di key.
 
@@ -193,6 +246,7 @@ const rangeKey = (p: ForecastRangeParams) => ({
 export const forecastKeys = {
   all: ['forecast'] as const,
   meta: ['forecast', 'meta'] as const,
+  settings: ['forecast', 'settings'] as const,
   summary: (p: ForecastRangeParams) => [...forecastKeys.all, 'summary', rangeKey(p)] as const,
   timeseries: (p: ForecastRangeParams, granularity: string) =>
     [...forecastKeys.all, 'timeseries', rangeKey(p), granularity] as const,
@@ -277,4 +331,18 @@ export async function getForecastRecommendations(
     ...options,
   });
   return forecastRecommendationsSchema.parse(data);
+}
+
+export async function getForecastSettings(options: FetchOptions = {}) {
+  const { data } = await apiFetch<unknown>(endpoints.forecast.settings, options);
+  return forecastSettingsSchema.parse(data);
+}
+
+/** PUT params lengkap; 422 → ApiError.errors per field (snake_case). */
+export async function updateForecastSettings(params: RecommendationParams) {
+  const { data } = await apiFetch<unknown>(endpoints.forecast.settings, {
+    method: 'put',
+    body: toRawParams(params),
+  });
+  return forecastSettingsSchema.parse(data);
 }

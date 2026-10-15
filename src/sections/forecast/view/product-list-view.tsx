@@ -30,6 +30,7 @@ import { ForecastDataState } from '../forecast-data-state';
 import { ForecastPageHeader } from '../forecast-page-header';
 import { InlineBarCell, ReturnRateCell } from '../forecast-cells';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
+import { useRecommendationParams } from '../use-recommendation-params';
 import { useForecastMeta, useForecastProducts } from '../use-forecast-data';
 import { productGroup, DEFAULT_FILTERS, isExcludedProduct } from '../forecast-utils';
 import { sortRows, TableEmptyRow, useTableState, ForecastTableHead } from '../forecast-table';
@@ -98,6 +99,7 @@ export function ProductListView() {
   );
 
   const { meta } = useForecastMeta();
+  const { params: recParams } = useRecommendationParams();
   const groups = useMemo(() => [...new Set(meta.products.map(productGroup))], [meta.products]);
   const productQuery = useForecastProducts(filters);
   const productRows = useMemo(() => productQuery.data ?? [], [productQuery.data]);
@@ -265,7 +267,10 @@ export function ProductListView() {
                       <InlineBarCell value={row.estSold} max={stats.maxEstSold} series="estSold" />
                     </TableCell>
                     <TableCell align="right">
-                      <ReturnRateCell value={row.returnRate} />
+                      <ReturnRateCell
+                        value={row.returnRate}
+                        threshold={recParams.returnThreshold}
+                      />
                     </TableCell>
                     <TableCell>
                       <Label

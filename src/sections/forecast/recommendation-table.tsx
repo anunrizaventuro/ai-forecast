@@ -21,7 +21,8 @@ import { Label } from 'src/components/label';
 
 import { useForecastMeta } from './use-forecast-data';
 import { RecommendationDelta } from './recommendation-delta';
-import { fDate, SIGNAL_LABEL, CONFIDENCE_LABEL } from './forecast-utils';
+import { useRecommendationParams } from './use-recommendation-params';
+import { fDate, signalLabel, CONFIDENCE_LABEL } from './forecast-utils';
 import {
   sortRows,
   TableEmptyRow,
@@ -78,6 +79,7 @@ type Props = {
 
 export function RecommendationTable({ rows, resetKey }: Props) {
   const { storeMap } = useForecastMeta();
+  const { params: recParams } = useRecommendationParams();
   const table = useTableState<ColumnId>('store', 'asc');
   const { resetPage } = table;
 
@@ -174,7 +176,7 @@ export function RecommendationTable({ rows, resetKey }: Props) {
                               color={signal === 'pencilan' ? 'error' : 'default'}
                               sx={{ height: 20, fontSize: 11 }}
                             >
-                              {SIGNAL_LABEL[signal]}
+                              {signalLabel(signal, recParams)}
                             </Label>
                           ))}
                       </Box>

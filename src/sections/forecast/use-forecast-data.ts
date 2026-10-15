@@ -29,6 +29,7 @@ import {
   getForecastRecommendations,
 } from 'src/lib/api';
 
+import { useRecommendationParams } from './use-recommendation-params';
 import {
   PERIOD,
   stores,
@@ -213,8 +214,14 @@ export function useForecastRecommendations(
   params: { asOf: string; nit?: string | null; product?: string | null },
   enabled = true
 ) {
+  const { params: recParams } = useRecommendationParams();
+
   return useForecastSource<Recommendation[]>(
-    forecastKeys.recommendations(params),
+    // Mode simulasi: params aturan ikut key agar hasil dihitung ulang saat
+    // pengaturan berubah. Mode api: server memakai params tersimpan.
+    IS_API
+      ? forecastKeys.recommendations(params)
+      : [...forecastKeys.recommendations(params), recParams],
     (signal) => getForecastRecommendations(params, { signal }),
     () =>
       computeRecommendations(
@@ -222,7 +229,8 @@ export function useForecastRecommendations(
           nit: params.nit ?? null,
           product: (params.product ?? null) as ForecastFilters['product'],
         }),
-        params.asOf
+        params.asOf,
+        recParams
       ),
     enabled
   );

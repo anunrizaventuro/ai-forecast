@@ -19,6 +19,7 @@ export const paths = {
     salesAnalysis: '/dashboard/analisis-penjualan',
     stores: '/dashboard/toko',
     products: '/dashboard/produk',
+    settings: '/dashboard/pengaturan',
   },
   /**
    * Common

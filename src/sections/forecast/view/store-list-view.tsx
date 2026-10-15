@@ -28,9 +28,10 @@ import { ForecastFilterBar } from '../forecast-filter-bar';
 import { StoreDetailDrawer } from '../store-detail-drawer';
 import { ForecastDataState } from '../forecast-data-state';
 import { ForecastStatStrip } from '../forecast-stat-strip';
+import { fDate, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastPageHeader } from '../forecast-page-header';
-import { fDate, REC_PARAMS, DEFAULT_FILTERS } from '../forecast-utils';
 import { ForecastSimulationAlert } from '../forecast-simulation-alert';
+import { useRecommendationParams } from '../use-recommendation-params';
 import { NameAvatar, InlineBarCell, ReturnRateCell } from '../forecast-cells';
 import { IS_API, useForecastMeta, useForecastStores } from '../use-forecast-data';
 import {
@@ -80,6 +81,7 @@ const FIELD_SX = { minWidth: { xs: 1, sm: 140 }, flex: { xs: '1 1 100%', sm: '0 
 
 export function StoreListView() {
   const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
+  const { params: recParams } = useRecommendationParams();
   const [query, setQuery] = useState('');
   const [kec, setKec] = useState<number | 'all'>('all');
   const [sales, setSales] = useState('all');
@@ -125,10 +127,10 @@ export function StoreListView() {
         ? intervals.reduce((acc, value) => acc + value, 0) / intervals.length
         : null,
       highReturn: rows.filter(
-        (row) => row.returnRate !== null && row.returnRate > REC_PARAMS.returnThreshold
+        (row) => row.returnRate !== null && row.returnRate > recParams.returnThreshold
       ).length,
     };
-  }, [rows]);
+  }, [rows, recParams.returnThreshold]);
 
   useEffect(() => {
     resetPage();
@@ -233,7 +235,7 @@ export function StoreListView() {
           {
             label: 'Toko retur tinggi',
             value: fNumber(stats.highReturn),
-            caption: `Rasio retur > ${fPercent(REC_PARAMS.returnThreshold, 0)}`,
+            caption: `Rasio retur > ${fPercent(recParams.returnThreshold, 0)}`,
             icon: 'solar:info-circle-outline',
             color: theme.vars.palette.error.main,
           },
@@ -288,7 +290,7 @@ export function StoreListView() {
                     <InlineBarCell value={row.kirim} max={stats.maxKirim} />
                   </TableCell>
                   <TableCell align="right">
-                    <ReturnRateCell value={row.returnRate} />
+                    <ReturnRateCell value={row.returnRate} threshold={recParams.returnThreshold} />
                   </TableCell>
                 </TableRow>
               ))}

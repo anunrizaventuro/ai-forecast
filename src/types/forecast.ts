@@ -118,6 +118,37 @@ export type Recommendation = {
   excluded: boolean;
 };
 
+export type ReturnCutUnit = 'pcs' | 'persen';
+
+/** Parameter aturan baseline — cermin `Params` di ai-forecast-be. */
+export type RecommendationParams = {
+  /** Jumlah observasi terakhir yang dipakai sebagai dasar median. */
+  window: number;
+  /** Minimum observasi sebelum memakai riwayat toko × produk sendiri. */
+  minObservations: number;
+  /** Ambang rasio retur (0–1) yang memicu penurunan. */
+  returnThreshold: number;
+  /** Observasi andal terakhir untuk menghitung rasio retur. */
+  returnWindow: number;
+  /** Kunjungan terakhir beruntun yang masing-masing harus di atas ambang. */
+  returnStreak: number;
+  returnCutUnit: ReturnCutUnit;
+  /** pcs (bulat) atau rasio dari dasar (0–1) sesuai `returnCutUnit`. */
+  returnCut: number;
+  /** Tambahan pcs saat sinyal habis. */
+  stockoutBonus: number;
+  /** Batas perubahan per kunjungan: max(minStep, rasio × kiriman terakhir). */
+  maxStepRatio: number;
+  minStep: number;
+};
+
+export type RecommendationSettings = {
+  params: RecommendationParams;
+  defaults: RecommendationParams;
+  /** ISO; null = belum pernah disimpan (memakai default). */
+  updatedAt: string | null;
+};
+
 // ---------------------------------------------------------------------- Dashboard
 // Bentuk data yang dikonsumsi UI — sama untuk sumber simulasi maupun API
 // (lihat src/lib/api/forecast.ts untuk pemetaan dari JSON backend).

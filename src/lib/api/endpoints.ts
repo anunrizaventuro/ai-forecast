@@ -26,5 +26,6 @@ export const endpoints = {
     regions: 'api/v1/forecast/regions',
     stores: 'api/v1/forecast/stores',
     recommendations: 'api/v1/forecast/recommendations',
+    settings: 'api/v1/forecast/settings',
   },
 };

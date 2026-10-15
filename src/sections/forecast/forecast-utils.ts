@@ -15,6 +15,7 @@ import type {
   Recommendation,
   ForecastFilters,
   ProductQuantities,
+  RecommendationParams,
   RecommendationSignal,
 } from 'src/types/forecast';
 
@@ -64,14 +65,16 @@ export const isExcludedProduct = (code: ProductCode) => EXCLUDED_PRODUCTS.includ
 
 export const productGroup = (product: MasterProduct) => `Kelompok ${product.nir[0]}xx`;
 
-export const REC_PARAMS = {
-  /** Jumlah observasi terakhir yang dipakai sebagai dasar median. */
+/** Default aturan baseline — sama dengan DefaultParams di backend. */
+export const DEFAULT_REC_PARAMS: RecommendationParams = {
   window: 4,
-  /** Minimum observasi sebelum memakai riwayat toko × produk sendiri. */
   minObservations: 3,
-  /** Ambang rasio retur yang memicu penurunan. */
   returnThreshold: 0.15,
-  /** Batas perubahan per kunjungan: max(minStep, 30% kiriman terakhir). */
+  returnWindow: 3,
+  returnStreak: 1,
+  returnCutUnit: 'pcs',
+  returnCut: 1,
+  stockoutBonus: 1,
   maxStepRatio: 0.3,
   minStep: 2,
 };
@@ -349,11 +352,28 @@ export function groupByStore(cells: VisitCell[]): StoreSummary[] {
 
 // ---------------------------------------------------------------------- Rekomendasi
 
+/** `returnStreak` observasi terakhir masing-masing di atas ambang (≤ 1 = cukup rasio agregat). */
+const returnStreakOk = (retObs: VisitCell[], params: RecommendationParams) =>
+  params.returnStreak <= 1 ||
+  (retObs.length >= params.returnStreak &&
+    retObs.slice(-params.returnStreak).every((c) => c.bs / c.prevKirim! > params.returnThreshold));
+
+/** Pengurangan saat retur tinggi; persen dari dasar, minimal 1 pcs. */
+const returnCut = (base: number, params: RecommendationParams) =>
+  params.returnCutUnit === 'persen'
+    ? Math.max(1, Math.round(base * params.returnCut))
+    : params.returnCut;
+
 /**
  * Aturan baseline (studi kelayakan §4.2) untuk kunjungan berikutnya, memakai
- * data s.d. `asOf` saja (walk-forward). Parameter = REC_PARAMS (contoh).
+ * data s.d. `asOf` saja (walk-forward). Parameter dari halaman Pengaturan;
+ * harus identik dengan recommend.go di backend.
  */
-export function computeRecommendations(cells: VisitCell[], asOf: string): Recommendation[] {
+export function computeRecommendations(
+  cells: VisitCell[],
+  asOf: string,
+  params: RecommendationParams = DEFAULT_REC_PARAMS
+): Recommendation[] {
   const scoped = cells.filter((cell) => cell.tgl <= asOf);
 
   const visitsByStore = new Map<string, string[]>();
@@ -368,8 +388,9 @@ export function computeRecommendations(cells: VisitCell[], asOf: string): Recomm
     pairs.set(key, [...(pairs.get(key) ?? []), cell]);
   });
 
-  const observationsOf = (pairCells: VisitCell[]) =>
-    pairCells.filter((c) => c.reliable && c.estSold !== null).slice(-REC_PARAMS.window);
+  const reliableObs = (pairCells: VisitCell[]) =>
+    pairCells.filter((c) => c.reliable && c.estSold !== null);
+  const observationsOf = (pairCells: VisitCell[]) => reliableObs(pairCells).slice(-params.window);
 
   // Fallback hierarki: median produk per kec → median produk global.
   const kecValues = new Map<string, number[]>();
@@ -377,7 +398,7 @@ export function computeRecommendations(cells: VisitCell[], asOf: string): Recomm
 
   pairs.forEach((pairCells) => {
     const obs = observationsOf(pairCells);
-    if (obs.length < REC_PARAMS.minObservations) return;
+    if (obs.length < params.minObservations) return;
     const value = median(obs.map((c) => c.estSold!))!;
     const { nit, product } = pairCells[0]!;
     const kecKey = `${storeMap.get(nit)?.kec}|${product}`;
@@ -403,10 +424,11 @@ export function computeRecommendations(cells: VisitCell[], asOf: string): Recomm
     const interval = Math.round(median(gaps.slice(-4)) ?? 7);
     const kec = storeMap.get(nit)?.kec;
 
-    const obs = observationsOf(pairCells);
-    const recentObs = obs.slice(-3);
-    const obsBasis = sum(recentObs.map((c) => c.prevKirim!));
-    const returnRate = obsBasis ? sum(recentObs.map((c) => c.bs)) / obsBasis : null;
+    const allObs = reliableObs(pairCells);
+    const obs = allObs.slice(-params.window);
+    const retObs = allObs.slice(-params.returnWindow);
+    const obsBasis = sum(retObs.map((c) => c.prevKirim!));
+    const returnRate = obsBasis ? sum(retObs.map((c) => c.bs)) / obsBasis : null;
     const refKirim = [...delivered].reverse().find((c) => !c.outlier)?.kirim ?? lastDelivered.kirim;
 
     const signals: RecommendationSignal[] = [];
@@ -442,10 +464,10 @@ export function computeRecommendations(cells: VisitCell[], asOf: string): Recomm
     let confidence: Confidence;
     const ownMedian = median(obs.map((c) => c.estSold!));
 
-    if (obs.length >= REC_PARAMS.minObservations && ownMedian !== null) {
+    if (obs.length >= params.minObservations && ownMedian !== null) {
       base = ownMedian;
       basis = `Median ${obs.length} kunjungan terakhir`;
-      confidence = obs.length >= REC_PARAMS.window ? 'tinggi' : 'sedang';
+      confidence = obs.length >= params.window ? 'tinggi' : 'sedang';
     } else {
       const kecMedian = median(kecValues.get(`${kec}|${product}`) ?? []);
       const globalMedian = median(globalValues.get(product) ?? []);
@@ -466,16 +488,20 @@ export function computeRecommendations(cells: VisitCell[], asOf: string): Recomm
     let adjustment = 0;
     const lastTwo = obs.slice(-2);
     if (lastTwo.length === 2 && lastTwo.every((c) => c.bs === 0 && c.stock === 0)) {
-      adjustment += 1;
+      adjustment += params.stockoutBonus;
       signals.push('habis');
     }
-    if (returnRate !== null && returnRate > REC_PARAMS.returnThreshold) {
-      adjustment -= 1;
+    if (
+      returnRate !== null &&
+      returnRate > params.returnThreshold &&
+      returnStreakOk(retObs, params)
+    ) {
+      adjustment -= returnCut(base, params);
       signals.push('retur-tinggi');
     }
 
     const raw = Math.round(base) + adjustment;
-    const step = Math.max(REC_PARAMS.minStep, Math.ceil(refKirim * REC_PARAMS.maxStepRatio));
+    const step = Math.max(params.minStep, Math.ceil(refKirim * params.maxStepRatio));
     let recommended = Math.min(refKirim + step, Math.max(refKirim - step, raw));
     if (recommended !== raw) signals.push('dibatasi');
     recommended = Math.max(base > 0 ? 1 : 0, recommended);
@@ -542,3 +568,16 @@ export const SIGNAL_LABEL: Record<RecommendationSignal, string> = {
   fallback: 'Riwayat pendek',
   pencilan: 'Kiriman terakhir pencilan',
 };
+
+/** "1 pcs" / "10%" */
+export const fReturnCut = (params: RecommendationParams) =>
+  params.returnCutUnit === 'persen'
+    ? `${Math.round(params.returnCut * 100)}%`
+    : `${params.returnCut} pcs`;
+
+/** Label sinyal dengan besaran dari params aktif. */
+export function signalLabel(signal: RecommendationSignal, params: RecommendationParams) {
+  if (signal === 'habis') return `Sinyal habis (+${params.stockoutBonus})`;
+  if (signal === 'retur-tinggi') return `Retur tinggi (−${fReturnCut(params)})`;
+  return SIGNAL_LABEL[signal];
+}
