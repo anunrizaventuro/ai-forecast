@@ -7,7 +7,7 @@ import { useSyncExternalStore } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { CONFIG } from 'src/global-config';
-import { forecastKeys, getForecastSettings, updateForecastSettings } from 'src/lib/api';
+import { ApiError, forecastKeys, getForecastSettings, updateForecastSettings } from 'src/lib/api';
 
 import { DEFAULT_REC_PARAMS } from './forecast-utils';
 import { parseStoredSettings } from './recommendation-params-schema';
@@ -88,16 +88,20 @@ export function useRecommendationParams(): RecommendationParamsResult {
     queryFn: ({ signal }) => getForecastSettings({ signal }),
     enabled: IS_API,
     staleTime: 60_000,
-    // Endpoint belum ada di backend lama (404) — jangan menunda halaman dengan retry.
-    retry: 1,
+    // 404 = backend belum punya endpoint pengaturan — jangan di-retry.
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 1,
   });
 
   const mutation = useMutation({
     mutationFn: updateForecastSettings,
     onSuccess: (data) => {
       queryClient.setQueryData(forecastKeys.settings, data);
-      // Rekomendasi & backtest dihitung ulang server dengan params baru.
-      return queryClient.invalidateQueries({ queryKey: forecastKeys.all });
+      // Rekomendasi & backtest dihitung ulang server dengan params baru;
+      // entri settings baru saja diisi dari respons PUT, tidak perlu diambil ulang.
+      return queryClient.invalidateQueries({
+        queryKey: forecastKeys.all,
+        predicate: (q) => q.queryKey[1] !== forecastKeys.settings[1],
+      });
     },
   });
 

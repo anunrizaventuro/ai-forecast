@@ -43,6 +43,15 @@ import {
 
 const IS_API = CONFIG.forecastSource === 'api';
 
+/** Field di bagian "Lanjutan" — dibuka otomatis bila salah satunya error. */
+const ADVANCED_FIELDS: (keyof RecParamsFormValues)[] = [
+  'window',
+  'minObservations',
+  'stockoutBonus',
+  'maxStepPct',
+  'minStep',
+];
+
 const gridSx = {
   gap: 3,
   display: 'grid',
@@ -113,7 +122,14 @@ export function SettingsParamsForm({
     resolver: zodResolver(recParamsFormSchema),
     defaultValues: toFormValues(params),
   });
-  const { reset, setError, control, handleSubmit } = methods;
+  const {
+    reset,
+    trigger,
+    setError,
+    control,
+    handleSubmit,
+    formState: { isSubmitted },
+  } = methods;
 
   // Params tersimpan berubah (muat api / simpan) → form ikut.
   useEffect(() => {
@@ -122,6 +138,19 @@ export function SettingsParamsForm({
 
   const values = useWatch({ control }) as RecParamsFormValues;
   const [pending, setPending] = useState<RecParamsFormValues | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  // Error lintas field menempel di field pasangannya — validasi ulang saat
+  // batas atasnya berubah agar pesan lama tidak tertinggal.
+  useEffect(() => {
+    if (isSubmitted) trigger(['minObservations', 'returnStreak']);
+  }, [values.window, values.returnWindow, isSubmitted, trigger]);
+
+  const revealErrors = (fields: string[]) => {
+    if (fields.some((field) => ADVANCED_FIELDS.includes(field as keyof RecParamsFormValues))) {
+      setAdvancedOpen(true);
+    }
+  };
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const handleConfirm = async () => {
@@ -131,10 +160,12 @@ export function SettingsParamsForm({
       setResult({ ok: true, message: 'Pengaturan disimpan. Rekomendasi dihitung ulang.' });
     } catch (error) {
       if (error instanceof ApiError && error.errors) {
-        Object.entries(error.errors).forEach(([field, messages]) => {
+        const names = Object.entries(error.errors).flatMap(([field, messages]) => {
           const name = API_FIELD_TO_FORM[field];
           if (name) setError(name, { message: messages.join(' ') });
+          return name ? [name] : [];
         });
+        revealErrors(names);
       }
       setResult({
         ok: false,
@@ -146,7 +177,10 @@ export function SettingsParamsForm({
   };
 
   return (
-    <Form methods={methods} onSubmit={handleSubmit((v) => setPending(v))}>
+    <Form
+      methods={methods}
+      onSubmit={handleSubmit(setPending, (errors) => revealErrors(Object.keys(errors)))}
+    >
       <Stack spacing={3}>
         <Card>
           <CardHeader
@@ -219,7 +253,11 @@ export function SettingsParamsForm({
         </Card>
 
         <Card sx={{ px: 3 }}>
-          <Accordion disableGutters>
+          <Accordion
+            disableGutters
+            expanded={advancedOpen}
+            onChange={(_, expanded) => setAdvancedOpen(expanded)}
+          >
             <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
               <Box>
                 <Typography variant="subtitle2">Lanjutan</Typography>
@@ -257,7 +295,9 @@ export function SettingsParamsForm({
                   name="maxStepPct"
                   label="Batas perubahan per kunjungan"
                   unit="% kiriman"
-                  min={5}
+                  // NumberInput meng-clamp tiap ketikan; min 0 agar "20" bisa diketik
+                  // (minimal 5 dijaga schema).
+                  min={0}
                   max={100}
                 />
                 <ParamField
