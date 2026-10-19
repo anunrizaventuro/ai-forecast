@@ -1,6 +1,6 @@
-import Box from '@mui/material/Box';
-
 import { CONFIG } from 'src/shared/config';
+
+import { SettingsView } from '../views/settings-view';
 
 // ----------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <title>{metadata.title}</title>
-      <Box sx={{ p: { xs: 2, md: 3 } }}>Pengaturan</Box>
+      <SettingsView />
     </>
   );
 }
