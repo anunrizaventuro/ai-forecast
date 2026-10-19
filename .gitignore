@@ -50,3 +50,6 @@ next-env.d.ts
 
 # laporan PDF hasil generate — jangan ikut commit
 *.pdf
+
+# workspace eksekusi plan superpowers
+.superpowers/

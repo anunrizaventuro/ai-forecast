@@ -1,0 +1,1399 @@
+{
+  "summary": {
+    "kirim": 12919,
+    "bs": 527,
+    "stock": 1522,
+    "estSold": 10192,
+    "basis": 10719,
+    "returnRate": 0.049165034051683924,
+    "sellThrough": 0.9508349659483161,
+    "salesValue": 19122710,
+    "visits": 425,
+    "stores": 72
+  },
+  "products": [
+    {
+      "product": {
+        "nir": "001",
+        "code": "mps",
+        "nama": "mps",
+        "hargaBeli": 670,
+        "hargaJual": 840
+      },
+      "kirim": 84,
+      "bs": 2,
+      "stock": 8,
+      "estSold": 68,
+      "basis": 70,
+      "returnRate": 0.02857142857142857,
+      "sellThrough": 0.9714285714285714,
+      "salesValue": 57120,
+      "visits": 13,
+      "stores": 2
+    },
+    {
+      "product": {
+        "nir": "002",
+        "code": "mpc",
+        "nama": "mpc",
+        "hargaBeli": 670,
+        "hargaJual": 840
+      },
+      "kirim": 180,
+      "bs": 8,
+      "stock": 19,
+      "estSold": 140,
+      "basis": 148,
+      "returnRate": 0.05405405405405406,
+      "sellThrough": 0.9459459459459459,
+      "salesValue": 117600,
+      "visits": 43,
+      "stores": 7
+    },
+    {
+      "product": {
+        "nir": "003",
+        "code": "mpkt",
+        "nama": "mpkt",
+        "hargaBeli": 670,
+        "hargaJual": 840
+      },
+      "kirim": 0,
+      "bs": 0,
+      "stock": 0,
+      "estSold": 0,
+      "basis": 0,
+      "returnRate": null,
+      "sellThrough": null,
+      "salesValue": 0,
+      "visits": 0,
+      "stores": 0
+    },
+    {
+      "product": {
+        "nir": "004",
+        "code": "mpkh",
+        "nama": "mpkh",
+        "hargaBeli": 670,
+        "hargaJual": 840
+      },
+      "kirim": 83,
+      "bs": 4,
+      "stock": 7,
+      "estSold": 66,
+      "basis": 70,
+      "returnRate": 0.05714285714285714,
+      "sellThrough": 0.9428571428571428,
+      "salesValue": 55440,
+      "visits": 13,
+      "stores": 2
+    },
+    {
+      "product": {
+        "nir": "005",
+        "code": "jasuke",
+        "nama": "jasuke",
+        "hargaBeli": 670,
+        "hargaJual": 840
+      },
+      "kirim": 0,
+      "bs": 0,
+      "stock": 0,
+      "estSold": 0,
+      "basis": 0,
+      "returnRate": null,
+      "sellThrough": null,
+      "salesValue": 0,
+      "visits": 0,
+      "stores": 0
+    },
+    {
+      "product": {
+        "nir": "101",
+        "code": "nc",
+        "nama": "nc",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 1136,
+      "bs": 43,
+      "stock": 121,
+      "estSold": 890,
+      "basis": 933,
+      "returnRate": 0.04608788853161844,
+      "sellThrough": 0.9539121114683816,
+      "salesValue": 1513000,
+      "visits": 238,
+      "stores": 42
+    },
+    {
+      "product": {
+        "nir": "102",
+        "code": "np",
+        "nama": "np",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 69,
+      "bs": 3,
+      "stock": 10,
+      "estSold": 58,
+      "basis": 61,
+      "returnRate": 0.04918032786885246,
+      "sellThrough": 0.9508196721311475,
+      "salesValue": 98600,
+      "visits": 26,
+      "stores": 4
+    },
+    {
+      "product": {
+        "nir": "103",
+        "code": "ncp",
+        "nama": "ncp",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 1441,
+      "bs": 45,
+      "stock": 127,
+      "estSold": 1159,
+      "basis": 1204,
+      "returnRate": 0.03737541528239203,
+      "sellThrough": 0.9626245847176079,
+      "salesValue": 1970300,
+      "visits": 306,
+      "stores": 53
+    },
+    {
+      "product": {
+        "nir": "104",
+        "code": "ncs",
+        "nama": "ncs",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 912,
+      "bs": 40,
+      "stock": 108,
+      "estSold": 723,
+      "basis": 763,
+      "returnRate": 0.05242463958060288,
+      "sellThrough": 0.9475753604193972,
+      "salesValue": 1229100,
+      "visits": 276,
+      "stores": 47
+    },
+    {
+      "product": {
+        "nir": "105",
+        "code": "ncb",
+        "nama": "ncb",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 1007,
+      "bs": 42,
+      "stock": 137,
+      "estSold": 795,
+      "basis": 837,
+      "returnRate": 0.05017921146953405,
+      "sellThrough": 0.9498207885304659,
+      "salesValue": 1351500,
+      "visits": 315,
+      "stores": 54
+    },
+    {
+      "product": {
+        "nir": "106",
+        "code": "nck",
+        "nama": "nck",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 960,
+      "bs": 42,
+      "stock": 123,
+      "estSold": 736,
+      "basis": 778,
+      "returnRate": 0.05398457583547558,
+      "sellThrough": 0.9460154241645244,
+      "salesValue": 1251200,
+      "visits": 274,
+      "stores": 47
+    },
+    {
+      "product": {
+        "nir": "107",
+        "code": "cocang",
+        "nama": "cocang",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 432,
+      "bs": 20,
+      "stock": 62,
+      "estSold": 344,
+      "basis": 364,
+      "returnRate": 0.054945054945054944,
+      "sellThrough": 0.945054945054945,
+      "salesValue": 584800,
+      "visits": 138,
+      "stores": 23
+    },
+    {
+      "product": {
+        "nir": "108",
+        "code": "sukemi",
+        "nama": "sukemi",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 459,
+      "bs": 23,
+      "stock": 92,
+      "estSold": 349,
+      "basis": 372,
+      "returnRate": 0.06182795698924731,
+      "sellThrough": 0.9381720430107527,
+      "salesValue": 593300,
+      "visits": 220,
+      "stores": 38
+    },
+    {
+      "product": {
+        "nir": "201",
+        "code": "sc",
+        "nama": "sc",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 1508,
+      "bs": 63,
+      "stock": 174,
+      "estSold": 1189,
+      "basis": 1252,
+      "returnRate": 0.050319488817891375,
+      "sellThrough": 0.9496805111821086,
+      "salesValue": 2021300,
+      "visits": 315,
+      "stores": 55
+    },
+    {
+      "product": {
+        "nir": "202",
+        "code": "ss",
+        "nama": "ss",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 825,
+      "bs": 41,
+      "stock": 113,
+      "estSold": 646,
+      "basis": 687,
+      "returnRate": 0.05967976710334789,
+      "sellThrough": 0.9403202328966521,
+      "salesValue": 1098200,
+      "visits": 246,
+      "stores": 40
+    },
+    {
+      "product": {
+        "nir": "203",
+        "code": "sb",
+        "nama": "sb",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 624,
+      "bs": 29,
+      "stock": 102,
+      "estSold": 485,
+      "basis": 514,
+      "returnRate": 0.05642023346303502,
+      "sellThrough": 0.943579766536965,
+      "salesValue": 824500,
+      "visits": 191,
+      "stores": 33
+    },
+    {
+      "product": {
+        "nir": "204",
+        "code": "sk",
+        "nama": "sk",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 983,
+      "bs": 64,
+      "stock": 158,
+      "estSold": 769,
+      "basis": 833,
+      "returnRate": 0.07683073229291716,
+      "sellThrough": 0.9231692677070829,
+      "salesValue": 1307300,
+      "visits": 292,
+      "stores": 50
+    },
+    {
+      "product": {
+        "nir": "401",
+        "code": "sisir3",
+        "nama": "sisir3000",
+        "hargaBeli": 2000,
+        "hargaJual": 2550
+      },
+      "kirim": 2094,
+      "bs": 50,
+      "stock": 140,
+      "estSold": 1679,
+      "basis": 1729,
+      "returnRate": 0.02891844997108155,
+      "sellThrough": 0.9710815500289185,
+      "salesValue": 4281450,
+      "visits": 270,
+      "stores": 46
+    },
+    {
+      "product": {
+        "nir": "402",
+        "code": "sisir2",
+        "nama": "sisir2000",
+        "hargaBeli": 1300,
+        "hargaJual": 1700
+      },
+      "kirim": 0,
+      "bs": 0,
+      "stock": 0,
+      "estSold": 0,
+      "basis": 0,
+      "returnRate": null,
+      "sellThrough": null,
+      "salesValue": 0,
+      "visits": 0,
+      "stores": 0
+    },
+    {
+      "product": {
+        "nir": "601",
+        "code": "tm",
+        "nama": "tm",
+        "hargaBeli": 5900,
+        "hargaJual": 8000
+      },
+      "kirim": 103,
+      "bs": 7,
+      "stock": 16,
+      "estSold": 82,
+      "basis": 89,
+      "returnRate": 0.07865168539325842,
+      "sellThrough": 0.9213483146067416,
+      "salesValue": 656000,
+      "visits": 34,
+      "stores": 5
+    },
+    {
+      "product": {
+        "nir": "602",
+        "code": "tf",
+        "nama": "tf",
+        "hargaBeli": 5900,
+        "hargaJual": 8000
+      },
+      "kirim": 19,
+      "bs": 1,
+      "stock": 5,
+      "estSold": 14,
+      "basis": 15,
+      "returnRate": 0.06666666666666667,
+      "sellThrough": 0.9333333333333333,
+      "salesValue": 112000,
+      "visits": 12,
+      "stores": 2
+    }
+  ],
+  "kec": [
+    {
+      "kec": 1,
+      "kirim": 1859,
+      "bs": 79,
+      "stock": 235,
+      "estSold": 1453,
+      "basis": 1532,
+      "returnRate": 0.05156657963446475,
+      "sellThrough": 0.9484334203655352,
+      "salesValue": 2717450,
+      "visits": 68,
+      "stores": 11
+    },
+    {
+      "kec": 2,
+      "kirim": 2077,
+      "bs": 92,
+      "stock": 235,
+      "estSold": 1615,
+      "basis": 1707,
+      "returnRate": 0.053895723491505565,
+      "sellThrough": 0.9461042765084944,
+      "salesValue": 3002810,
+      "visits": 63,
+      "stores": 11
+    },
+    {
+      "kec": 3,
+      "kirim": 1651,
+      "bs": 76,
+      "stock": 229,
+      "estSold": 1334,
+      "basis": 1410,
+      "returnRate": 0.05390070921985816,
+      "sellThrough": 0.9460992907801419,
+      "salesValue": 2707540,
+      "visits": 62,
+      "stores": 10
+    },
+    {
+      "kec": 4,
+      "kirim": 1715,
+      "bs": 94,
+      "stock": 233,
+      "estSold": 1376,
+      "basis": 1470,
+      "returnRate": 0.06394557823129252,
+      "sellThrough": 0.9360544217687075,
+      "salesValue": 2593730,
+      "visits": 60,
+      "stores": 10
+    },
+    {
+      "kec": 5,
+      "kirim": 1497,
+      "bs": 59,
+      "stock": 166,
+      "estSold": 1142,
+      "basis": 1201,
+      "returnRate": 0.049125728559533725,
+      "sellThrough": 0.9508742714404663,
+      "salesValue": 2142000,
+      "visits": 56,
+      "stores": 10
+    },
+    {
+      "kec": 6,
+      "kirim": 2166,
+      "bs": 67,
+      "stock": 210,
+      "estSold": 1706,
+      "basis": 1773,
+      "returnRate": 0.03778905809362662,
+      "sellThrough": 0.9622109419063734,
+      "salesValue": 3093180,
+      "visits": 57,
+      "stores": 10
+    },
+    {
+      "kec": 7,
+      "kirim": 1954,
+      "bs": 60,
+      "stock": 214,
+      "estSold": 1566,
+      "basis": 1626,
+      "returnRate": 0.03690036900369004,
+      "sellThrough": 0.9630996309963099,
+      "salesValue": 2866000,
+      "visits": 59,
+      "stores": 10
+    }
+  ],
+  "storesTop10": [
+    {
+      "store": {
+        "nit": "1003",
+        "kec": 1,
+        "nama": "Toko Rukun"
+      },
+      "kirim": 155,
+      "bs": 0,
+      "stock": 7,
+      "estSold": 130,
+      "basis": 130,
+      "returnRate": 0,
+      "sellThrough": 1,
+      "salesValue": 256700,
+      "visits": 6,
+      "stores": 1,
+      "lastVisit": "2026-09-29",
+      "lastSales": "S-A",
+      "avgInterval": 8,
+      "productCount": 6
+    },
+    {
+      "store": {
+        "nit": "1008",
+        "kec": 1,
+        "nama": "Toko Kelontong Berkah"
+      },
+      "kirim": 355,
+      "bs": 20,
+      "stock": 40,
+      "estSold": 293,
+      "basis": 313,
+      "returnRate": 0.06389776357827476,
+      "sellThrough": 0.9361022364217252,
+      "salesValue": 458540,
+      "visits": 7,
+      "stores": 1,
+      "lastVisit": "2026-09-28",
+      "lastSales": "S-A",
+      "avgInterval": 6.166666666666667,
+      "productCount": 9
+    },
+    {
+      "store": {
+        "nit": "1009",
+        "kec": 1,
+        "nama": "Toko Kelontong Barokah"
+      },
+      "kirim": 184,
+      "bs": 14,
+      "stock": 31,
+      "estSold": 138,
+      "basis": 152,
+      "returnRate": 0.09210526315789473,
+      "sellThrough": 0.9078947368421053,
+      "salesValue": 259250,
+      "visits": 7,
+      "stores": 1,
+      "lastVisit": "2026-09-26",
+      "lastSales": "S-A",
+      "avgInterval": 6.333333333333333,
+      "productCount": 7
+    },
+    {
+      "store": {
+        "nit": "1010",
+        "kec": 1,
+        "nama": "Kios Sentosa"
+      },
+      "kirim": 107,
+      "bs": 8,
+      "stock": 28,
+      "estSold": 84,
+      "basis": 92,
+      "returnRate": 0.08695652173913043,
+      "sellThrough": 0.9130434782608695,
+      "salesValue": 158950,
+      "visits": 8,
+      "stores": 1,
+      "lastVisit": "2026-09-29",
+      "lastSales": "S-A",
+      "avgInterval": 5.571428571428571,
+      "productCount": 7
+    },
+    {
+      "store": {
+        "nit": "1014",
+        "kec": 1,
+        "nama": "Minimarket Mekar Sari"
+      },
+      "kirim": 124,
+      "bs": 2,
+      "stock": 16,
+      "estSold": 96,
+      "basis": 98,
+      "returnRate": 0.02040816326530612,
+      "sellThrough": 0.9795918367346939,
+      "salesValue": 327000,
+      "visits": 6,
+      "stores": 1,
+      "lastVisit": "2026-09-26",
+      "lastSales": "S-A",
+      "avgInterval": 7.6,
+      "productCount": 7
+    },
+    {
+      "store": {
+        "nit": "1015",
+        "kec": 1,
+        "nama": "Toko Harapan"
+      },
+      "kirim": 130,
+      "bs": 9,
+      "stock": 26,
+      "estSold": 97,
+      "basis": 106,
+      "returnRate": 0.08490566037735849,
+      "sellThrough": 0.9150943396226415,
+      "salesValue": 166460,
+      "visits": 6,
+      "stores": 1,
+      "lastVisit": "2026-09-30",
+      "lastSales": "S-A",
+      "avgInterval": 7.8,
+      "productCount": 8
+    },
+    {
+      "store": {
+        "nit": "1018",
+        "kec": 1,
+        "nama": "Toko Kelontong Sinar Pagi"
+      },
+      "kirim": 101,
+      "bs": 2,
+      "stock": 17,
+      "estSold": 82,
+      "basis": 84,
+      "returnRate": 0.023809523809523808,
+      "sellThrough": 0.9761904761904762,
+      "salesValue": 139400,
+      "visits": 6,
+      "stores": 1,
+      "lastVisit": "2026-09-25",
+      "lastSales": "S-A",
+      "avgInterval": 7,
+      "productCount": 7
+    },
+    {
+      "store": {
+        "nit": "1020",
+        "kec": 1,
+        "nama": "Warung Makmur"
+      },
+      "kirim": 103,
+      "bs": 6,
+      "stock": 27,
+      "estSold": 80,
+      "basis": 86,
+      "returnRate": 0.06976744186046512,
+      "sellThrough": 0.9302325581395349,
+      "salesValue": 136000,
+      "visits": 6,
+      "stores": 1,
+      "lastVisit": "2026-09-22",
+      "lastSales": "S-A",
+      "avgInterval": 5.8,
+      "productCount": 9
+    },
+    {
+      "store": {
+        "nit": "1026",
+        "kec": 1,
+        "nama": "Warung Makmur"
+      },
+      "kirim": 213,
+      "bs": 7,
+      "stock": 18,
+      "estSold": 175,
+      "basis": 182,
+      "returnRate": 0.038461538461538464,
+      "sellThrough": 0.9615384615384616,
+      "salesValue": 297500,
+      "visits": 7,
+      "stores": 1,
+      "lastVisit": "2026-09-26",
+      "lastSales": "S-A",
+      "avgInterval": 6.333333333333333,
+      "productCount": 6
+    },
+    {
+      "store": {
+        "nit": "1031",
+        "kec": 1,
+        "nama": "Warung Maju Jaya"
+      },
+      "kirim": 191,
+      "bs": 6,
+      "stock": 13,
+      "estSold": 120,
+      "basis": 126,
+      "returnRate": 0.047619047619047616,
+      "sellThrough": 0.9523809523809523,
+      "salesValue": 222700,
+      "visits": 3,
+      "stores": 1,
+      "lastVisit": "2026-09-30",
+      "lastSales": "S-A",
+      "avgInterval": 6,
+      "productCount": 10
+    }
+  ],
+  "series": {
+    "harian": [
+      {
+        "key": "2026-08-19",
+        "label": "19 Agt",
+        "kirim": 270,
+        "estSold": 0,
+        "bs": 0
+      },
+      {
+        "key": "2026-08-20",
+        "label": "20 Agt",
+        "kirim": 231,
+        "estSold": 0,
+        "bs": 0
+      },
+      {
+        "key": "2026-08-21",
+        "label": "21 Agt",
+        "kirim": 175,
+        "estSold": 0,
+        "bs": 0
+      },
+      {
+        "key": "2026-08-22",
+        "label": "22 Agt",
+        "kirim": 552,
+        "estSold": 0,
+        "bs": 0
+      },
+      {
+        "key": "2026-08-24",
+        "label": "24 Agt",
+        "kirim": 756,
+        "estSold": 70,
+        "bs": 4
+      },
+      {
+        "key": "2026-08-25",
+        "label": "25 Agt",
+        "kirim": 79,
+        "estSold": 70,
+        "bs": 5
+      },
+      {
+        "key": "2026-08-26",
+        "label": "26 Agt",
+        "kirim": 255,
+        "estSold": 229,
+        "bs": 12
+      },
+      {
+        "key": "2026-08-27",
+        "label": "27 Agt",
+        "kirim": 63,
+        "estSold": 55,
+        "bs": 4
+      },
+      {
+        "key": "2026-08-28",
+        "label": "28 Agt",
+        "kirim": 381,
+        "estSold": 345,
+        "bs": 15
+      },
+      {
+        "key": "2026-08-29",
+        "label": "29 Agt",
+        "kirim": 590,
+        "estSold": 553,
+        "bs": 28
+      },
+      {
+        "key": "2026-08-31",
+        "label": "31 Agt",
+        "kirim": 387,
+        "estSold": 392,
+        "bs": 9
+      },
+      {
+        "key": "2026-09-01",
+        "label": "1 Sep",
+        "kirim": 248,
+        "estSold": 215,
+        "bs": 13
+      },
+      {
+        "key": "2026-09-02",
+        "label": "2 Sep",
+        "kirim": 227,
+        "estSold": 227,
+        "bs": 7
+      },
+      {
+        "key": "2026-09-03",
+        "label": "3 Sep",
+        "kirim": 117,
+        "estSold": 109,
+        "bs": 4
+      },
+      {
+        "key": "2026-09-04",
+        "label": "4 Sep",
+        "kirim": 327,
+        "estSold": 335,
+        "bs": 9
+      },
+      {
+        "key": "2026-09-05",
+        "label": "5 Sep",
+        "kirim": 709,
+        "estSold": 687,
+        "bs": 33
+      },
+      {
+        "key": "2026-09-07",
+        "label": "7 Sep",
+        "kirim": 433,
+        "estSold": 412,
+        "bs": 17
+      },
+      {
+        "key": "2026-09-08",
+        "label": "8 Sep",
+        "kirim": 255,
+        "estSold": 244,
+        "bs": 8
+      },
+      {
+        "key": "2026-09-09",
+        "label": "9 Sep",
+        "kirim": 245,
+        "estSold": 173,
+        "bs": 13
+      },
+      {
+        "key": "2026-09-10",
+        "label": "10 Sep",
+        "kirim": 192,
+        "estSold": 187,
+        "bs": 11
+      },
+      {
+        "key": "2026-09-11",
+        "label": "11 Sep",
+        "kirim": 302,
+        "estSold": 286,
+        "bs": 13
+      },
+      {
+        "key": "2026-09-12",
+        "label": "12 Sep",
+        "kirim": 423,
+        "estSold": 384,
+        "bs": 17
+      },
+      {
+        "key": "2026-09-14",
+        "label": "14 Sep",
+        "kirim": 480,
+        "estSold": 492,
+        "bs": 26
+      },
+      {
+        "key": "2026-09-15",
+        "label": "15 Sep",
+        "kirim": 325,
+        "estSold": 319,
+        "bs": 11
+      },
+      {
+        "key": "2026-09-16",
+        "label": "16 Sep",
+        "kirim": 350,
+        "estSold": 322,
+        "bs": 22
+      },
+      {
+        "key": "2026-09-17",
+        "label": "17 Sep",
+        "kirim": 330,
+        "estSold": 305,
+        "bs": 15
+      },
+      {
+        "key": "2026-09-18",
+        "label": "18 Sep",
+        "kirim": 292,
+        "estSold": 244,
+        "bs": 20
+      },
+      {
+        "key": "2026-09-19",
+        "label": "19 Sep",
+        "kirim": 462,
+        "estSold": 353,
+        "bs": 24
+      },
+      {
+        "key": "2026-09-21",
+        "label": "21 Sep",
+        "kirim": 355,
+        "estSold": 337,
+        "bs": 10
+      },
+      {
+        "key": "2026-09-22",
+        "label": "22 Sep",
+        "kirim": 334,
+        "estSold": 282,
+        "bs": 19
+      },
+      {
+        "key": "2026-09-23",
+        "label": "23 Sep",
+        "kirim": 582,
+        "estSold": 551,
+        "bs": 25
+      },
+      {
+        "key": "2026-09-24",
+        "label": "24 Sep",
+        "kirim": 168,
+        "estSold": 169,
+        "bs": 12
+      },
+      {
+        "key": "2026-09-25",
+        "label": "25 Sep",
+        "kirim": 308,
+        "estSold": 242,
+        "bs": 13
+      },
+      {
+        "key": "2026-09-26",
+        "label": "26 Sep",
+        "kirim": 381,
+        "estSold": 317,
+        "bs": 26
+      },
+      {
+        "key": "2026-09-28",
+        "label": "28 Sep",
+        "kirim": 556,
+        "estSold": 524,
+        "bs": 38
+      },
+      {
+        "key": "2026-09-29",
+        "label": "29 Sep",
+        "kirim": 170,
+        "estSold": 224,
+        "bs": 8
+      },
+      {
+        "key": "2026-09-30",
+        "label": "30 Sep",
+        "kirim": 609,
+        "estSold": 538,
+        "bs": 36
+      }
+    ],
+    "mingguan": [
+      {
+        "key": "2026-08-24",
+        "label": "Mg 24 Agt",
+        "kirim": 2124,
+        "estSold": 1322,
+        "bs": 68
+      },
+      {
+        "key": "2026-08-31",
+        "label": "Mg 31 Agt",
+        "kirim": 2015,
+        "estSold": 1965,
+        "bs": 75
+      },
+      {
+        "key": "2026-09-07",
+        "label": "Mg 7 Sep",
+        "kirim": 1850,
+        "estSold": 1686,
+        "bs": 79
+      },
+      {
+        "key": "2026-09-14",
+        "label": "Mg 14 Sep",
+        "kirim": 2239,
+        "estSold": 2035,
+        "bs": 118
+      },
+      {
+        "key": "2026-09-21",
+        "label": "Mg 21 Sep",
+        "kirim": 2128,
+        "estSold": 1898,
+        "bs": 105
+      }
+    ]
+  },
+  "recommendations": {
+    "total": 550,
+    "summary": {
+      "total": 550,
+      "increase": 187,
+      "decrease": 157,
+      "same": 200,
+      "excluded": 6,
+      "totalRecommended": 2411,
+      "totalLast": 2392,
+      "confidence": {
+        "tinggi": 470,
+        "sedang": 21,
+        "rendah": 53
+      },
+      "stores": 72
+    },
+    "first20": [
+      {
+        "nit": "1003",
+        "product": "ncb",
+        "lastTgl": "2026-09-29",
+        "lastKirim": 2,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-07",
+        "estSold": 2.5,
+        "recommended": 4,
+        "delta": 2,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "habis"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1003",
+        "product": "nck",
+        "lastTgl": "2026-09-29",
+        "lastKirim": 4,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-07",
+        "estSold": 4.5,
+        "recommended": 5,
+        "delta": 1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1003",
+        "product": "sb",
+        "lastTgl": "2026-09-29",
+        "lastKirim": 5,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-07",
+        "estSold": 4,
+        "recommended": 5,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "habis"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1003",
+        "product": "sisir3",
+        "lastTgl": "2026-09-29",
+        "lastKirim": 8,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-07",
+        "estSold": 8,
+        "recommended": 8,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1003",
+        "product": "sk",
+        "lastTgl": "2026-09-29",
+        "lastKirim": 3,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-07",
+        "estSold": 3,
+        "recommended": 4,
+        "delta": 1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "habis"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1003",
+        "product": "sukemi",
+        "lastTgl": "2026-09-29",
+        "lastKirim": 3,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-07",
+        "estSold": 3,
+        "recommended": 4,
+        "delta": 1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "habis"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "cocang",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 7,
+        "lastBs": 0,
+        "returnRate": 0.0625,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 4.5,
+        "recommended": 6,
+        "delta": -1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "habis"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "mpkh",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 10,
+        "lastBs": 0,
+        "returnRate": 0.06896551724137931,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 9.5,
+        "recommended": 10,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "ncb",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 5,
+        "lastBs": 1,
+        "returnRate": 0.1111111111111111,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 5.5,
+        "recommended": 6,
+        "delta": 1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "ncp",
+        "lastTgl": "2026-09-22",
+        "lastKirim": 8,
+        "lastBs": 0,
+        "returnRate": 0.041666666666666664,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 8,
+        "recommended": 8,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "ncs",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 4,
+        "lastBs": 0,
+        "returnRate": 0.13333333333333333,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 5,
+        "recommended": 5,
+        "delta": 1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "sb",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 3,
+        "lastBs": 1,
+        "returnRate": 0.16666666666666666,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 3.5,
+        "recommended": 3,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "retur-tinggi"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "sc",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 9,
+        "lastBs": 1,
+        "returnRate": 0.14814814814814814,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 8,
+        "recommended": 8,
+        "delta": -1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "sk",
+        "lastTgl": "2026-09-22",
+        "lastKirim": 4,
+        "lastBs": 0,
+        "returnRate": 0.14285714285714285,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 4,
+        "recommended": 4,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1008",
+        "product": "sukemi",
+        "lastTgl": "2026-09-28",
+        "lastKirim": 4,
+        "lastBs": 0,
+        "returnRate": 0,
+        "observations": 4,
+        "nextVisit": "2026-10-05",
+        "estSold": 4,
+        "recommended": 4,
+        "delta": 0,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1009",
+        "product": "nc",
+        "lastTgl": "2026-09-26",
+        "lastKirim": 5,
+        "lastBs": 1,
+        "returnRate": 0.07692307692307693,
+        "observations": 4,
+        "nextVisit": "2026-10-02",
+        "estSold": 4,
+        "recommended": 4,
+        "delta": -1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1009",
+        "product": "nck",
+        "lastTgl": "2026-09-26",
+        "lastKirim": 5,
+        "lastBs": 2,
+        "returnRate": 0.16666666666666666,
+        "observations": 4,
+        "nextVisit": "2026-10-02",
+        "estSold": 3,
+        "recommended": 3,
+        "delta": -2,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "retur-tinggi",
+          "dibatasi"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1009",
+        "product": "ncp",
+        "lastTgl": "2026-09-26",
+        "lastKirim": 4,
+        "lastBs": 1,
+        "returnRate": 0.16666666666666666,
+        "observations": 4,
+        "nextVisit": "2026-10-02",
+        "estSold": 3.5,
+        "recommended": 3,
+        "delta": -1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "retur-tinggi"
+        ],
+        "excluded": false
+      },
+      {
+        "nit": "1009",
+        "product": "ncs",
+        "lastTgl": "2026-09-26",
+        "lastKirim": 4,
+        "lastBs": 1,
+        "returnRate": 0.1111111111111111,
+        "observations": 4,
+        "nextVisit": "2026-10-02",
+        "estSold": 2.5,
+        "recommended": 3,
+        "delta": -1,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [],
+        "excluded": false
+      },
+      {
+        "nit": "1009",
+        "product": "sb",
+        "lastTgl": "2026-09-26",
+        "lastKirim": 5,
+        "lastBs": 1,
+        "returnRate": 0.2,
+        "observations": 4,
+        "nextVisit": "2026-10-02",
+        "estSold": 4,
+        "recommended": 3,
+        "delta": -2,
+        "confidence": "tinggi",
+        "basis": "Median 4 kunjungan terakhir",
+        "signals": [
+          "retur-tinggi"
+        ],
+        "excluded": false
+      }
+    ]
+  }
+}
