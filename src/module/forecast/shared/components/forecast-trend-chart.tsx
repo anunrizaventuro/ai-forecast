@@ -31,7 +31,7 @@ export function ForecastTrendChart({ categories, series, height = 320, ariaLabel
       <LineChart
         height={height}
         xAxis={[{ scaleType: 'point', data: categories }]}
-        yAxis={[{ width: 56, valueFormatter: (value: number) => fNumber(value) }]}
+        yAxis={[{ min: 0, width: 56, valueFormatter: (value: number) => fNumber(value) }]}
         series={series.map((s) => ({
           id: s.key,
           data: s.values,

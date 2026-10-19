@@ -1,6 +1,6 @@
-import Box from '@mui/material/Box';
-
 import { CONFIG } from 'src/shared/config';
+
+import { SalesAnalysisView } from '../views/sales-analysis-view';
 
 // ----------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ export default function Page() {
   return (
     <>
       <title>{metadata.title}</title>
-      <Box sx={{ p: { xs: 2, md: 3 } }}>Analisis Penjualan</Box>
+      <SalesAnalysisView />
     </>
   );
 }
