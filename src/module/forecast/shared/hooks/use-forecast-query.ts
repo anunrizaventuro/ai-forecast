@@ -137,7 +137,14 @@ export type ForecastQueryResult<T> = {
   refetch: () => void;
 };
 
-type State<T> = { data: T | undefined; error: Error | null; fetching: boolean };
+// `errorKey` = key tempat error terjadi; error key lama tidak ikut ke key baru
+// (setara RQ: key baru mulai tanpa error, data lama tetap tampil).
+type State<T> = {
+  data: T | undefined;
+  error: Error | null;
+  errorKey: string | null;
+  fetching: boolean;
+};
 
 export function useForecastQuery<T>(
   key: Key,
@@ -148,7 +155,12 @@ export function useForecastQuery<T>(
 
   const [state, setState] = useState<State<T>>(() => {
     const entry = entries.get(keyString);
-    return { data: entry?.hasData ? (entry.data as T) : undefined, error: null, fetching: false };
+    return {
+      data: entry?.hasData ? (entry.data as T) : undefined,
+      error: null,
+      errorKey: null,
+      fetching: false,
+    };
   });
   // Dinaikkan untuk memaksa effect fetch berjalan lagi (refetch / invalidate).
   const [nonce, setNonce] = useState(0);
@@ -178,12 +190,17 @@ export function useForecastQuery<T>(
 
     const entry = entries.get(keyString);
     if (entry?.hasData) {
-      setState({ data: entry.data as T, error: null, fetching: false });
+      setState({ data: entry.data as T, error: null, errorKey: null, fetching: false });
       return undefined;
     }
 
     let active = true;
-    setState((prev) => ({ ...prev, fetching: true }));
+    setState((prev) => ({
+      ...prev,
+      fetching: true,
+      // Refetch key yang sama mempertahankan error-nya; key baru mulai bersih.
+      ...(prev.errorKey !== keyString && { error: null, errorKey: null }),
+    }));
 
     const { promise, release } = acquire(
       keyString,
@@ -193,11 +210,16 @@ export function useForecastQuery<T>(
     );
     promise.then(
       (data) => {
-        if (active) setState({ data, error: null, fetching: false });
+        if (active) setState({ data, error: null, errorKey: null, fetching: false });
       },
       (error: unknown) => {
         if (!active || axios.isCancel(error)) return;
-        setState((prev) => ({ data: prev.data, error: error as Error, fetching: false }));
+        setState((prev) => ({
+          data: prev.data,
+          error: error as Error,
+          errorKey: keyString,
+          fetching: false,
+        }));
       }
     );
 
