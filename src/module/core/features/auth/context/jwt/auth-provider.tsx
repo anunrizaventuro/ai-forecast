@@ -2,6 +2,7 @@ import type { AuthState, SignInParams, SignUpParams, AuthContextValue } from '..
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
+import { CONFIG } from 'src/shared/config';
 import { configureAxiosAuth } from 'src/shared/lib/axios';
 import { getGoogleIdToken } from 'src/shared/lib/firebase';
 import { invalidateAllCompanyCaches } from 'src/shared/lib/cache-registry';
@@ -123,6 +124,12 @@ export function AuthProvider({ children }: Props) {
   }, [applySignOut, resolveActiveCompanyId]);
 
   useEffect(() => {
+    // Auth dimatikan: tidak ada sesi yang dicek, tidak ada request ke /core/v1.
+    if (CONFIG.auth.skip) {
+      setState({ ...INITIAL_STATE, loading: false });
+      return;
+    }
+
     configureAxiosAuth({
       getAccessToken,
       getRefreshToken,

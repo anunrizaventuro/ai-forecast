@@ -10,6 +10,7 @@ import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
 import { iconButtonClasses } from '@mui/material/IconButton';
 
+import { CONFIG } from 'src/shared/config';
 // import { allLangs } from 'src/locales';
 import { BrandLogo } from 'src/shared/ui/logo';
 import { useAuthContext } from 'src/module/core/features/auth/hooks';
@@ -207,7 +208,7 @@ export function DashboardLayout({
         borderTop: `dashed 1px ${t.vars.palette.divider}`,
       })}
     >
-      <AccountDrawer compact={compact} />
+      {!CONFIG.auth.skip && <AccountDrawer compact={compact} />}
     </Box>
   );
 

@@ -6,6 +6,7 @@ import { varAlpha, mergeClasses } from 'minimal-shared/utils';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 
+import { CONFIG } from 'src/shared/config';
 import { BrandLogo } from 'src/shared/ui/logo';
 import { Scrollbar } from 'src/shared/ui/scrollbar';
 import { NavSectionMini, NavSectionVertical } from 'src/shared/ui/nav-section';
@@ -47,20 +48,24 @@ export function NavVertical({
         </Box>
       )}
 
-      <Box sx={{ px: 2.5, pb: 2 }}>
-        <WorkspacesPopover
-          sx={{
-            px: 1.5,
-            py: 1.25,
-            width: '100%',
-            borderRadius: 1,
-            justifyContent: 'flex-start',
-            border: (theme) => `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.2)}`,
-            '&:hover': { bgcolor: 'action.hover' },
-            '&::before': { display: 'none' },
-          }}
-        />
-      </Box>
+      {/* Pemilih company modul core — tidak ada company selama auth di-skip. */}
+      {!CONFIG.auth.skip && (
+        <Box sx={{ px: 2.5, pb: 2 }}>
+          <WorkspacesPopover
+            sx={{
+              px: 1.5,
+              py: 1.25,
+              width: '100%',
+              borderRadius: 1,
+              justifyContent: 'flex-start',
+              border: (theme) =>
+                `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.2)}`,
+              '&:hover': { bgcolor: 'action.hover' },
+              '&::before': { display: 'none' },
+            }}
+          />
+        </Box>
+      )}
 
       <Scrollbar fillContent>
         <NavSectionVertical

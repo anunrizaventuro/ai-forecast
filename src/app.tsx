@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { usePathname } from 'src/routes/hooks';
 
+import { CONFIG } from 'src/shared/config';
 import { Snackbar } from 'src/shared/ui/snackbar';
 import { themeConfig, ThemeProvider } from 'src/theme';
 import { ProgressBar } from 'src/shared/ui/progress-bar';
@@ -40,8 +41,9 @@ export default function App({ children }: AppProps) {
                 <ProgressBar />
                 <Snackbar />
                 <SettingsDrawer defaultSettings={defaultSettings} />
-                <OnboardingDialog />
-                <TranslationOverrideSync />
+                {/* Modul core skeleton dimatikan selama auth di-skip (tanpa backend /core/v1). */}
+                {!CONFIG.auth.skip && <OnboardingDialog />}
+                {!CONFIG.auth.skip && <TranslationOverrideSync />}
                 {children}
               </MotionLazy>
             </LocalizationProvider>

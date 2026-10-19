@@ -52,12 +52,12 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
 
   const settingsItems = (
     [
-      { key: 'branches', path: paths.dashboard.settings.branches, perm: PERM.branches.read },
-      { key: 'roles', path: paths.dashboard.settings.roles, perm: PERM.roles.read },
-      { key: 'users', path: paths.dashboard.settings.users, perm: PERM.userManagement.read },
+      { key: 'branches', path: paths.core.settings.branches, perm: PERM.branches.read },
+      { key: 'roles', path: paths.core.settings.roles, perm: PERM.roles.read },
+      { key: 'users', path: paths.core.settings.users, perm: PERM.userManagement.read },
       {
         key: 'translationOverride',
-        path: paths.dashboard.settings.translationOverride,
+        path: paths.core.settings.translationOverride,
         perm: PERM.translationOverrides.read,
       },
     ] satisfies { key: SettingsKey; path: string; perm: string }[]

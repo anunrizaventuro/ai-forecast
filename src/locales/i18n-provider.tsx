@@ -1,23 +1,17 @@
 import type { InitOptions } from 'i18next';
-import type { LangCode } from './locales-config';
 
 import i18next from 'i18next';
-import { getStorage } from 'minimal-shared/utils';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next, I18nextProvider as Provider } from 'react-i18next';
 
-import { i18nOptions, fallbackLng, storageConfig, i18nResourceLoader } from './locales-config';
+import { i18nOptions, fallbackLng, i18nResourceLoader } from './locales-config';
 
 // ----------------------------------------------------------------------
 
-const i18nextLng = getStorage(
-  storageConfig.localStorage.key,
-  storageConfig.localStorage.autoDetection ? undefined : fallbackLng
-) as LangCode;
-
+// Bahasa dikunci ke 'id' (fallbackLng) — pilihan bahasa di localStorage diabaikan.
 const initOptions: InitOptions = {
-  ...i18nOptions(i18nextLng),
-  detection: { caches: ['localStorage'] },
+  ...i18nOptions(fallbackLng),
+  detection: { order: [], caches: [] },
 };
 
 i18next.use(LanguageDetector).use(initReactI18next).use(i18nResourceLoader).init(initOptions);

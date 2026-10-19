@@ -7,7 +7,8 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 export const supportedLngs = ['id', 'en'] as const;
 export type LangCode = (typeof supportedLngs)[number];
 
-export const fallbackLng: LangCode = 'en';
+// AI Forecast hanya berbahasa Indonesia.
+export const fallbackLng: LangCode = 'id';
 export const defaultNS = 'common';
 
 export const storageConfig = {
