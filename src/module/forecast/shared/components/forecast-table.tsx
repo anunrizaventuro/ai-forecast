@@ -1,5 +1,3 @@
-import type { TablePaginationCustomProps } from 'src/shared/ui/table';
-
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
@@ -32,12 +30,21 @@ export function sortRows<T>(
 
 // ----------------------------------------------------------------------
 
-type PaginationProps = Pick<
-  TablePaginationCustomProps,
-  'count' | 'page' | 'rowsPerPage' | 'onPageChange' | 'onRowsPerPageChange'
->;
+type PaginationProps = {
+  count: number;
+  page: number;
+  rowsPerPage: number;
+  onPageChange: (page: number) => void;
+  onRowsPerPageChange: (rows: number) => void;
+};
 
-export function ForecastTablePagination({ count, page, rowsPerPage, ...other }: PaginationProps) {
+export function ForecastTablePagination({
+  count,
+  page,
+  rowsPerPage,
+  onPageChange,
+  onRowsPerPageChange,
+}: PaginationProps) {
   return (
     <TablePaginationCustom
       count={count}
@@ -45,6 +52,11 @@ export function ForecastTablePagination({ count, page, rowsPerPage, ...other }: 
       page={Math.min(page, Math.max(0, Math.ceil(count / rowsPerPage) - 1))}
       rowsPerPage={rowsPerPage}
       rowsPerPageOptions={[10, 25, 50]}
+      onPageChange={(_, next) => onPageChange(next)}
+      onRowsPerPageChange={(event) => {
+        onRowsPerPageChange(parseInt(event.target.value, 10));
+        onPageChange(0);
+      }}
       labelRowsPerPage="Baris per halaman"
       labelDisplayedRows={({ from, to, count: total }) => `${from}–${to} dari ${total}`}
       getItemAriaLabel={(type) =>
@@ -53,7 +65,6 @@ export function ForecastTablePagination({ count, page, rowsPerPage, ...other }: 
         ] ?? 'Sebelumnya'
       }
       sx={(theme) => ({ borderTop: `dashed 1px ${theme.vars.palette.divider}` })}
-      {...other}
     />
   );
 }
