@@ -3,7 +3,7 @@ import type { Theme, Components } from '@mui/material/styles';
 import { formLabelClasses } from '@mui/material/FormLabel';
 import { inputLabelClasses } from '@mui/material/InputLabel';
 
-import { INPUT_PADDING, getInputTypography } from './text-field';
+import { getInputTypography } from './text-field';
 
 // ----------------------------------------------------------------------
 
@@ -36,19 +36,6 @@ const MuiInputLabel: Components<Theme>['MuiInputLabel'] = {
             [`&.${inputLabelClasses.focused}:not(.${inputLabelClasses.error})`]: {
               color: 'inherit',
             },
-          },
-        },
-        {
-          props: (props) => !props.shrink && props.variant === 'outlined' && props.size === 'small',
-          style: {
-            transform: `translate(14px, ${INPUT_PADDING.outlined.small.paddingTop}px) scale(1)`,
-          },
-        },
-        {
-          props: (props) =>
-            !props.shrink && props.variant === 'outlined' && props.size === 'medium',
-          style: {
-            transform: `translate(14px, ${INPUT_PADDING.outlined.medium.paddingTop}px) scale(1)`,
           },
         },
         {

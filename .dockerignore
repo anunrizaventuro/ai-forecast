@@ -1,27 +1,28 @@
-# Artefak build & dependency — di-install/di-build ulang di dalam image
 node_modules
-.next
-out
 dist
 build
-
-# VCS, tooling repo, CI — tidak dibutuhkan di image
 .git
 .github
-.husky
 .vscode
-Jenkinsfile
-docs
+.husky
 
-# Env lokal TIDAK boleh bocor ke image — build hanya memakai .env.prod
+# Local envs — prod uses .env.prod, which IS copied in by the Dockerfile
 .env
 .env.local
-.env.development
-.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Lain-lain
+# Docs and misc
+*.md
+docs
+coverage
 .DS_Store
-*.log
-Dockerfile
-docker-compose.yml
-.dockerignore
+.cache
+.vercel
+.netlify
+tsconfig.tsbuildinfo
+
+# Editor & OS
+.idea
+Thumbs.db

@@ -1,0 +1,64 @@
+{
+  "title": "Branches",
+  "buttons": {
+    "new": "Branch"
+  },
+  "default": "Default",
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search branch name..."
+  },
+  "table": {
+    "code": "Code",
+    "name": "Name",
+    "sort": "Sort",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "form": {
+    "newTitle": "Add Branch",
+    "editTitle": "Edit Branch {{name}}",
+    "name": "Branch Name",
+    "code": "Code",
+    "codeHint": "Leave empty to auto-generate (CB0001, CB0002, ...).",
+    "codeImmutable": "Cannot be changed after creation.",
+    "sort": "Sort Order",
+    "logoUrl": "Logo URL",
+    "isActive": "Active",
+    "isDefault": "Default"
+  },
+  "validation": {
+    "nameMin": "Name must be at least 2 characters.",
+    "nameMax": "Name must be at most 255 characters.",
+    "logoMax": "Logo URL must be at most 500 characters.",
+    "logoUrl": "Invalid logo URL."
+  },
+  "delete": {
+    "title": "Delete Branch",
+    "message": "Branch {{name}} will be deleted."
+  },
+  "detail": {
+    "title": "Branch Detail"
+  },
+  "rowActions": {
+    "viewDetail": "View Detail",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "list": {
+    "emptyTitle": "No branches yet",
+    "emptySubtitle": "Click \"Branch\" to create your first branch."
+  },
+  "feedback": {
+    "saved": "Branch {{name}} saved.",
+    "deleted": "Branch deleted."
+  },
+  "errors": {
+    "loadData": "Failed to load branches.",
+    "saveFailed": "Failed to save branch.",
+    "deleteFailed": "Failed to delete branch."
+  }
+}

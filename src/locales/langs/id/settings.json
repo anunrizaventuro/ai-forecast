@@ -1,0 +1,36 @@
+{
+  "title": "Pengaturan",
+  "actions": {
+    "resetAll": "Reset semua",
+    "close": "Tutup",
+    "fullscreen": "Layar penuh",
+    "exitFullscreen": "Keluar layar penuh"
+  },
+  "options": {
+    "mode": "Mode",
+    "system": "Sistem",
+    "contrast": "Kontras",
+    "rightToLeft": "Kanan ke kiri",
+    "compact": "Ringkas",
+    "compactTooltip": "Khusus dasbor dan tersedia pada resolusi besar > 1600px (xl)"
+  },
+  "sections": {
+    "presets": "Preset",
+    "nav": "Navigasi",
+    "navTooltip": "Khusus dasbor",
+    "font": "Font"
+  },
+  "labels": {
+    "layout": "Tata letak",
+    "color": "Warna",
+    "family": "Jenis",
+    "size": "Ukuran"
+  },
+  "navColors": {
+    "integrate": "Integrasi",
+    "apparent": "Terlihat"
+  },
+  "fontSize": {
+    "ariaLabel": "Ubah ukuran font"
+  }
+}

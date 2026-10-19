@@ -33,7 +33,7 @@ export function getAvatarColor(
     return fallback;
   }
 
-  const firstChar = inputValue.trim()[0]!.toLowerCase();
+  const firstChar = inputValue.trim()[0].toLowerCase();
 
   // Only handle alphabet characters a-z
   if (!/[a-z]/.test(firstChar)) {

@@ -1,52 +1,44 @@
-# logs
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
 # dependencies
-/node_modules
-/.pnp
-.pnp.*
-
-# yarn is the only package manager — never commit an npm lockfile
-package-lock.json
-
-# yarn berry
-/.yarn/*
-!/.yarn/patches
-!/.yarn/plugins
-!/.yarn/releases
-!/.yarn/versions
+node_modules
+.pnp
+.pnp.js
 
 # testing
-/coverage
+coverage
 
-# build outputs
-/.next/
-/out/
-/dist
-/build
+# production
+.next
+.swc
+_static
+out
+dist
+build
 
-# environment variables (.env.example is the committed template)
-.env*
-!.env.example
+# environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# deployment
+# misc
+.DS_Store
 .vercel
 .netlify
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# editor & system files
-.DS_Store
 .vscode
-
-# local configs & certificates
-*.pem
+tsconfig.tsbuildinfo
 .ncurc.js
+.env.prod
+
+# yarn adalah satu-satunya package manager
+package-lock.json
 
 # laporan PDF hasil generate — jangan ikut commit
 *.pdf

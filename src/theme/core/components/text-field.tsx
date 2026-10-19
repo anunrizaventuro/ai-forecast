@@ -39,7 +39,7 @@ export const INPUT_TYPOGRAPHY = {
   lineHeight: 24,
 } as const;
 
-export const INPUT_PADDING = {
+export const INPUT_PADDING: Record<string, Record<string, CSSObject>> = {
   base: {
     small: { paddingTop: 0, paddingBottom: 4 },
     medium: { paddingTop: 4, paddingBottom: 4 },
@@ -54,7 +54,7 @@ export const INPUT_PADDING = {
     smallHidden: { paddingTop: 8, paddingBottom: 8 },
     mediumHidden: { paddingTop: 16, paddingBottom: 16 },
   },
-} satisfies Record<string, Record<string, CSSObject>>;
+};
 
 export function getInputTypography(
   theme: Theme,
@@ -330,6 +330,7 @@ const MuiTextField: Components<Theme>['MuiTextField'] = {
   // ▼▼▼▼▼▼▼▼ ⚙️ PROPS ▼▼▼▼▼▼▼▼
   defaultProps: {
     variant: 'outlined',
+    size: 'small',
   },
 };
 

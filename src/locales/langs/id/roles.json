@@ -1,0 +1,84 @@
+{
+  "title": "Roles",
+  "system": "System",
+  "buttons": {
+    "new": "Role"
+  },
+  "statuses": {
+    "active": "Aktif",
+    "inactive": "Tidak Aktif"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Cari kode atau nama role..."
+  },
+  "table": {
+    "code": "Kode",
+    "name": "Nama",
+    "description": "Deskripsi",
+    "permissions": "Izin",
+    "status": "Status",
+    "actions": "Aksi"
+  },
+  "form": {
+    "newTitle": "Tambah Role",
+    "editTitle": "Ubah Role {{name}}",
+    "code": "Kode",
+    "codeHint": "Format: huruf kecil, angka, underscore (mis. finance_manager).",
+    "codeImmutable": "Tidak bisa diubah setelah dibuat.",
+    "name": "Nama",
+    "description": "Deskripsi",
+    "permissions": "Izin Akses",
+    "isActive": "Aktif"
+  },
+  "groups": {
+    "core": "Core",
+    "audit": "Audit"
+  },
+  "levels": {
+    "viewer": "Viewer",
+    "editor": "Editor",
+    "admin": "Admin"
+  },
+  "resources": {
+    "roles": "Roles",
+    "user-management": "Manajemen User",
+    "branches": "Cabang",
+    "companies": "Company",
+    "company_users": "Membership Company",
+    "translation_overrides": "Kustomisasi Istilah",
+    "audit-log": "Log Audit"
+  },
+  "validation": {
+    "codeMin": "Kode minimal 2 karakter.",
+    "codeMax": "Kode maksimal 50 karakter.",
+    "codeFormat": "Hanya huruf kecil, angka, dan underscore.",
+    "nameMin": "Nama minimal 2 karakter.",
+    "nameMax": "Nama maksimal 100 karakter.",
+    "descMax": "Deskripsi maksimal 1000 karakter."
+  },
+  "delete": {
+    "title": "Hapus Role",
+    "message": "Role {{name}} akan dihapus."
+  },
+  "detail": {
+    "title": "Detail Role"
+  },
+  "rowActions": {
+    "viewDetail": "Lihat Detail",
+    "edit": "Ubah",
+    "delete": "Hapus"
+  },
+  "list": {
+    "emptyTitle": "Belum ada role",
+    "emptySubtitle": "Klik \"Role\" untuk membuat role baru."
+  },
+  "feedback": {
+    "saved": "Role {{name}} tersimpan.",
+    "deleted": "Role dihapus."
+  },
+  "errors": {
+    "loadData": "Gagal memuat role.",
+    "saveFailed": "Gagal menyimpan role.",
+    "deleteFailed": "Gagal menghapus role."
+  }
+}

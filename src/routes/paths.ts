@@ -1,36 +1,22 @@
-// ----------------------------------------------------------------------
-// Semua string route terpusat di sini — jangan hardcode URL di komponen.
-//
-// Kebijakan trailing slash: entri di bawah TANPA trailing slash (Next
-// menormalkan saat navigasi karena `trailingSlash: true`). Untuk URL yang
-// dipublikasikan ke crawler (canonical, sitemap, JSON-LD), SELALU tambahkan
-// '/' di akhir — gunakan `pathWithSlash()` supaya konsisten.
-
-export const pathWithSlash = (path: string) => (path.endsWith('/') ? path : `${path}/`);
+const ROOTS = {
+  AUTH: '/auth',
+};
 
 export const paths = {
-  home: '/',
-  /**
-   * Dashboard AI Forecast (admin)
-   */
-  dashboard: {
-    root: '/dashboard',
-    recommendation: '/dashboard/rekomendasi-stok',
-    salesAnalysis: '/dashboard/analisis-penjualan',
-    stores: '/dashboard/toko',
-    products: '/dashboard/produk',
-    settings: '/dashboard/pengaturan',
+  faqs: '/faqs',
+  auth: {
+    jwt: {
+      signIn: `${ROOTS.AUTH}/jwt/sign-in`,
+      signUp: `${ROOTS.AUTH}/jwt/sign-up`,
+    },
   },
-  /**
-   * Common
-   */
-  maintenance: '/maintenance',
-  comingSoon: '/coming-soon',
-  page404: '/error/404',
-  page500: '/error/500',
-  /**
-   * Others
-   */
-  blank: '/blank',
-  components: '/components',
+  dashboard: {
+    root: '/',
+    settings: {
+      branches: '/settings/branches',
+      roles: '/settings/roles',
+      users: '/settings/users',
+      translationOverride: '/settings/translation-override',
+    },
+  },
 };

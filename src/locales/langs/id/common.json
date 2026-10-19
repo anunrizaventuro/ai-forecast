@@ -1,0 +1,55 @@
+{
+  "actions": {
+    "add": "Tambah",
+    "approve": "Setujui",
+    "cancel": "Batal",
+    "close": "Tutup",
+    "collapse": "Perkecil",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "expand": "Perbesar",
+    "new": "Baru",
+    "reject": "Tolak",
+    "save": "Simpan",
+    "submit": "Submit",
+    "view": "Lihat"
+  },
+  "state": {
+    "loading": "Memuat data...",
+    "emptyDash": "—",
+    "errorOccurred": "Terjadi kesalahan."
+  },
+  "error": {
+    "title": "Terjadi Kesalahan"
+  },
+  "pagination": {
+    "rowsPerPage": "Baris per halaman"
+  },
+  "table": {
+    "noData": "Belum ada data"
+  },
+  "validation": {
+    "requiredField": "{{field}} wajib diisi."
+  },
+  "dateRange": {
+    "title": "Pilih Periode",
+    "placeholder": "Pilih periode",
+    "startDate": "Tanggal Mulai",
+    "endDate": "Tanggal Akhir",
+    "presets": {
+      "today": "Hari Ini",
+      "thisWeek": "Minggu Ini",
+      "thisMonth": "Bulan Ini",
+      "lastMonth": "Bulan Lalu",
+      "thisYear": "Tahun Ini",
+      "lastYear": "Tahun Lalu"
+    },
+    "actions": {
+      "apply": "Terapkan",
+      "reset": "Reset"
+    },
+    "errors": {
+      "endBeforeStart": "Tanggal akhir harus setelah tanggal mulai."
+    }
+  }
+}

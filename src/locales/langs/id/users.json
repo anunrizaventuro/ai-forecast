@@ -1,0 +1,79 @@
+{
+  "title": "Pengguna",
+  "buttons": {
+    "new": "Pengguna"
+  },
+  "statuses": {
+    "active": "Aktif",
+    "inactive": "Tidak Aktif"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Cari nama, email, atau username..."
+  },
+  "table": {
+    "name": "Nama",
+    "email": "Email",
+    "role": "Role",
+    "branches": "Cabang",
+    "status": "Status",
+    "actions": "Aksi"
+  },
+  "form": {
+    "newTitle": "Tambah Pengguna",
+    "editTitle": "Ubah Pengguna {{name}}",
+    "fullName": "Nama Lengkap",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "passwordHint": "Minimal 8 karakter.",
+    "phone": "Telepon",
+    "role": "Role",
+    "companyAccess": "Akses Perusahaan",
+    "companyAccessHint": "Pilih perusahaan yang bisa diakses pengguna.",
+    "searchCompany": "Cari perusahaan",
+    "notFound": "Tidak ditemukan",
+    "companyOwnedHint": "Pengguna adalah pemilik perusahaan ini dan tidak bisa dilepas.",
+    "companyOwnerLabel": "pemilik",
+    "companyRequired": "Pilih minimal satu perusahaan.",
+    "branchScoping": "Akses Cabang",
+    "branchScopingHint": "Pilih cabang yang bisa diakses pengguna. Kosongkan untuk akses semua cabang pada perusahaan terpilih.",
+    "branchScopingEmpty": "Pilih perusahaan terlebih dahulu untuk menampilkan cabang.",
+    "branchScopingNoResult": "Tidak ada cabang yang cocok.",
+    "searchBranch": "Cari cabang",
+    "isActive": "Aktif"
+  },
+  "validation": {
+    "emailInvalid": "Email tidak valid.",
+    "usernameMin": "Username minimal 3 karakter.",
+    "usernameMax": "Username maksimal 100 karakter.",
+    "usernameFormat": "Username hanya boleh berisi huruf, angka, dan underscore.",
+    "passwordMin": "Password minimal 8 karakter."
+  },
+  "delete": {
+    "title": "Hapus Pengguna",
+    "message": "Pengguna {{name}} akan dihapus."
+  },
+  "detail": {
+    "title": "Detail Pengguna",
+    "lastLogin": "Login Terakhir",
+    "allBranches": "Semua cabang"
+  },
+  "rowActions": {
+    "viewDetail": "Lihat Detail",
+    "edit": "Ubah",
+    "delete": "Hapus"
+  },
+  "list": {
+    "emptyTitle": "Belum ada pengguna",
+    "emptySubtitle": "Klik \"Pengguna\" untuk membuat pengguna baru."
+  },
+  "feedback": {
+    "saved": "Pengguna {{name}} tersimpan.",
+    "deleted": "Pengguna dihapus."
+  },
+  "errors": {
+    "loadData": "Gagal memuat pengguna.",
+    "saveFailed": "Gagal menyimpan pengguna.",
+    "deleteFailed": "Gagal menghapus pengguna."
+  }
+}

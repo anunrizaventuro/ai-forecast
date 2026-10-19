@@ -1,0 +1,79 @@
+{
+  "title": "Users",
+  "buttons": {
+    "new": "User"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search name, email, or username..."
+  },
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "branches": "Branches",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "form": {
+    "newTitle": "Add User",
+    "editTitle": "Edit User {{name}}",
+    "fullName": "Full Name",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "passwordHint": "Minimum 8 characters.",
+    "phone": "Phone",
+    "role": "Role",
+    "companyAccess": "Company Access",
+    "companyAccessHint": "Select companies the user can access.",
+    "searchCompany": "Search company",
+    "notFound": "Not found",
+    "companyOwnedHint": "User is the owner of this company and cannot be removed.",
+    "companyOwnerLabel": "owner",
+    "companyRequired": "Select at least one company.",
+    "branchScoping": "Branch Access",
+    "branchScopingHint": "Select branches the user can access. Leave empty for all branches of selected companies.",
+    "branchScopingEmpty": "Select a company first to display branches.",
+    "branchScopingNoResult": "No matching branches.",
+    "searchBranch": "Search branch",
+    "isActive": "Active"
+  },
+  "validation": {
+    "emailInvalid": "Invalid email address.",
+    "usernameMin": "Username must be at least 3 characters.",
+    "usernameMax": "Username must be at most 100 characters.",
+    "usernameFormat": "Username can only contain letters, digits, and underscores.",
+    "passwordMin": "Password must be at least 8 characters."
+  },
+  "delete": {
+    "title": "Delete User",
+    "message": "User {{name}} will be deleted."
+  },
+  "detail": {
+    "title": "User Detail",
+    "lastLogin": "Last Login",
+    "allBranches": "All branches"
+  },
+  "rowActions": {
+    "viewDetail": "View Detail",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "list": {
+    "emptyTitle": "No users yet",
+    "emptySubtitle": "Click \"User\" to create a new user."
+  },
+  "feedback": {
+    "saved": "User {{name}} saved.",
+    "deleted": "User deleted."
+  },
+  "errors": {
+    "loadData": "Failed to load users.",
+    "saveFailed": "Failed to save user.",
+    "deleteFailed": "Failed to delete user."
+  }
+}

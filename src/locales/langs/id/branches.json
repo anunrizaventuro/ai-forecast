@@ -1,0 +1,64 @@
+{
+  "title": "Cabang",
+  "buttons": {
+    "new": "Cabang"
+  },
+  "default": "Default",
+  "statuses": {
+    "active": "Aktif",
+    "inactive": "Tidak Aktif"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Cari nama cabang..."
+  },
+  "table": {
+    "code": "Kode",
+    "name": "Nama",
+    "sort": "Urutan",
+    "status": "Status",
+    "actions": "Aksi"
+  },
+  "form": {
+    "newTitle": "Tambah Cabang",
+    "editTitle": "Ubah Cabang {{name}}",
+    "name": "Nama Cabang",
+    "code": "Kode",
+    "codeHint": "Kosongkan untuk auto-generate (CB0001, CB0002, ...).",
+    "codeImmutable": "Tidak bisa diubah setelah dibuat.",
+    "sort": "Urutan",
+    "logoUrl": "URL Logo",
+    "isActive": "Aktif",
+    "isDefault": "Default"
+  },
+  "validation": {
+    "nameMin": "Nama minimal 2 karakter.",
+    "nameMax": "Nama maksimal 255 karakter.",
+    "logoMax": "URL logo maksimal 500 karakter.",
+    "logoUrl": "URL logo tidak valid."
+  },
+  "delete": {
+    "title": "Hapus Cabang",
+    "message": "Cabang {{name}} akan dihapus."
+  },
+  "detail": {
+    "title": "Detail Cabang"
+  },
+  "rowActions": {
+    "viewDetail": "Lihat Detail",
+    "edit": "Ubah",
+    "delete": "Hapus"
+  },
+  "list": {
+    "emptyTitle": "Belum ada cabang",
+    "emptySubtitle": "Klik \"Cabang\" untuk membuat cabang baru."
+  },
+  "feedback": {
+    "saved": "Cabang {{name}} tersimpan.",
+    "deleted": "Cabang dihapus."
+  },
+  "errors": {
+    "loadData": "Gagal memuat cabang.",
+    "saveFailed": "Gagal menyimpan cabang.",
+    "deleteFailed": "Gagal menghapus cabang."
+  }
+}

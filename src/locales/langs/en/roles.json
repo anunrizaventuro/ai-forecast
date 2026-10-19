@@ -1,0 +1,84 @@
+{
+  "title": "Roles",
+  "system": "System",
+  "buttons": {
+    "new": "Role"
+  },
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search role code or name..."
+  },
+  "table": {
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "permissions": "Permissions",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "form": {
+    "newTitle": "Add Role",
+    "editTitle": "Edit Role {{name}}",
+    "code": "Code",
+    "codeHint": "Format: lowercase, digits, underscore (e.g. finance_manager).",
+    "codeImmutable": "Cannot be changed after creation.",
+    "name": "Name",
+    "description": "Description",
+    "permissions": "Permissions",
+    "isActive": "Active"
+  },
+  "groups": {
+    "core": "Core",
+    "audit": "Audit"
+  },
+  "levels": {
+    "viewer": "Viewer",
+    "editor": "Editor",
+    "admin": "Admin"
+  },
+  "resources": {
+    "roles": "Roles",
+    "user-management": "User Management",
+    "branches": "Branches",
+    "companies": "Companies",
+    "company_users": "Company Membership",
+    "translation_overrides": "Translation Overrides",
+    "audit-log": "Audit Log"
+  },
+  "validation": {
+    "codeMin": "Code must be at least 2 characters.",
+    "codeMax": "Code must be at most 50 characters.",
+    "codeFormat": "Only lowercase, digits, and underscore allowed.",
+    "nameMin": "Name must be at least 2 characters.",
+    "nameMax": "Name must be at most 100 characters.",
+    "descMax": "Description must be at most 1000 characters."
+  },
+  "delete": {
+    "title": "Delete Role",
+    "message": "Role {{name}} will be deleted."
+  },
+  "detail": {
+    "title": "Role Detail"
+  },
+  "rowActions": {
+    "viewDetail": "View Detail",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "list": {
+    "emptyTitle": "No roles yet",
+    "emptySubtitle": "Click \"Role\" to create a new role."
+  },
+  "feedback": {
+    "saved": "Role {{name}} saved.",
+    "deleted": "Role deleted."
+  },
+  "errors": {
+    "loadData": "Failed to load roles.",
+    "saveFailed": "Failed to save role.",
+    "deleteFailed": "Failed to delete role."
+  }
+}

@@ -36,7 +36,7 @@ const MuiDialogContent: Components<Theme>['MuiDialogContent'] = {
       padding: theme.spacing(0, 3),
     }),
     dividers: ({ theme }) => ({
-      borderTop: 0,
+      borderTopStyle: 'dashed',
       borderBottomStyle: 'dashed',
       paddingBottom: theme.spacing(3),
     }),

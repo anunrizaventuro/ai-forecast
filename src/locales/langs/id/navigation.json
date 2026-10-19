@@ -1,0 +1,31 @@
+{
+  "home": "Beranda",
+  "dashboards": {
+    "finance": "Keuangan",
+    "monitoring": "Monitoring",
+    "sales": "Penjualan"
+  },
+  "settings": {
+    "root": "Pengaturan",
+    "branches": "Cabang",
+    "roles": "Roles",
+    "users": "Pengguna",
+    "translationOverride": "Kustomisasi Istilah"
+  },
+  "account": {
+    "profile": "Profil",
+    "theme": "Tema",
+    "logout": "Keluar",
+    "logoutConfirm": {
+      "title": "Konfirmasi Keluar",
+      "description": "Apakah Anda yakin ingin keluar dari aplikasi?",
+      "confirm": "Keluar"
+    },
+    "notifications": {
+      "title": "Notifikasi",
+      "empty": "Belum ada notifikasi.",
+      "markAllRead": "Tandai semua dibaca",
+      "seeAll": "Lihat semua notifikasi"
+    }
+  }
+}

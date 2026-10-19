@@ -1,0 +1,80 @@
+{
+  "title": "Kustomisasi Istilah",
+  "subtitle": "Ganti label bawaan dengan istilah yang sesuai dengan organisasi Anda.",
+  "subtitleWithCount": "{{custom}} dari {{total}} istilah dikustomisasi.",
+  "newOverride": "Kustomisasi Istilah",
+  "editOverride": "Ubah Kustomisasi",
+  "badge": {
+    "custom": "Kustom",
+    "default": "Bawaan"
+  },
+  "table": {
+    "module": "Modul",
+    "default": "Istilah Bawaan",
+    "custom": "Istilah Kustom"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Cari istilah, kunci, atau catatan...",
+    "namespace": "Modul",
+    "allNamespaces": "Semua Modul",
+    "status": "Status",
+    "allStatus": "Semua",
+    "statusCustom": "Hanya Kustom",
+    "statusDefault": "Hanya Bawaan",
+    "noNamespaceFound": "Modul tidak ditemukan"
+  },
+  "namespaces": {
+    "branches": "Cabang",
+    "common": "Umum",
+    "home": "Beranda",
+    "messages": "Pesan Sistem",
+    "navigation": "Menu Navigasi",
+    "roles": "Role",
+    "translation-override": "Kustomisasi Istilah",
+    "users": "Pengguna"
+  },
+  "rowActions": {
+    "edit": "Ubah",
+    "customize": "Kustomisasi",
+    "reset": "Kembalikan ke Bawaan"
+  },
+  "form": {
+    "keyLabel": "Kunci Istilah",
+    "defaultId": "Bawaan (Indonesia)",
+    "defaultEn": "Bawaan (English)",
+    "value": "Istilah Kustom",
+    "valuePlaceholder": "Contoh: Pelanggan",
+    "valueHint": "Nilai ini akan dipakai di seluruh aplikasi menggantikan teks bawaan.",
+    "notes": "Catatan",
+    "notesPlaceholder": "Opsional: alasan perubahan...",
+    "notesHint": "Catatan internal — tidak ditampilkan ke pengguna."
+  },
+  "validation": {
+    "keyRequired": "Kunci istilah wajib diisi.",
+    "valueRequired": "Istilah kustom wajib diisi.",
+    "valueMax": "Istilah kustom maksimal 500 karakter.",
+    "notesMax": "Catatan maksimal 500 karakter."
+  },
+  "confirm": {
+    "reset": {
+      "title": "Kembalikan ke Bawaan",
+      "desc": "Hapus istilah kustom <strong>{{value}}</strong>? Label akan kembali ke teks bawaan.",
+      "confirm": "Kembalikan"
+    }
+  },
+  "list": {
+    "emptyTitle": "Tidak ada istilah ditemukan",
+    "emptySubtitle": "Coba ubah kata kunci pencarian atau filter."
+  },
+  "feedback": {
+    "created": "Kustomisasi istilah disimpan.",
+    "updated": "Kustomisasi istilah diperbarui.",
+    "reset": "Istilah dikembalikan ke bawaan.",
+    "saveFailed": "Gagal menyimpan kustomisasi.",
+    "actionFailed": "Aksi gagal."
+  },
+  "errors": {
+    "loadData": "Gagal memuat data kustomisasi istilah.",
+    "noClient": "Tidak ada client aktif. Tidak dapat mengelola kustomisasi istilah."
+  }
+}

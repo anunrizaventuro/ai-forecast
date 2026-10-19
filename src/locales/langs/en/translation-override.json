@@ -1,0 +1,80 @@
+{
+  "title": "Term Customization",
+  "subtitle": "Replace default labels with terms that fit your organization.",
+  "subtitleWithCount": "{{custom}} of {{total}} terms customized.",
+  "newOverride": "Customize Term",
+  "editOverride": "Edit Customization",
+  "badge": {
+    "custom": "Custom",
+    "default": "Default"
+  },
+  "table": {
+    "module": "Module",
+    "default": "Default Term",
+    "custom": "Custom Term"
+  },
+  "toolbar": {
+    "searchPlaceholder": "Search term, key, or note...",
+    "namespace": "Module",
+    "allNamespaces": "All Modules",
+    "status": "Status",
+    "allStatus": "All",
+    "statusCustom": "Custom Only",
+    "statusDefault": "Default Only",
+    "noNamespaceFound": "Module not found"
+  },
+  "namespaces": {
+    "branches": "Branches",
+    "common": "Common",
+    "home": "Home",
+    "messages": "System Messages",
+    "navigation": "Navigation Menu",
+    "roles": "Roles",
+    "translation-override": "Term Customization",
+    "users": "Users"
+  },
+  "rowActions": {
+    "edit": "Edit",
+    "customize": "Customize",
+    "reset": "Reset to Default"
+  },
+  "form": {
+    "keyLabel": "Translation Key",
+    "defaultId": "Default (Indonesia)",
+    "defaultEn": "Default (English)",
+    "value": "Custom Term",
+    "valuePlaceholder": "Example: Customer",
+    "valueHint": "This value replaces the default text app-wide.",
+    "notes": "Notes",
+    "notesPlaceholder": "Optional: reason for the change...",
+    "notesHint": "Internal note — not shown to users."
+  },
+  "validation": {
+    "keyRequired": "Translation key is required.",
+    "valueRequired": "Custom term is required.",
+    "valueMax": "Custom term must be at most 500 characters.",
+    "notesMax": "Notes must be at most 500 characters."
+  },
+  "confirm": {
+    "reset": {
+      "title": "Reset to Default",
+      "desc": "Remove the custom term <strong>{{value}}</strong>? The label will revert to the default text.",
+      "confirm": "Reset"
+    }
+  },
+  "list": {
+    "emptyTitle": "No terms found",
+    "emptySubtitle": "Try adjusting your search keyword or filter."
+  },
+  "feedback": {
+    "created": "Term customization saved.",
+    "updated": "Term customization updated.",
+    "reset": "Term reverted to default.",
+    "saveFailed": "Failed to save customization.",
+    "actionFailed": "Action failed."
+  },
+  "errors": {
+    "loadData": "Failed to load term customizations.",
+    "noClient": "No active client. Cannot manage term customizations."
+  }
+}

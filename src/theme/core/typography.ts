@@ -1,6 +1,6 @@
 import type { Breakpoint, TypographyVariantsOptions } from '@mui/material/styles';
 
-import { pxToRem } from 'minimal-shared/utils';
+import { pxToRem, setFont } from 'minimal-shared/utils';
 
 import { createTheme } from '@mui/material/styles';
 
@@ -47,13 +47,8 @@ function responsiveFontSizes(sizes: FontSizesInput): FontSizesResult {
 
 // ----------------------------------------------------------------------
 
-// setFont() dari minimal-shared membungkus nama dengan kutip — tidak valid
-// untuk var() dari next/font, jadi fallback stack dirakit langsung di sini.
-const FONT_FALLBACK =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-
-const primaryFont = `${themeConfig.fontFamily.primary}, ${FONT_FALLBACK}`;
-const secondaryFont = `${themeConfig.fontFamily.secondary}, ${FONT_FALLBACK}`;
+const primaryFont = setFont(themeConfig.fontFamily.primary);
+const secondaryFont = setFont(themeConfig.fontFamily.secondary);
 
 const baseTypography: TypographyVariantsOptions = {
   fontFamily: primaryFont,

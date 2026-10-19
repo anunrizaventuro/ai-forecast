@@ -1,7 +1,12 @@
-'use client';
+import 'dayjs/locale/id';
+import 'dayjs/locale/en';
+
+import dayjs from 'dayjs';
 
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider as Provider } from '@mui/x-date-pickers/LocalizationProvider';
+
+import { useTranslate } from './use-locales';
 
 // ----------------------------------------------------------------------
 
@@ -10,5 +15,13 @@ type Props = {
 };
 
 export function LocalizationProvider({ children }: Props) {
-  return <Provider dateAdapter={AdapterDayjs}>{children}</Provider>;
+  const { currentLang } = useTranslate();
+
+  dayjs.locale(currentLang.adapterLocale);
+
+  return (
+    <Provider dateAdapter={AdapterDayjs} adapterLocale={currentLang.adapterLocale}>
+      {children}
+    </Provider>
+  );
 }

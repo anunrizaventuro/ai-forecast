@@ -1,25 +1,21 @@
-'use client';
-
 import type { Breakpoint } from '@mui/material/styles';
 import type { SimpleCompactContentProps } from './content';
-import type { MainSectionProps } from '../core/main-section';
-import type { HeaderSectionProps } from '../core/header-section';
-import type { LayoutSectionProps } from '../core/layout-section';
+import type { MainSectionProps, HeaderSectionProps, LayoutSectionProps } from '../core';
 
 import { merge } from 'es-toolkit';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
+import Alert from '@mui/material/Alert';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { Logo } from 'src/components/logo';
+import { BrandLogo } from 'src/shared/ui/logo';
 
 import { SimpleCompactContent } from './content';
-import { MainSection } from '../core/main-section';
-import { LayoutSection } from '../core/layout-section';
-import { HeaderSection } from '../core/header-section';
+import { SettingsButton } from '../components/settings-button';
+import { MainSection, LayoutSection, HeaderSection } from '../core';
 
 // ----------------------------------------------------------------------
 
@@ -45,23 +41,26 @@ export function SimpleLayout({
     const headerSlotProps: HeaderSectionProps['slotProps'] = { container: { maxWidth: false } };
 
     const headerSlots: HeaderSectionProps['slots'] = {
-      leftArea: (
-        <>
-          {/** @slot Logo */}
-          <Logo />
-        </>
+      topArea: (
+        <Alert severity="info" sx={{ display: 'none', borderRadius: 0 }}>
+          This is an info Alert.
+        </Alert>
       ),
+      leftArea: <BrandLogo />,
       rightArea: (
-        <Box sx={{ gap: 1, display: 'flex', alignItems: 'center' }}>
-          {/** @slot Dashboard link */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+          {/** @slot Help link */}
           <Link
+            href={paths.faqs}
             component={RouterLink}
-            href={paths.dashboard.root}
             color="inherit"
             sx={{ typography: 'subtitle2' }}
           >
-            Dashboard
+            Need help?
           </Link>
+
+          {/** @slot Settings button */}
+          <SettingsButton />
         </Box>
       ),
     };

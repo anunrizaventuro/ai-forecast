@@ -1,0 +1,29 @@
+{
+  "types": {
+    "holding": "Holding",
+    "subsidiary": "Subsidiary"
+  },
+  "form": {
+    "newTitle": "New Company",
+    "editTitle": "Edit Company {{name}}",
+    "name": "Company Name",
+    "type": "Type",
+    "parent": "Parent Company",
+    "parentImmutable": "Cannot be changed after creation.",
+    "parentHint": "Leave empty for a top-level (holding) company.",
+    "noParent": "— No parent —",
+    "logoUrl": "Logo URL"
+  },
+  "validation": {
+    "nameMin": "Name must be at least 2 characters.",
+    "nameMax": "Name must be at most 255 characters.",
+    "logoMax": "Logo URL must be at most 500 characters.",
+    "logoUrl": "Invalid logo URL."
+  },
+  "feedback": {
+    "saved": "Company {{name}} saved."
+  },
+  "errors": {
+    "saveFailed": "Failed to save company."
+  }
+}

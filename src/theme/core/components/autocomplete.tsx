@@ -28,6 +28,7 @@ const MuiAutocomplete: Components<Theme>['MuiAutocomplete'] = {
   // ▼▼▼▼▼▼▼▼ ⚙️ PROPS ▼▼▼▼▼▼▼▼
   defaultProps: {
     popupIcon: <ArrowDownIcon />,
+    size: 'small',
   },
   // ▼▼▼▼▼▼▼▼ 🎨 STYLE ▼▼▼▼▼▼▼▼
   styleOverrides: {

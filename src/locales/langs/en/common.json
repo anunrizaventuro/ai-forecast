@@ -1,0 +1,55 @@
+{
+  "actions": {
+    "add": "Add",
+    "approve": "Approve",
+    "cancel": "Cancel",
+    "close": "Close",
+    "collapse": "Collapse",
+    "delete": "Delete",
+    "edit": "Edit",
+    "expand": "Expand",
+    "new": "New",
+    "reject": "Reject",
+    "save": "Save",
+    "submit": "Submit",
+    "view": "View"
+  },
+  "state": {
+    "loading": "Loading data...",
+    "emptyDash": "—",
+    "errorOccurred": "An error occurred."
+  },
+  "error": {
+    "title": "An Error Occurred"
+  },
+  "pagination": {
+    "rowsPerPage": "Rows per page"
+  },
+  "table": {
+    "noData": "No data yet"
+  },
+  "validation": {
+    "requiredField": "{{field}} is required."
+  },
+  "dateRange": {
+    "title": "Select Period",
+    "placeholder": "Select period",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "presets": {
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "lastMonth": "Last Month",
+      "thisYear": "This Year",
+      "lastYear": "Last Year"
+    },
+    "actions": {
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "errors": {
+      "endBeforeStart": "End date must be after start date."
+    }
+  }
+}

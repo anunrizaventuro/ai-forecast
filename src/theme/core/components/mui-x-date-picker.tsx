@@ -4,6 +4,7 @@ import type { TextFieldProps } from '@mui/material/TextField';
 
 import SvgIcon from '@mui/material/SvgIcon';
 import { buttonClasses } from '@mui/material/Button';
+import { inputLabelClasses } from '@mui/material/InputLabel';
 import { pickersSectionListClasses } from '@mui/x-date-pickers/PickersSectionList';
 import {
   pickersInputBaseClasses,
@@ -98,7 +99,7 @@ const defaultProps = {
   tabs: { dateIcon: <CalendarIcon />, timeIcon: <ClockIcon /> },
   baseField: {
     slotProps: {
-      textField: { fullWidth: true } satisfies Partial<TextFieldProps>,
+      textField: { fullWidth: true, size: 'small' } satisfies Partial<TextFieldProps>,
     },
   },
 };
@@ -155,6 +156,22 @@ const inputComponents: Components<Theme> = {
   MuiPickersTextField: {
     defaultProps: {
       variant: 'outlined',
+      size: 'small',
+    },
+    styleOverrides: {
+      root: {
+        variants: [
+          {
+            props: (props) => !props.isFieldFocused && !props.isFieldValueEmpty,
+            style: {
+              [`& .${inputLabelClasses.root}[data-shrink="false"] + .${pickersInputBaseClasses.root} > .${pickersSectionListClasses.root}`]:
+                {
+                  opacity: 0,
+                },
+            },
+          },
+        ],
+      },
     },
   },
   MuiPickersInputBase: {
@@ -167,7 +184,16 @@ const inputComponents: Components<Theme> = {
       }),
       sectionsContainer: ({ theme }) => ({
         ...inputBaseStyles.input('picker', theme),
-        variants: [...inputBaseVariants.input],
+        variants: [
+          ...inputBaseVariants.input,
+          {
+            props: (props) => !props.isFieldFocused && !!props.isFieldValueEmpty,
+            style: {
+              opacity: 1,
+              color: theme.vars.palette.text.disabled,
+            },
+          },
+        ],
       }),
     },
   },

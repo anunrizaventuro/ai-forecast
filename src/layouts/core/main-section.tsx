@@ -1,5 +1,3 @@
-'use client';
-
 import { mergeClasses } from 'minimal-shared/utils';
 
 import { styled } from '@mui/material/styles';
@@ -12,14 +10,7 @@ export type MainSectionProps = React.ComponentProps<typeof MainRoot>;
 
 export function MainSection({ children, className, sx, ...other }: MainSectionProps) {
   return (
-    <MainRoot
-      // Target skip-link (lihat layout-section.tsx); tabIndex agar bisa difokus.
-      id="main-content"
-      tabIndex={-1}
-      className={mergeClasses([layoutClasses.main, className])}
-      sx={sx}
-      {...other}
-    >
+    <MainRoot className={mergeClasses([layoutClasses.main, className])} sx={sx} {...other}>
       {children}
     </MainRoot>
   );

@@ -1,48 +1,33 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 
-# ============================================================================
-# Build & run:  docker compose up -d --build
-# (manual:      docker build -t venturo-web . && docker run --env-file .env.prod -p 80:80 venturo-web)
-#
-# Env dibaca dari .env.prod DUA kali:
-#   1. Saat BUILD — di-copy jadi .env.production supaya NEXT_PUBLIC_* ter-inline
-#      ke bundle JS. Nilai ini dibekukan di image: ganti .env.prod ⇒ rebuild.
-#   2. Saat RUN   — env_file di docker-compose.yml untuk var server-only
-#      (API_URL, REVALIDATE_TOKEN) yang dibaca dari process.env saat runtime.
-# ============================================================================
-
-FROM node:22-alpine AS deps
+# ───── Stage 1: Build ─────
+FROM node:22-alpine AS build
 WORKDIR /app
-# HUSKY=0: skip git hooks di script `prepare` — tidak ada .git di dalam image
-ENV HUSKY=0
+
+# Manifest first — lets Docker reuse the install layer when only source changes
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
 
-FROM node:22-alpine AS builder
-WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    BUILD_STANDALONE=true \
-    HUSKY=0
-COPY --from=deps /app/node_modules ./node_modules
+# BuildKit cache mount keeps the yarn cache across builds
+RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
+    yarn install --frozen-lockfile --network-timeout 300000
+
 COPY . .
-# NEXT_PUBLIC_* wajib tersedia SAAT build (bukan runtime) — lihat catatan atas.
-# Validasi zod di src/lib/env.ts menggagalkan build bila ada var wajib kosong.
-RUN cp .env.prod .env.production && yarn build
 
-FROM node:22-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
-    PORT=80 \
-    HOSTNAME=0.0.0.0
-RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
-# Output standalone berisi server.js + hasil trace dependency minimum;
-# .next/static dan public TIDAK ikut otomatis — harus di-copy manual.
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-USER nextjs
+# Vite inlines env at build time — .env.prod is the source of truth for prod
+COPY .env.prod .env
+
+RUN yarn build
+
+# ───── Stage 2: Serve ─────
+FROM nginx:1.27-alpine AS runtime
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1
+
 EXPOSE 80
-# Non-root bind port 80 aman di Docker >= 20.10 (ip_unprivileged_port_start=0).
-# Di runtime lain (mis. k8s tanpa sysctl itu), override PORT ke >= 1024.
-CMD ["node", "server.js"]
+
+CMD ["nginx", "-g", "daemon off;"]

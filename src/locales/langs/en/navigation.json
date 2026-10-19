@@ -1,0 +1,31 @@
+{
+  "home": "Home",
+  "dashboards": {
+    "finance": "Finance",
+    "monitoring": "Monitoring",
+    "sales": "Sales"
+  },
+  "settings": {
+    "root": "Settings",
+    "branches": "Branches",
+    "roles": "Roles",
+    "users": "Users",
+    "translationOverride": "Term Customization"
+  },
+  "account": {
+    "profile": "Profile",
+    "theme": "Theme",
+    "logout": "Logout",
+    "logoutConfirm": {
+      "title": "Logout Confirmation",
+      "description": "Are you sure you want to log out?",
+      "confirm": "Logout"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No notifications yet.",
+      "markAllRead": "Mark all as read",
+      "seeAll": "See all notifications"
+    }
+  }
+}

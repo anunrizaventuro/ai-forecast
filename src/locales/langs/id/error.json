@@ -1,0 +1,8 @@
+{
+  "notFound": {
+    "title": "Maaf, halaman tidak ditemukan!",
+    "description": "Halaman yang Anda cari tidak dapat kami temukan. Mungkin URL yang Anda ketik salah? Pastikan ejaannya benar.",
+    "goHome": "Kembali ke beranda",
+    "pageTitle": "404 halaman tidak ditemukan!"
+  }
+}

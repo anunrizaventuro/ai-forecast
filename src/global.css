@@ -1,20 +1,26 @@
 /** **************************************
 * Fonts: app
 *************************************** */
+@import '@fontsource-variable/public-sans';
 
+@import '@fontsource/barlow/400.css';
+@import '@fontsource/barlow/500.css';
+@import '@fontsource/barlow/600.css';
+@import '@fontsource/barlow/700.css';
+@import '@fontsource/barlow/800.css';
 
 /** **************************************
 * Fonts: options
 *************************************** */
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/nunito-sans';
 
 /** **************************************
 * Plugins
 *************************************** */
 /* scrollbar */
-@import './components/scrollbar/styles.css';
-
-/* lightbox */
-@import './components/lightbox/styles.css';
+@import './shared/ui/scrollbar/styles.css';
 
 /** **************************************
 * Baseline

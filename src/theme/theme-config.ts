@@ -23,7 +23,7 @@ export const themeConfig: ThemeConfig = {
   /** **************************************
    * Base
    *************************************** */
-  defaultMode: 'light',
+  defaultMode: 'dark',
   modeStorageKey: 'theme-mode',
   direction: 'ltr',
   classesPrefix: 'minimal',
@@ -38,21 +38,19 @@ export const themeConfig: ThemeConfig = {
    * Typography
    *************************************** */
   fontFamily: {
-    // CSS variable dari next/font/local — didefinisikan di src/app/layout.tsx.
-    // Ganti font = ganti file woff2 di src/assets/fonts + definisi localFont.
-    primary: 'var(--font-dm-sans)',
-    secondary: 'var(--font-barlow)',
+    primary: 'Public Sans Variable',
+    secondary: 'Barlow',
   },
   /** **************************************
    * Palette
    *************************************** */
   palette: {
     primary: {
-      lighter: '#CDF1F6',
-      light: '#5BD0DD',
-      main: '#007F96',
-      dark: '#005B66',
-      darker: '#003A42',
+      lighter: '#C8FAD6',
+      light: '#5BE49B',
+      main: '#00A76F',
+      dark: '#007867',
+      darker: '#004B50',
       contrastText: '#FFFFFF',
     },
     secondary: {

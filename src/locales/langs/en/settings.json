@@ -1,0 +1,36 @@
+{
+  "title": "Settings",
+  "actions": {
+    "resetAll": "Reset all",
+    "close": "Close",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit"
+  },
+  "options": {
+    "mode": "Mode",
+    "system": "System",
+    "contrast": "Contrast",
+    "rightToLeft": "Right to left",
+    "compact": "Compact",
+    "compactTooltip": "Dashboard only and available at large resolutions > 1600px (xl)"
+  },
+  "sections": {
+    "presets": "Presets",
+    "nav": "Nav",
+    "navTooltip": "Dashboard only",
+    "font": "Font"
+  },
+  "labels": {
+    "layout": "Layout",
+    "color": "Color",
+    "family": "Family",
+    "size": "Size"
+  },
+  "navColors": {
+    "integrate": "Integrate",
+    "apparent": "Apparent"
+  },
+  "fontSize": {
+    "ariaLabel": "Change font size"
+  }
+}

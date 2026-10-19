@@ -1,0 +1,29 @@
+{
+  "types": {
+    "holding": "Holding",
+    "subsidiary": "Subsidiary"
+  },
+  "form": {
+    "newTitle": "Tambah Perusahaan",
+    "editTitle": "Ubah Perusahaan {{name}}",
+    "name": "Nama Perusahaan",
+    "type": "Tipe",
+    "parent": "Perusahaan Induk",
+    "parentImmutable": "Tidak bisa diubah setelah dibuat.",
+    "parentHint": "Kosongkan untuk perusahaan induk (holding).",
+    "noParent": "— Tanpa induk —",
+    "logoUrl": "URL Logo"
+  },
+  "validation": {
+    "nameMin": "Nama minimal 2 karakter.",
+    "nameMax": "Nama maksimal 255 karakter.",
+    "logoMax": "URL logo maksimal 500 karakter.",
+    "logoUrl": "URL logo tidak valid."
+  },
+  "feedback": {
+    "saved": "Perusahaan {{name}} tersimpan."
+  },
+  "errors": {
+    "saveFailed": "Gagal menyimpan perusahaan."
+  }
+}

@@ -27,7 +27,8 @@ const MuiListItemText: Components<Theme>['MuiListItemText'] = {
   // ▼▼▼▼▼▼▼▼ ⚙️ PROPS ▼▼▼▼▼▼▼▼
   defaultProps: {
     slotProps: {
-      primary: { sx: { typography: 'subtitle2' } },
+      primary: { typography: 'subtitle2' },
+      secondary: { component: 'span' },
     },
   },
   // ▼▼▼▼▼▼▼▼ 🎨 STYLE ▼▼▼▼▼▼▼▼
