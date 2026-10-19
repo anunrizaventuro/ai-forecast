@@ -49,9 +49,7 @@
     "@mui/material": "^7.3.6",
     "@mui/stylis-plugin-rtl": "^7.3.6",
     "@mui/x-charts": "^9.0.2",
-    "@mui/x-data-grid": "^8.22.0",
     "@mui/x-date-pickers": "^8.22.0",
-    "@mui/x-tree-view": "^8.22.0",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
@@ -61,7 +59,6 @@
     "i18next": "^25.7.2",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-resources-to-backend": "^1.2.1",
-    "lightweight-charts": "^5.2.0",
     "minimal-shared": "^1.1.5",
     "nprogress": "^0.2.0",
     "react": "^19.2.3",
@@ -72,7 +69,6 @@
     "simplebar-react": "^3.3.2",
     "sonner": "^2.0.7",
     "stylis": "^4.3.6",
-    "yet-another-react-lightbox": "^3.31.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {

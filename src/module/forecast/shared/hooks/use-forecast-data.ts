@@ -65,6 +65,28 @@ export type ForecastResult<T> = {
 
 const noop = () => undefined;
 
+// Hasil simulasi di-cache per sesi (generator deterministik, key memuat seluruh
+// input termasuk parameter rekomendasi) supaya pindah halaman / buka drawer lagi
+// tidak menghitung ulang. Dibatasi agar tidak tumbuh tanpa batas.
+const SIMULATED_CACHE_LIMIT = 50;
+const simulatedCache = new Map<string, unknown>();
+
+function simulateCached<T>(keyString: string, simulate: () => T): T {
+  if (simulatedCache.has(keyString)) {
+    const hit = simulatedCache.get(keyString) as T;
+    // LRU: pindahkan ke belakang.
+    simulatedCache.delete(keyString);
+    simulatedCache.set(keyString, hit);
+    return hit;
+  }
+  const value = simulate();
+  simulatedCache.set(keyString, value);
+  if (simulatedCache.size > SIMULATED_CACHE_LIMIT) {
+    simulatedCache.delete(simulatedCache.keys().next().value!);
+  }
+  return value;
+}
+
 function useForecastSource<T>(
   queryKey: readonly unknown[],
   fetcher: (signal: AbortSignal) => Promise<T>,
@@ -75,7 +97,7 @@ function useForecastSource<T>(
 
   const keyString = JSON.stringify(queryKey);
   const simulated = useMemo(
-    () => (IS_API || !enabled ? undefined : simulate()),
+    () => (IS_API || !enabled ? undefined : simulateCached(keyString, simulate)),
     // Key sudah memuat seluruh input simulasi.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [keyString, enabled]

@@ -1,5 +1,7 @@
 import type { CellSummary, SeriesPoint } from 'src/module/forecast/shared/types';
 
+import { useMemo } from 'react';
+
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -28,7 +30,14 @@ type Props = {
 
 export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
   const colors = useSeriesColors();
-  const trend = (key: 'kirim' | 'estSold' | 'bs') => points?.map((point) => point[key]);
+  const sparks = useMemo(
+    () => ({
+      kirim: points?.map((point) => point.kirim),
+      estSold: points?.map((point) => point.estSold),
+      bs: points?.map((point) => point.bs),
+    }),
+    [points]
+  );
   const size = { xs: 12, sm: 6, lg: hideSalesValue ? 4 : 3 };
 
   return (
@@ -41,7 +50,7 @@ export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
           caption={`${fNumber(summary.visits)} kunjungan ke ${fNumber(summary.stores)} toko`}
           icon="carbon:delivery"
           accentColor={colors.kirim}
-          spark={trend('kirim')}
+          spark={sparks.kirim}
         />
       </Grid>
       <Grid size={size}>
@@ -53,7 +62,7 @@ export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
           caption={`${fPercent(summary.sellThrough)} dari kiriman sebelumnya laku`}
           icon="carbon:chart-average"
           accentColor={colors.estSold}
-          spark={trend('estSold')}
+          spark={sparks.estSold}
         />
       </Grid>
       <Grid size={size}>
@@ -64,7 +73,7 @@ export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
           caption={`Rasio retur ${fPercent(summary.returnRate)} dari kiriman sebelumnya`}
           icon="carbon:arrow-down"
           accentColor={colors.bs}
-          spark={trend('bs')}
+          spark={sparks.bs}
         />
       </Grid>
       {!hideSalesValue && (

@@ -3,6 +3,8 @@ import type { SeriesKey } from './forecast-chart-colors';
 import type { TrendSeries } from './forecast-trend-chart';
 import type { Granularity, SeriesPoint } from 'src/module/forecast/shared/types';
 
+import { useMemo } from 'react';
+
 import CardContent from '@mui/material/CardContent';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
@@ -33,10 +35,17 @@ export function ForecastTrendCard({
   height,
   ...other
 }: Props) {
-  const series: TrendSeries[] = seriesKeys.map((key) => ({
-    key,
-    values: points.map((point) => point[key]),
-  }));
+  // `seriesKeys` biasanya literal array dari pemanggil — memo pada isinya, bukan identitasnya.
+  const keys = seriesKeys.join();
+  const series: TrendSeries[] = useMemo(
+    () =>
+      (keys.split(',') as SeriesKey[]).map((key) => ({
+        key,
+        values: points.map((point) => point[key]),
+      })),
+    [points, keys]
+  );
+  const categories = useMemo(() => points.map((point) => point.label), [points]);
 
   return (
     <ChartCard
@@ -60,7 +69,7 @@ export function ForecastTrendCard({
     >
       <CardContent>
         <ForecastTrendChart
-          categories={points.map((point) => point.label)}
+          categories={categories}
           series={series}
           height={height}
           ariaLabel={`${title}. Gunakan panah kiri dan kanan untuk membaca nilai per titik.`}

@@ -1,6 +1,8 @@
 import type { CardProps } from '@mui/material/Card';
 import type { Recommendation } from 'src/module/forecast/shared/types';
 
+import { useMemo } from 'react';
+
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
@@ -45,15 +47,19 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export function DashboardRecommendationSummary({ recommendations, asOf, ...other }: Props) {
   const theme = useTheme();
   const { storeMap } = useForecastMeta();
-  const summary = summarizeRecommendations(recommendations);
+  const summary = useMemo(() => summarizeRecommendations(recommendations), [recommendations]);
 
   const totalDelta = summary.totalRecommended - summary.totalLast;
   const totalRatio = summary.totalLast ? totalDelta / summary.totalLast : null;
 
-  const biggestChanges = recommendations
-    .filter((r) => !r.excluded && r.delta && !r.signals.includes('pencilan'))
-    .sort((a, b) => Math.abs(b.delta ?? 0) - Math.abs(a.delta ?? 0))
-    .slice(0, 6);
+  const biggestChanges = useMemo(
+    () =>
+      recommendations
+        .filter((r) => !r.excluded && r.delta && !r.signals.includes('pencilan'))
+        .sort((a, b) => Math.abs(b.delta ?? 0) - Math.abs(a.delta ?? 0))
+        .slice(0, 6),
+    [recommendations]
+  );
 
   const { palette } = theme.vars;
 

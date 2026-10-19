@@ -1,5 +1,7 @@
 import type { Recommendation } from 'src/module/forecast/shared/types';
 
+import { useMemo } from 'react';
+
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
@@ -13,9 +15,9 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 
 import { Iconify } from 'src/shared/ui/iconify';
 import { TableHeadCustom } from 'src/shared/ui/table';
-import { useForecastMeta } from 'src/module/forecast/shared/hooks';
 import { RecommendationDelta } from 'src/module/forecast/shared/components';
 import { fNumber, summarizeRecommendations } from 'src/module/forecast/shared/utils';
+import { useForecastMeta, useRecommendationParams } from 'src/module/forecast/shared/hooks';
 
 import {
   ReturnCell,
@@ -41,8 +43,7 @@ type Props = {
 };
 
 export function RecommendationGroup({ title, subtitle, meta, rows, rowLabel }: Props) {
-  const { storeMap, productMap } = useForecastMeta();
-  const summary = summarizeRecommendations(rows);
+  const summary = useMemo(() => summarizeRecommendations(rows), [rows]);
   const showNextVisit = rowLabel === 'store';
 
   const head = [
@@ -134,59 +135,81 @@ export function RecommendationGroup({ title, subtitle, meta, rows, rowLabel }: P
                 sx: { whiteSpace: 'nowrap', ...(index === 0 && { pl: { xs: 2, md: 3 } }) },
               }))}
             />
-            <TableBody>
-              {rows.map((row) => {
-                const store = storeMap.get(row.nit);
-                const product = productMap.get(row.product);
-
-                return (
-                  <TableRow key={`${row.nit}-${row.product}`} hover>
-                    <TableCell sx={{ pl: { xs: 2, md: 3 } }}>
-                      {rowLabel === 'product' ? (
-                        <>
-                          <Typography variant="subtitle2">{row.product}</Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            {product?.nama ?? '–'}
-                          </Typography>
-                        </>
-                      ) : (
-                        <>
-                          <Typography variant="subtitle2" noWrap sx={{ maxWidth: 220 }}>
-                            {store?.nama ?? 'Di luar master'}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            {row.nit} · {store?.kec ? `Kec. ${store.kec}` : 'kec tidak diketahui'}
-                          </Typography>
-                        </>
-                      )}
-                    </TableCell>
-                    <TableCell align="right">
-                      <LastKirimCell row={row} />
-                    </TableCell>
-                    <TableCell align="right">
-                      <EstSoldCell row={row} />
-                    </TableCell>
-                    <TableCell align="right">
-                      <ReturnCell row={row} />
-                    </TableCell>
-                    <TableCell align="right">
-                      <RecommendedCell row={row} />
-                    </TableCell>
-                    <TableCell>
-                      <ConfidenceCell row={row} />
-                    </TableCell>
-                    {showNextVisit && (
-                      <TableCell>
-                        <NextVisitCell row={row} />
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+            <RecommendationGroupRows
+              rows={rows}
+              rowLabel={rowLabel}
+              showNextVisit={showNextVisit}
+            />
           </Table>
         </TableContainer>
       </AccordionDetails>
     </Accordion>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+type RowsProps = Pick<Props, 'rows' | 'rowLabel'> & { showNextVisit: boolean };
+
+/**
+ * Baris tabel grup — hanya ter-mount saat accordion dibuka (`unmountOnExit`),
+ * jadi master & parameter aturan dibaca sekali per grup terbuka, bukan per
+ * grup tertutup atau per baris.
+ */
+function RecommendationGroupRows({ rows, rowLabel, showNextVisit }: RowsProps) {
+  const { storeMap, productMap } = useForecastMeta();
+  const { params } = useRecommendationParams();
+
+  return (
+    <TableBody>
+      {rows.map((row) => {
+        const store = storeMap.get(row.nit);
+        const product = productMap.get(row.product);
+
+        return (
+          <TableRow key={`${row.nit}-${row.product}`} hover>
+            <TableCell sx={{ pl: { xs: 2, md: 3 } }}>
+              {rowLabel === 'product' ? (
+                <>
+                  <Typography variant="subtitle2">{row.product}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    {product?.nama ?? '–'}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography variant="subtitle2" noWrap sx={{ maxWidth: 220 }}>
+                    {store?.nama ?? 'Di luar master'}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                    {row.nit} · {store?.kec ? `Kec. ${store.kec}` : 'kec tidak diketahui'}
+                  </Typography>
+                </>
+              )}
+            </TableCell>
+            <TableCell align="right">
+              <LastKirimCell row={row} />
+            </TableCell>
+            <TableCell align="right">
+              <EstSoldCell row={row} />
+            </TableCell>
+            <TableCell align="right">
+              <ReturnCell row={row} />
+            </TableCell>
+            <TableCell align="right">
+              <RecommendedCell row={row} params={params} />
+            </TableCell>
+            <TableCell>
+              <ConfidenceCell row={row} />
+            </TableCell>
+            {showNextVisit && (
+              <TableCell>
+                <NextVisitCell row={row} />
+              </TableCell>
+            )}
+          </TableRow>
+        );
+      })}
+    </TableBody>
   );
 }

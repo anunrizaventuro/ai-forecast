@@ -4,7 +4,6 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import { CONFIG } from 'src/shared/config';
 import { configureAxiosAuth } from 'src/shared/lib/axios';
-import { getGoogleIdToken } from 'src/shared/lib/firebase';
 import { invalidateAllCompanyCaches } from 'src/shared/lib/cache-registry';
 
 import * as authApi from '../../api';
@@ -172,6 +171,8 @@ export function AuthProvider({ children }: Props) {
   );
 
   const signInWithGoogle = useCallback(async () => {
+    // Dinamis: SDK firebase (~100 kB) hanya dimuat saat login Google dipakai.
+    const { getGoogleIdToken } = await import('src/shared/lib/firebase');
     const idToken = await getGoogleIdToken();
     const res = await authApi.signInWithGoogle({ id_token: idToken });
     setTokens(res.access_token, res.refresh_token);

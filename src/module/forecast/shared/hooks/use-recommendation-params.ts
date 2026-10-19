@@ -92,6 +92,8 @@ export function useRecommendationParams(): RecommendationParamsResult {
       enabled: IS_API,
       // 404 = backend belum punya endpoint pengaturan — jangan di-retry.
       retry: (count, error) => apiErrorStatus(error) !== 404 && count < 1,
+      // ...dan jangan diminta ulang di setiap mount (hook ini dipakai banyak komponen).
+      cacheError: (error) => apiErrorStatus(error) === 404,
     }
   );
 

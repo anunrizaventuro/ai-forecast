@@ -2,6 +2,7 @@
   "actions": {
     "add": "Tambah",
     "approve": "Setujui",
+    "back": "Kembali",
     "cancel": "Batal",
     "close": "Tutup",
     "collapse": "Perkecil",

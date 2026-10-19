@@ -10,6 +10,8 @@ import { styled } from '@mui/material/styles';
 import { iconifyClasses } from './classes';
 import { allIconNames, registerIcons } from './register-icons';
 
+const iconNameSet = new Set<string>(allIconNames);
+
 // ----------------------------------------------------------------------
 
 export type IconifyProps = React.ComponentProps<typeof IconRoot> &
@@ -20,7 +22,7 @@ export type IconifyProps = React.ComponentProps<typeof IconRoot> &
 export function Iconify({ className, icon, width = 20, height, sx, ...other }: IconifyProps) {
   const uniqueId = useId();
 
-  if (!allIconNames.includes(icon)) {
+  if (!iconNameSet.has(icon)) {
     console.warn(
       [
         `Icon "${icon}" is currently loaded online, which may cause flickering effects.`,

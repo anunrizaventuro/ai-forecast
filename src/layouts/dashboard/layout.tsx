@@ -194,23 +194,25 @@ export function DashboardLayout({
     );
   };
 
-  const renderNavAccountFooter = (compact: boolean) => (
-    <Box
-      sx={(t) => ({
-        mt: 'auto',
-        px: compact ? 1 : 2,
-        py: 2,
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: compact ? 'column' : 'row',
-        justifyContent: compact ? 'center' : 'space-between',
-        gap: 1,
-        borderTop: `dashed 1px ${t.vars.palette.divider}`,
-      })}
-    >
-      {!CONFIG.auth.skip && <AccountDrawer compact={compact} />}
-    </Box>
-  );
+  // Auth off → footer akun kosong; jangan render kotak bergaris tanpa isi.
+  const renderNavAccountFooter = (compact: boolean) =>
+    !CONFIG.auth.skip && (
+      <Box
+        sx={(t) => ({
+          mt: 'auto',
+          px: compact ? 1 : 2,
+          py: 2,
+          display: 'flex',
+          alignItems: 'center',
+          flexDirection: compact ? 'column' : 'row',
+          justifyContent: compact ? 'center' : 'space-between',
+          gap: 1,
+          borderTop: `dashed 1px ${t.vars.palette.divider}`,
+        })}
+      >
+        <AccountDrawer compact={compact} />
+      </Box>
+    );
 
   const renderSidebar = () => (
     <NavVertical

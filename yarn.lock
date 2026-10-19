@@ -151,16 +151,6 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@base-ui-components/utils@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.npmjs.org/@base-ui-components/utils/-/utils-0.1.2.tgz"
-  integrity sha512-aEitDGpMsYO2qnSpYOwZNykn9Rzn2ioyEVk2fyDRH7t+TIHVKpp9CeV7SPTq43M9mMSDxQ+7UeZJVkrj2dCVIQ==
-  dependencies:
-    "@babel/runtime" "^7.28.4"
-    "@floating-ui/utils" "^0.2.10"
-    reselect "^5.1.1"
-    use-sync-external-store "^1.5.0"
-
 "@emnapi/core@^1.4.3":
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.10.0.tgz#380ccc8f2412ea22d1d972df7f8ee23a3b9c7467"
@@ -881,11 +871,6 @@
   resolved "https://registry.yarnpkg.com/@firebase/webchannel-wrapper/-/webchannel-wrapper-1.0.6.tgz#4be6a62b8c27a6bad8cc8da41f9a12de901e965d"
   integrity sha512-Vr/Mqu79dMwGRAyGbJ4uN4+BtXB3/mRTdzetD1daWNeG8QaWuzhhbG77GltO5c0yYmYls8i250iX73624GJd7Q==
 
-"@floating-ui/utils@^0.2.10":
-  version "0.2.10"
-  resolved "https://registry.npmjs.org/@floating-ui/utils/-/utils-0.2.10.tgz"
-  integrity sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==
-
 "@fontsource-variable/dm-sans@^5.2.8":
   version "5.2.8"
   resolved "https://registry.npmjs.org/@fontsource-variable/dm-sans/-/dm-sans-5.2.8.tgz"
@@ -1166,19 +1151,6 @@
     reselect "^5.1.1"
     use-sync-external-store "^1.6.0"
 
-"@mui/x-data-grid@^8.22.0":
-  version "8.22.0"
-  resolved "https://registry.npmjs.org/@mui/x-data-grid/-/x-data-grid-8.22.0.tgz"
-  integrity sha512-Xz/tB2KKrLS1JKhfw37FgY2dtCrY1+sDvU7K5N0+wTPjOT5R9NRxGV/TzCERY/novvIOXuUOPVuLqAlRv+2qbg==
-  dependencies:
-    "@babel/runtime" "^7.28.4"
-    "@mui/utils" "^7.3.5"
-    "@mui/x-internals" "8.22.0"
-    "@mui/x-virtualizer" "0.2.12"
-    clsx "^2.1.1"
-    prop-types "^15.8.1"
-    use-sync-external-store "^1.6.0"
-
 "@mui/x-date-pickers@^8.22.0":
   version "8.22.0"
   resolved "https://registry.npmjs.org/@mui/x-date-pickers/-/x-date-pickers-8.22.0.tgz"
@@ -1218,29 +1190,6 @@
     "@mui/utils" "9.0.0"
     reselect "^5.1.1"
     use-sync-external-store "^1.6.0"
-
-"@mui/x-tree-view@^8.22.0":
-  version "8.22.0"
-  resolved "https://registry.npmjs.org/@mui/x-tree-view/-/x-tree-view-8.22.0.tgz"
-  integrity sha512-g7tAe8hHvpOgJi/DzrMVIX7DKAD4o575isVdRciojR5IGlT+FAVbdUz+8NJJQ5DNkLFhi1MfMXgU22ilkkRpJg==
-  dependencies:
-    "@babel/runtime" "^7.28.4"
-    "@base-ui-components/utils" "0.1.2"
-    "@mui/utils" "^7.3.5"
-    "@mui/x-internals" "8.22.0"
-    "@types/react-transition-group" "^4.4.12"
-    clsx "^2.1.1"
-    prop-types "^15.8.1"
-    react-transition-group "^4.4.5"
-
-"@mui/x-virtualizer@0.2.12":
-  version "0.2.12"
-  resolved "https://registry.npmjs.org/@mui/x-virtualizer/-/x-virtualizer-0.2.12.tgz"
-  integrity sha512-TdNeXRpulYrQ9J8jdU+YnS8IDNLz5YQ4v3u+qEmNC2gqnLMVsuDZCjVwU5rkCPbraFYN94csHB0YvDwrXZ/dog==
-  dependencies:
-    "@babel/runtime" "^7.28.4"
-    "@mui/utils" "^7.3.5"
-    "@mui/x-internals" "8.22.0"
 
 "@napi-rs/wasm-runtime@^0.2.11":
   version "0.2.12"
@@ -2750,11 +2699,6 @@ esutils@^2.0.2:
   resolved "https://registry.npmjs.org/esutils/-/esutils-2.0.3.tgz"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-fancy-canvas@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/fancy-canvas/-/fancy-canvas-2.1.0.tgz#44b40e40419ad8ef8304df365e4276767e918552"
-  integrity sha512-nifxXJ95JNLFR2NgRV4/MxVP45G9909wJTEKz5fg/TZS20JJZA6hfgRVh/bC9bwl2zBtBNcYPjiBE4njQHVBwQ==
-
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"
@@ -3430,13 +3374,6 @@ levn@^0.4.1:
   dependencies:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
-
-lightweight-charts@^5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/lightweight-charts/-/lightweight-charts-5.2.0.tgz#ef3f681794e9dad0ac131913259439ad596bcf92"
-  integrity sha512-ey3Vas8UhV06ni+LT9TA1nEe4y8So4Mi6CL/oarNHFMyTktz/xy8e8+oh04Q//eO3t6etvFXgayz2fClyFQb5w==
-  dependencies:
-    fancy-canvas "2.1.0"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"
@@ -4444,7 +4381,7 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-sync-external-store@^1.5.0, use-sync-external-store@^1.6.0:
+use-sync-external-store@^1.6.0:
   version "1.6.0"
   resolved "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz"
   integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
@@ -4617,11 +4554,6 @@ yargs@^17.7.2:
     string-width "^4.2.3"
     y18n "^5.0.5"
     yargs-parser "^21.1.1"
-
-yet-another-react-lightbox@^3.31.0:
-  version "3.31.0"
-  resolved "https://registry.yarnpkg.com/yet-another-react-lightbox/-/yet-another-react-lightbox-3.31.0.tgz#96f2561763c43282e2bea41e4221621341ed0808"
-  integrity sha512-qcj8Vz5Gpbl2/XCXW/4vAdLGganPHEL1D5VgHxBQWbPF8ZeomH1DSN2ci++kv/1hMlccpUkg/nNx2CrMf9cLAg==
 
 yocto-queue@^0.1.0:
   version "0.1.0"

@@ -2,6 +2,7 @@
   "actions": {
     "add": "Add",
     "approve": "Approve",
+    "back": "Back",
     "cancel": "Cancel",
     "close": "Close",
     "collapse": "Collapse",

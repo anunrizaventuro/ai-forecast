@@ -1,5 +1,6 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
+import { varAlpha } from 'minimal-shared/utils';
 import { useBoolean } from 'minimal-shared/hooks';
 import { useRef, useState, useCallback } from 'react';
 
@@ -296,17 +297,19 @@ export function AccountDrawer({ compact, sx, ...other }: AccountDrawerProps) {
           }}
         >
           <Box
-            component="img"
-            src="/assets/illustrations/characters/character-notification.webp"
-            alt=""
-            loading="eager"
             sx={{
-              width: 120,
-              height: 120,
-              objectFit: 'contain',
-              opacity: 0.9,
+              width: 72,
+              height: 72,
+              display: 'flex',
+              borderRadius: '50%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'text.disabled',
+              bgcolor: (theme) => varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
             }}
-          />
+          >
+            <Iconify width={34} icon="solar:bell-off-bold" />
+          </Box>
           <Typography variant="body2" color="text.secondary">
             {t('account.notifications.empty')}
           </Typography>

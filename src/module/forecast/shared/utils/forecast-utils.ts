@@ -279,11 +279,18 @@ export function timeSeries(
   to: string,
   granularity: Granularity = 'harian'
 ): SeriesPoint[] {
+  // Di-cache per tanggal: parse dayjs per sel jadi titik panas tampilan mingguan.
+  const bucketCache = new Map<string, string>();
   const bucketOf = (tgl: string) => {
     if (granularity === 'harian') return tgl;
-    const date = dayjs(tgl);
-    const offset = (date.day() + 6) % 7; // Senin = awal minggu
-    return date.subtract(offset, 'day').format('YYYY-MM-DD');
+    let bucket = bucketCache.get(tgl);
+    if (bucket === undefined) {
+      const date = dayjs(tgl);
+      const offset = (date.day() + 6) % 7; // Senin = awal minggu
+      bucket = date.subtract(offset, 'day').format('YYYY-MM-DD');
+      bucketCache.set(tgl, bucket);
+    }
+    return bucket;
   };
 
   const buckets = new Map<string, SeriesPoint>();
@@ -395,7 +402,9 @@ export function computeRecommendations(
     visitsByStore.set(cell.nit, dates);
 
     const key = `${cell.nit}|${cell.product}`;
-    pairs.set(key, [...(pairs.get(key) ?? []), cell]);
+    const list = pairs.get(key);
+    if (list) list.push(cell);
+    else pairs.set(key, [cell]);
   });
 
   const reliableObs = (pairCells: VisitCell[]) =>
@@ -412,8 +421,20 @@ export function computeRecommendations(
     const value = median(obs.map((c) => c.estSold!))!;
     const { nit, product } = pairCells[0]!;
     const kecKey = `${storeMap.get(nit)?.kec}|${product}`;
-    kecValues.set(kecKey, [...(kecValues.get(kecKey) ?? []), value]);
-    globalValues.set(product, [...(globalValues.get(product) ?? []), value]);
+    const kecList = kecValues.get(kecKey);
+    if (kecList) kecList.push(value);
+    else kecValues.set(kecKey, [value]);
+    const globalList = globalValues.get(product);
+    if (globalList) globalList.push(value);
+    else globalValues.set(product, [value]);
+  });
+
+  // Jadwal kunjungan hanya bergantung pada toko — hitung sekali per toko, bukan per produk.
+  const nextVisitByStore = new Map<string, string>();
+  visitsByStore.forEach((storeVisits, nit) => {
+    const gaps = storeVisits.slice(1).map((d, i) => dayjs(d).diff(dayjs(storeVisits[i]), 'day'));
+    const interval = Math.round(median(gaps.slice(-4)) ?? 7);
+    nextVisitByStore.set(nit, addVisitDays(storeVisits[storeVisits.length - 1]!, interval));
   });
 
   const results: Recommendation[] = [];
@@ -430,8 +451,6 @@ export function computeRecommendations(
 
     const lastStoreVisit = storeVisits[storeVisits.length - 1]!;
     const lastCell = pairCells[pairCells.length - 1]!;
-    const gaps = storeVisits.slice(1).map((d, i) => dayjs(d).diff(dayjs(storeVisits[i]), 'day'));
-    const interval = Math.round(median(gaps.slice(-4)) ?? 7);
     const kec = storeMap.get(nit)?.kec;
 
     const allObs = reliableObs(pairCells);
@@ -452,7 +471,7 @@ export function computeRecommendations(
       lastBs: lastCell.tgl === lastStoreVisit ? lastCell.bs : 0,
       returnRate,
       observations: obs.length,
-      nextVisit: addVisitDays(lastStoreVisit, interval),
+      nextVisit: nextVisitByStore.get(nit)!,
     };
 
     if (isExcludedProduct(product)) {

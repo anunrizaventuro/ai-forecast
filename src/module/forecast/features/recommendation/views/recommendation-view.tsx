@@ -147,7 +147,7 @@ export function RecommendationView() {
     [recommendations, status, confidence]
   );
 
-  const summary = summarizeRecommendations(recommendations);
+  const summary = useMemo(() => summarizeRecommendations(recommendations), [recommendations]);
 
   const resetKey = [filters.to, filters.nit, filters.product, status, confidence].join('|');
 

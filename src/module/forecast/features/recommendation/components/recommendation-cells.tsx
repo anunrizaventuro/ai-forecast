@@ -1,11 +1,10 @@
-import type { Recommendation } from 'src/module/forecast/shared/types';
+import type { Recommendation, RecommendationParams } from 'src/module/forecast/shared/types';
 
 import Box from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 import { Label } from 'src/shared/ui/label';
-import { useRecommendationParams } from 'src/module/forecast/shared/hooks';
 import { RecommendationDelta } from 'src/module/forecast/shared/components';
 import {
   fDate,
@@ -57,8 +56,7 @@ export function ReturnCell({ row }: RowProps) {
   );
 }
 
-export function RecommendedCell({ row }: RowProps) {
-  const { params } = useRecommendationParams();
+export function RecommendedCell({ row, params }: RowProps & { params: RecommendationParams }) {
   const signals = row.signals.filter((signal) => signal !== 'fallback');
 
   return (
