@@ -15,7 +15,7 @@ import {
   DEFAULT_REC_PARAMS,
   computeRecommendations,
   summarizeRecommendations,
-} from 'src/sections/forecast/forecast-utils';
+} from 'src/module/forecast/shared/utils';
 
 const cells = filterCells(forecastCells, DEFAULT_FILTERS);
 const recs = computeRecommendations(forecastCells, PERIOD.end, DEFAULT_REC_PARAMS);
