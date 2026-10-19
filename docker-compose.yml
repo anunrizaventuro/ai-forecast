@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    image: ai-forecast-web
+    container_name: ai-forecast-web
+    ports:
+      - '80:80'
+    # SPA statis di nginx — semua VITE_* sudah di-inline saat build dari
+    # .env.prod (lihat Dockerfile); tidak ada env runtime.
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:80/']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

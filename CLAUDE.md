@@ -4,98 +4,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is **AI Forecast** — a dashboard for bread-distribution analysis and stock recommendations (how many units of each product a salesperson should bring to each store on the next visit). Next.js 16 + MUI 9 + TypeScript, built on an internal skeleton based on the Zone UI v4.6.0 template (Minimals). The UI language is Indonesian. Live vertical: **forecast** under `/dashboard` (Dashboard, Rekomendasi Stok, Analisis Penjualan, Data Toko, Data Produk); `/` redirects there. Also present: utility pages (error, coming-soon, maintenance, blank) and the `/components` reference gallery. The skeleton's marketing verticals (home/article/support) were removed.
+This is **AI Forecast** — a dashboard for bread-distribution analysis and stock recommendations (how many units of each product a salesperson should bring to each store on the next visit). Vite 7 + React 19 + React Router 7 + MUI 7 + TypeScript, built on **venturo-skeleton-react** (Minimals MUI starter v7.6.1). The skeleton was only the starting point — there is no `skeleton` remote and no syncing with it; fix things here. The UI language is Indonesian. Pages (all at the root): `/` Dashboard, `/rekomendasi-stok`, `/analisis-penjualan`, `/toko`, `/produk`, `/pengaturan`. Old Next.js paths `/dashboard/*` redirect to these (`legacyRedirects` in [src/routes/paths.ts](src/routes/paths.ts)).
 
-**Data has two sources**, chosen at build time by `NEXT_PUBLIC_FORECAST_SOURCE` (`CONFIG.forecastSource`): `simulasi` (default) and `api` (real data from the Go backend **ai-forecast-be**, contract in `ai-forecast-be/docs/api.md`). Views never touch either directly — they call the hooks in [src/sections/forecast/use-forecast-data.ts](src/sections/forecast/use-forecast-data.ts), which use [src/lib/api/forecast.ts](src/lib/api/forecast.ts) (zod-validated, snake_case → camelCase) in `api` mode. In `simulasi` mode [src/_mock/_forecast.ts](src/_mock/_forecast.ts) generates deterministic dummy rows shaped like the client's source tables (MRoti, MToko, KIRIMAN, BS, STOCK — see `../ai-forecast-be/docs/database-analysis.md`), and [src/sections/forecast/forecast-utils.ts](src/sections/forecast/forecast-utils.ts) derives metrics and the baseline recommendation rule (`../ai-forecast-be/docs/forecast-feasibility.md` §3–§4). The same rule lives in the backend — keep both in sync. The rule's parameters (return threshold/window/streak/cut, stockout bonus, …) are admin-editable at `/dashboard/pengaturan` via [src/sections/forecast/use-recommendation-params.ts](src/sections/forecast/use-recommendation-params.ts) — `simulasi` stores them in localStorage, `api` uses `GET/PUT /api/v1/forecast/settings` (backend side still pending, see `docs/superpowers/plans/2026-10-15-pengaturan-rekomendasi.md` Task 1–3); `DEFAULT_REC_PARAMS` must equal the backend's `DefaultParams`. Every page must keep the source marker ("simulasi" / "data asli · baseline") until the recommendation rule is validated. Shared types live in [src/types/forecast.ts](src/types/forecast.ts). Other mock data in `src/_mock/` only feeds the component gallery.
+**Data has two sources**, chosen at build time by `VITE_FORECAST_SOURCE` (`CONFIG.forecastSource`): `simulasi` (default) and `api` (real data from the Go backend **ai-forecast-be**, contract in `ai-forecast-be/docs/api.md`). Views never touch either directly — they call the hooks in [src/module/forecast/shared/hooks/use-forecast-data.ts](src/module/forecast/shared/hooks/use-forecast-data.ts), which use [src/module/forecast/shared/api/](src/module/forecast/shared/api/) (zod-validated, snake_case → camelCase) in `api` mode. In `simulasi` mode [src/module/forecast/shared/data/simulasi.ts](src/module/forecast/shared/data/simulasi.ts) generates deterministic dummy rows shaped like the client's source tables (MRoti, MToko, KIRIMAN, BS, STOCK — see `../ai-forecast-be/docs/database-analysis.md`), and [src/module/forecast/shared/utils/forecast-utils.ts](src/module/forecast/shared/utils/forecast-utils.ts) derives metrics and the baseline recommendation rule (`../ai-forecast-be/docs/forecast-feasibility.md` §3–§4). The same rule lives in the backend — keep both in sync. The rule's parameters are admin-editable at `/pengaturan` via [use-recommendation-params.ts](src/module/forecast/shared/hooks/use-recommendation-params.ts) — `simulasi` stores them in localStorage, `api` uses `GET/PUT /api/v1/forecast/settings` (backend side still pending, see `docs/superpowers/plans/2026-10-15-pengaturan-rekomendasi.md` Task 1–3); `DEFAULT_REC_PARAMS` must equal the backend's `DefaultParams`. Every page must keep the source marker (`ForecastSourceChip`: "simulasi" / "data asli · baseline") until the recommendation rule is validated. Shared types live in [src/module/forecast/shared/types/](src/module/forecast/shared/types/).
 
-Branch model: this repo (github.com/venturo-id/ai-forecast-fe) works on `staging` (default branch). The upstream skeleton's `production` / `template-default-4.6.0` branches live in the skeleton repo, not here (see docs/distribution.md for cherry-picking fixes).
+**Equivalence check:** `scripts/forecast-baseline.ts` prints the metrics + recommendations for the default filter in simulasi mode; `scripts/forecast-baseline.json` is the reference captured from the pre-migration Next.js code. After touching `forecast-utils.ts` or the simulator, run it and diff (an intended change → regenerate the JSON in the same commit):
 
-Step-by-step team recipes live in [docs/](docs/): add-a-page, add-an-api-endpoint, branding (per-client checklist), deployment (Docker/Jenkins), distribution (template-repo + cherry-pick model). Point users there for how-to questions; this file stays the source of truth for the rules themselves.
+```sh
+node_modules/.bin/esbuild scripts/forecast-baseline.ts --bundle --platform=node --format=esm \
+  --tsconfig=tsconfig.json --outfile=/tmp/fb.mjs && node /tmp/fb.mjs | diff - scripts/forecast-baseline.json
+```
+
+Branch model: this repo (github.com/venturo-id/ai-forecast-fe) works on `staging` (default branch).
 
 ## Commands
 
-Dev server and build run on **port 8002**.
+Dev server and preview run on **port 8002**.
 
 ```sh
-yarn dev            # start dev server (port 8002)
-yarn build          # production build
-yarn start          # serve production build (port 8002)
+yarn dev            # Vite dev server (+ in-process TS/ESLint checker overlay)
+yarn build          # tsc && vite build → dist/
+yarn start          # vite preview of dist/
 
 yarn lint           # eslint over src/**/*.{js,jsx,ts,tsx}
-yarn lint:fix       # eslint --fix
+yarn lint:fix
 yarn fm:check       # prettier --check
-yarn fm:fix         # prettier --write
+yarn fm:fix
 yarn fix:all        # lint:fix + fm:fix (run before committing)
 
-yarn tsc:check      # tsc --noEmit --pretty (type-check, no test runner exists)
-yarn tsc:watch      # type-check in watch mode
+yarn tsc:check      # tsc --noEmit --pretty
+yarn tsc:watch
 ```
 
-There is **no test framework** configured — `tsc:check` plus lint are the verification gates, enforced automatically: husky pre-commit runs lint-staged (eslint + prettier on staged files), pre-push runs `tsc:check`, and the `Jenkinsfile` runs the full gate (install → lint → fm:check → tsc:check → build) in CI. Yarn is the ONLY package manager (`packageManager: yarn@1.22.22`, Node >= 22.12, see `.nvmrc`); never use npm or commit a `package-lock.json`.
+There is **no test framework** — `tsc:check` plus lint are the verification gates (and the baseline script above for calculation changes), enforced automatically: husky pre-commit runs lint-staged (eslint + prettier on staged files), pre-push runs `tsc:check`, and the `Jenkinsfile` runs install → lint → fm:check → tsc:check → build. Yarn is the ONLY package manager (`packageManager: yarn@1.22.22`, Node >= 22.12, see `.nvmrc`); never use npm or commit a `package-lock.json`.
 
-**Production Docker:** `docker compose up -d --build` — multi-stage standalone image listening on port 80, env from `.env.prod` (gitignored). `NEXT_PUBLIC_*` values are baked into the bundle at image BUILD time — changing them requires a rebuild, not a restart; server-only vars (`API_URL`, `REVALIDATE_TOKEN`) also flow at runtime via compose `env_file`. `output: 'standalone'` only activates when `BUILD_STANDALONE=true` (set by the Dockerfile), so plain `yarn build`/`yarn start` behave as before.
+**Production Docker:** `docker compose up -d --build` — multi-stage build, `dist/` served by nginx on port 80 ([nginx.conf](nginx.conf), SPA fallback). `.env.prod` (gitignored) is copied to `.env` at image BUILD time; every `VITE_*` value is inlined into the bundle, so changing one requires a rebuild. See [docs/deployment.md](docs/deployment.md).
 
 ## Architecture
 
-### The page → view → section pattern (most important)
+### Module layout (feature modules)
 
-Routing uses the **App Router** under [src/app/](src/app/). Route-group rule: a group = a shared layout without adding a URL segment — `(simple)` for compact utility pages (coming-soon, maintenance); other routes carry their own `layout.tsx`. The layering is strict and pervasive:
+Code is split into domain modules under [src/module/](src/module/), each feature following `features/<feature>/{api,components,hooks,pages,types,views}` (see [docs/patterns/feature-module.md](docs/patterns/feature-module.md)):
 
-- **`src/app/<route>/page.tsx`** — thin Server Component. Exports `metadata` (short title only — the root layout template appends "- AI Forecast") and does server-side data fetching, then renders a single `*View`. Keep these minimal.
-- **`src/app/<route>/layout.tsx`** — wraps children in a layout (`MainLayout` or `SimpleLayout`).
-- **`src/sections/<vertical>/view/<name>-view.tsx`** — the `'use client'` View that composes the page from section components. This shape is mandatory for every vertical (including error/coming-soon/maintenance). Section dirs use plain kebab-case names (`forecast`, `error`, …); the ONLY underscore-prefixed dir is `_examples` (the component gallery — not a page vertical).
-- **`src/sections/<vertical>/<name>-section.tsx`** — individual presentational/section building blocks.
+- [src/module/forecast/](src/module/forecast/) — the product. `features/{dashboard,recommendation,sales-analysis,stores,products,settings}` hold `pages/index.tsx` (thin lazy route leaf: sets `<title>` and renders the view), `views/*-view.tsx` (page body) and page-specific `components/`. `shared/` holds what several pages use: `api/`, `hooks/` (`use-forecast-data`, `use-forecast-query`, `use-recommendation-params`), `utils/`, `data/simulasi.ts`, `types/`, `components/` (filter bar, page header + source chip, KPI grid, trend chart, tables helpers, …).
+- [src/module/core/](src/module/core/) — skeleton cross-cutting features (auth JWT, users, roles, branches, companies, audit-log, translation-override, settings drawer, error pages). **Auth is switched off** (`CONFIG.auth.skip = true` in [src/shared/config/index.ts](src/shared/config/index.ts)): no session check, no `/core/v1/*` requests, core routes/menus/account drawer/company picker not mounted. Kept so login can be enabled later once ai-forecast-be has auth.
 
-When adding a page, follow this chain: create the section components and a `view`, then a thin `page.tsx` that imports the view. Don't put substantial UI directly in `app/`.
+Everything else lives in [src/shared/](src/shared/) (`api`, `config`, `lib`, `ui`, `utils`, …), [src/layouts/](src/layouts/), [src/routes/](src/routes/), [src/theme/](src/theme/).
 
-### API/data layer (the reference pattern)
+### Data fetching
 
-[src/lib/api/](src/lib/api/) is the canonical pattern for talking to the backend — **[src/lib/api/articles.ts](src/lib/api/articles.ts) is the reference implementation; copy its shape for every new endpoint**: entry in `endpoints.ts` → zod schema validated at the fetch boundary (no `as`-casts) → fetcher via the shared `apiFetch` (typed `ApiError`, `X-Company-Slug` header) → query-key factory → `'use client'` hooks in a separate `use-*.ts` module (intentionally NOT re-exported from the barrel — server code must not import client hooks).
-
-Three data-flow modes, by SEO/interactivity need (the example pages were removed with the marketing verticals — the patterns still apply to future API-backed pages):
-
-1. **RSC props**: fetch in `page.tsx`, pass as props, `.catch(() => null)` + static fallback in the section so the page never breaks when the API is down.
-2. **Prefetch + HydrationBoundary** (interactive lists): server `prefetchQuery` + client `useQuery` for interactive lists (TanStack SSR pattern, see [src/lib/query/](src/lib/query/)).
-3. **Pure RSC + ISR** (detail pages): `revalidate` export + `generateMetadata`; 404 via `notFound()`.
-
-### Component reference gallery (for AI and developers)
-
-**Before writing any new UI pattern, check whether an example already exists** — the gallery at `/components` renders [src/sections/_examples/](src/sections/_examples/), the canonical usage samples for every shared component in [src/components/](src/components/) (carousel, animate, hook-form fields, image, lightbox, markdown, icons, etc.). Follow those patterns; do not invent parallel ones.
-
-The gallery is dev-only by default: always visible under `yarn dev`, and in production builds only when `NEXT_PUBLIC_SHOW_COMPONENTS=true` (client deploys leave it unset → all `/components/*` routes 404, enforced in [src/middleware.ts](src/middleware.ts) — a layout-level `notFound()` cannot gate statically prerendered pages). Several dependencies exist ONLY for the gallery (`yet-another-react-lightbox`, `react-phone-number-input`, `@mui/lab`, `mui-one-time-password-input`, embla `fade`/`auto-height` plugins, `@mui/x-date-pickers`) — a client project that strips the gallery can remove them too.
+No TanStack Query/SWR. API calls go through the single shared axios instance [src/shared/lib/axios.ts](src/shared/lib/axios.ts) (baseURL `CONFIG.serverUrl`, adds `X-Company-Slug` when configured, normalizes errors to `ApiError` with `.status` and field `.errors`, passes cancellations through). Envelope helpers (`unwrap`, `unwrapNullable`, `ApiError`, `apiErrorStatus`, `apiFieldErrors`) are in [src/shared/api/](src/shared/api/). Forecast data goes through `useForecastQuery` ([use-forecast-query.ts](src/module/forecast/shared/hooks/use-forecast-query.ts)): per-key cache + dedupe, aborts stale requests, keeps previous data while a key changes, `invalidateForecast()` / `setForecastData()` for refetch after saving settings.
 
 ### Routing
 
-All route strings are centralized in [src/routes/paths.ts](src/routes/paths.ts) as the `paths` object (use these, do not hardcode URLs; dynamic routes are functions, e.g. `paths.dashboard.recommendation`). Trailing-slash policy: `paths.*` entries have NO trailing slash; crawler-facing URLs (canonical/sitemap/JSON-LD) must end with `/` — compose them with `pathWithSlash()` from the same module. Navigation helpers in [src/routes/hooks/](src/routes/hooks/) (`useRouter`, `usePathname`, `useParams`, `useSearchParams`) wrap `next/navigation`; prefer them and the `RouterLink` component over importing `next/navigation`/`next/link` directly.
+[src/main.tsx](src/main.tsx) builds a `createBrowserRouter` from [src/routes/sections/](src/routes/sections/); pages are `lazy()` and wrapped in a `Suspense` keyed by pathname. All route strings are in [src/routes/paths.ts](src/routes/paths.ts) (`paths.dashboard.*` for forecast pages, `paths.core.*` for skeleton core pages) — never hardcode URLs. Use the wrappers in [src/routes/hooks/](src/routes/hooks/) and `RouterLink`. Nav items: [src/layouts/nav-config-dashboard.tsx](src/layouts/nav-config-dashboard.tsx).
 
-### Theme system
+### UI conventions (skeleton style)
 
-[src/theme/](src/theme/) is a full MUI theme built on **CSS variables** (light/dark via `colorSchemeSelector`). Key pieces: `theme-config.ts` (fonts, defaults), `create-theme.ts`, per-component overrides in `core/components/`, and `theme-overrides.ts` for app-level tweaks. User-facing settings are runtime state managed by `SettingsProvider`/`SettingsDrawer` in [src/components/settings/](src/components/settings/) and merged via `theme/with-settings/`. The whole provider stack is assembled in [src/app/layout.tsx](src/app/layout.tsx).
+- Page shell: `<Box sx={{ p: { xs: 2, md: 3 } }}>` → `ForecastPageHeader` (skeleton `PageHeader` + source chip) → `ForecastSimulationAlert` → `ForecastFilterBar` → `ForecastDataState` → content.
+- KPI: `KpiCard`, charts: `ChartCard` + `@mui/x-charts` (both in [src/shared/ui/dashboard-card/](src/shared/ui/dashboard-card/)). Series colours follow the entity (Kiriman / Estimasi terjual / Retur) via `SERIES` + `useSeriesColors()`.
+- Tables: skeleton toolkit [src/shared/ui/table/](src/shared/ui/table/) (`useTable({ defaultDense: true })`, `TableHeadCustom`), plus `sortRows`, `ForecastTablePagination`, `TableEmptyRow` from forecast shared components (client-side sort/paging — the backend returns whole lists).
+- Dates: `DateRangePicker` ([src/shared/ui/date-range-picker/](src/shared/ui/date-range-picker/)) with `presets`/`minDate`/`maxDate` bound to the data period — its built-in presets count back from today and would select dates with no data.
+- Forms: react-hook-form + Zod with `Form` / `Field.*` from [src/shared/ui/hook-form/](src/shared/ui/hook-form/).
+- Icons: `Iconify` with an offline icon set — add new icons to [src/shared/ui/iconify/icon-sets.ts](src/shared/ui/iconify/icon-sets.ts).
 
-### Forms
+### Deliberate deviations from the skeleton
 
-Forms use **react-hook-form + Zod**. Do not use raw MUI inputs in forms — use the RHF wrappers in [src/components/hook-form/](src/components/hook-form/) (exported as the `Field.*` namespace plus `Form`). `schema-utils.ts` holds shared Zod helpers. Resolvers come from `@hookform/resolvers/zod`. Usage samples: `/components/form-validation` in the gallery.
+- **No i18n in forecast code.** The skeleton requires `t()` for every string; AI Forecast is Indonesian-only, so forecast UI text and nav labels are written directly in Indonesian. i18next stays installed (core modules use it) with the language locked to `id`; the language switcher is hidden.
+- **Auth off** (see above).
+- **`manualChunks`** in [vite.config.ts](vite.config.ts) only splits leaf libraries (mui-x, firebase, lightweight-charts). The skeleton's broader split produced circular chunks that crashed the production build at load time.
+- **Mock data in features** — the skeleton forbids it, but `simulasi` mode is a product requirement.
 
-### Layouts, components, mock data
-
-- [src/layouts/](src/layouts/) — page shells (`main`, `simple`); nav config lives in `nav-config-main.tsx`.
-- [src/components/](src/components/) — shared reusable components (iconify, carousel, image, animate, scrollbar, etc.). Each folder has an `index.ts` barrel.
-- [src/_mock/](src/_mock/) — sample data for the gallery + static fallbacks only. Real features fetch from the backend via `src/lib/api`.
-- [src/lib/env.ts](src/lib/env.ts) — the ONLY place env vars are read: zod-validated at module load, so a missing/malformed required var fails the build with a clear message. [src/global-config.ts](src/global-config.ts) exposes them as `CONFIG`; consume that, never `process.env` directly (exception: `src/middleware.ts`, which runs in its own bundle).
-
-## SEO rules
-
-- Root layout owns the title template (`%s - AI Forecast`, from `CONFIG.appName`), default description (`CONFIG.appDescription`), OG/Twitter defaults, and the file-convention `opengraph-image.png`/`twitter-image.png`. Page-level `openGraph` REPLACES the root's whole object — restate everything.
-- The dashboard is internal: `/dashboard` sets `robots: noindex` and `robots.ts` disallows the whole site (no sitemap).
-- Above-the-fold/LCP content must be visible in SSR HTML: no entry animations on hero H1/CTA, hero images use `visibleByDefault` + `fetchPriority: 'high'`.
-- `NEXT_PUBLIC_SITE_URL` is required for production builds (build fails without it).
+The skeleton's own pattern docs remain useful for new features: [docs/CONVENTIONS.md](docs/CONVENTIONS.md), [docs/patterns/](docs/patterns/).
 
 ## Conventions
 
-- **Path alias:** import internal modules as `src/...` (absolute, via `baseUrl: "."`). The ESLint `perfectionist` plugin sorts imports into ordered groups (mui → routes → hooks → utils → internal → components → sections → types → relative) by **line length ascending** — let `yarn fix:all` handle ordering rather than hand-sorting.
-- **SVGs** import as React components via `@svgr/webpack` (configured for both webpack and turbopack in [next.config.ts](next.config.ts)).
-- `trailingSlash: true` is set globally — generated URLs end in `/`.
+- **Path alias:** import internal modules as `src/...` (Vite alias + TS `baseUrl`). ESLint `perfectionist/sort-imports` is error-level with custom groups — run `yarn lint:fix` rather than hand-sorting.
+- `import type` for type-only imports; files kebab-case; barrel `index.ts` per directory.
 - Prettier: single quotes, semicolons, `printWidth: 100`, `trailingComma: es5`.
-- ESLint disables `@typescript-eslint/no-explicit-any` and enforces `consistent-type-imports` (use `import type`); unused imports/vars are auto-removable warnings (prefix intentionally-unused vars with `_`).
-- Files use kebab-case; barrel `index.ts` files re-export from each directory.
-- Env vars: copy `.env.example` to `.env` (committed template documents every variable); `.env` itself stays gitignored.
+- Env: only read in [src/shared/config/index.ts](src/shared/config/index.ts) (zod-validated); copy `.env.example` to `.env`. The dashboard is internal: `index.html` sets `robots: noindex` and `public/robots.txt` disallows everything.

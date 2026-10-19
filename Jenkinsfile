@@ -1,4 +1,4 @@
-// CI gate untuk skeleton & semua project client turunannya.
+// CI gate AI Forecast (Vite + React).
 // Verifikasi: install (frozen lockfile) → lint → format → typecheck → build.
 // Node 22 (lihat .nvmrc) + yarn 1.22 harus tersedia di agent.
 pipeline {
@@ -25,7 +25,7 @@ pipeline {
 
     stage('Env (contoh)') {
       steps {
-        // Build butuh env valid (divalidasi zod di src/lib/env.ts).
+        // Build butuh env valid (divalidasi zod di src/shared/config).
         // CI gate memakai nilai contoh; deploy production mengganti .env
         // dengan nilai asli per-client sebelum `yarn build`.
         sh 'cp .env.example .env'
@@ -59,7 +59,7 @@ pipeline {
 
   post {
     always {
-      cleanWs(deleteDirs: true, notFailBuild: true, patterns: [[pattern: '.next/**', type: 'INCLUDE']])
+      cleanWs(deleteDirs: true, notFailBuild: true, patterns: [[pattern: 'dist/**', type: 'INCLUDE']])
     }
   }
 }

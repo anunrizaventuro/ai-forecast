@@ -1,4 +1,4 @@
-# Tuai FE — Documentation
+# AI Forecast FE — Documentation
 
 Dokumen ini menjelaskan standar dan pattern yang disepakati di proyek ini. Claude Code dan developer baru membaca ini untuk memahami "cara proyek ini bekerja" tanpa harus reverse-engineer dari kode.
 
