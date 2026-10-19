@@ -1,5 +1,6 @@
-import type { DateRangeValue } from './use-date-range-picker';
+import type { DateRangeValue, DateRangeCustomPreset } from './use-date-range-picker';
 
+import dayjs from 'dayjs';
 import { useRef, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
@@ -25,7 +26,7 @@ import { Iconify } from 'src/shared/ui/iconify';
 
 import { RangePickerDay } from './range-picker-day';
 import { formatDateRangeLabel } from './format-range-label';
-import { DATE_RANGE_PRESETS, useDateRangePicker } from './use-date-range-picker';
+import { useDateRangePicker } from './use-date-range-picker';
 
 // ----------------------------------------------------------------------
 
@@ -43,6 +44,11 @@ type Props = {
    * - `'input'`: force dialog with stacked DatePicker
    */
   variant?: Variant;
+  /** Ganti preset bawaan (dihitung dari hari ini) dengan preset bertanggal tetap. */
+  presets?: DateRangeCustomPreset[];
+  /** Batas tanggal yang bisa dipilih (YYYY-MM-DD). */
+  minDate?: string;
+  maxDate?: string;
 };
 
 export function DateRangePicker({
@@ -52,6 +58,9 @@ export function DateRangePicker({
   triggerLabel,
   fullWidth,
   variant = 'auto',
+  presets,
+  minDate,
+  maxDate,
 }: Props) {
   const theme = useTheme();
   const { t } = useTranslate('common');
@@ -63,7 +72,9 @@ export function DateRangePicker({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [navKey, setNavKey] = useState(0);
 
-  const picker = useDateRangePicker({ startDate, endDate, onApply });
+  const picker = useDateRangePicker({ startDate, endDate, onApply, presets });
+  const min = minDate ? dayjs(minDate) : undefined;
+  const max = maxDate ? dayjs(maxDate) : undefined;
 
   const handlePresetClick = (preset: Parameters<typeof picker.onApplyPreset>[0]) => {
     picker.onApplyPreset(preset);
@@ -158,21 +169,21 @@ export function DateRangePicker({
                 borderRight: `1px dashed ${theme.vars.palette.divider}`,
               }}
             >
-              {DATE_RANGE_PRESETS.map((preset) => {
-                const active = picker.activePreset === preset;
+              {picker.presetItems.map((preset) => {
+                const active = picker.activePreset === preset.key;
                 return (
                   <Button
-                    key={preset}
+                    key={preset.key}
                     size="small"
                     variant="soft"
                     color={active ? 'primary' : 'inherit'}
-                    onClick={() => handlePresetClick(preset)}
+                    onClick={() => handlePresetClick(preset.key)}
                     sx={{
                       justifyContent: 'flex-start',
                       fontWeight: active ? 600 : 400,
                     }}
                   >
-                    {t(`dateRange.presets.${preset}`)}
+                    {preset.label ?? t(`dateRange.presets.${preset.key}`)}
                   </Button>
                 );
               })}
@@ -190,6 +201,8 @@ export function DateRangePicker({
                 <DateCalendar
                   key={`left-${navKey}`}
                   defaultValue={picker.pendingStart}
+                  minDate={min}
+                  maxDate={max}
                   onChange={picker.onDayClick}
                   slots={{ day: RangePickerDay }}
                   slotProps={{
@@ -204,6 +217,8 @@ export function DateRangePicker({
                 <DateCalendar
                   key={`right-${navKey}`}
                   defaultValue={picker.pendingEnd ?? picker.pendingStart?.add(1, 'month') ?? null}
+                  minDate={min}
+                  maxDate={max}
                   onChange={picker.onDayClick}
                   slots={{ day: RangePickerDay }}
                   slotProps={{
@@ -245,16 +260,16 @@ export function DateRangePicker({
           <DialogContent dividers sx={{ p: 2 }}>
             <Stack spacing={2.5}>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {DATE_RANGE_PRESETS.map((preset) => {
-                  const active = picker.activePreset === preset;
+                {picker.presetItems.map((preset) => {
+                  const active = picker.activePreset === preset.key;
                   return (
                     <Chip
-                      key={preset}
-                      label={t(`dateRange.presets.${preset}`)}
+                      key={preset.key}
+                      label={preset.label ?? t(`dateRange.presets.${preset.key}`)}
                       size="small"
                       color={active ? 'primary' : 'default'}
                       variant={active ? 'filled' : 'outlined'}
-                      onClick={() => picker.onApplyPreset(preset)}
+                      onClick={() => picker.onApplyPreset(preset.key)}
                     />
                   );
                 })}
@@ -265,7 +280,8 @@ export function DateRangePicker({
                   label={t('dateRange.startDate')}
                   value={picker.pendingStart}
                   onChange={picker.onChangeStart}
-                  maxDate={picker.pendingEnd ?? undefined}
+                  minDate={min}
+                  maxDate={picker.pendingEnd ?? max}
                   format="DD MMM YYYY"
                   slotProps={{ field: { clearable: true } }}
                 />
@@ -273,7 +289,8 @@ export function DateRangePicker({
                   label={t('dateRange.endDate')}
                   value={picker.pendingEnd}
                   onChange={picker.onChangeEnd}
-                  minDate={picker.pendingStart ?? undefined}
+                  minDate={picker.pendingStart ?? min}
+                  maxDate={max}
                   format="DD MMM YYYY"
                   slotProps={{ field: { clearable: true } }}
                 />

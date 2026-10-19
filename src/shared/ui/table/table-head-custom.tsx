@@ -28,6 +28,8 @@ export type TableHeadCellProps = {
   label?: string;
   width?: CSSObject['width'];
   align?: 'left' | 'center' | 'right';
+  /** `false` = kolom tanpa tombol sort walau `onSort` diisi. */
+  sortable?: boolean;
   sx?: SxProps<Theme>;
 };
 
@@ -83,7 +85,7 @@ export function TableHeadCustom({
               ...(Array.isArray(headCell.sx) ? headCell.sx : [headCell.sx]),
             ]}
           >
-            {onSort ? (
+            {onSort && headCell.sortable !== false ? (
               <TableSortLabel
                 hideSortIcon
                 active={orderBy === headCell.id}

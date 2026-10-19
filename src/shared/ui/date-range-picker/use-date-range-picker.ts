@@ -23,6 +23,14 @@ export const DATE_RANGE_PRESETS: Exclude<DateRangePreset, 'custom'>[] = [
 
 export type DateRangeValue = { start: string; end: string };
 
+/** Preset dengan tanggal tetap (mis. terikat periode data) — menggantikan preset bawaan. */
+export type DateRangeCustomPreset = { label: string; start: string; end: string };
+
+/** Item preset yang dirender: bawaan (`label` dari i18n) atau kustom (`label` langsung). */
+export type DateRangePresetItem = { key: string; label?: string };
+
+const customKey = (index: number) => `custom-${index}`;
+
 function presetToRange(preset: Exclude<DateRangePreset, 'custom'>): { start: Dayjs; end: Dayjs } {
   const now = dayjs();
   switch (preset) {
@@ -59,9 +67,15 @@ export type UseDateRangePickerProps = {
   startDate: string;
   endDate: string;
   onApply: (value: DateRangeValue) => void;
+  presets?: DateRangeCustomPreset[];
 };
 
-export function useDateRangePicker({ startDate, endDate, onApply }: UseDateRangePickerProps) {
+export function useDateRangePicker({
+  startDate,
+  endDate,
+  onApply,
+  presets,
+}: UseDateRangePickerProps) {
   const [open, setOpen] = useState(false);
   const [pendingStart, setPendingStart] = useState<Dayjs | null>(
     startDate ? dayjs(startDate) : null
@@ -82,20 +96,40 @@ export function useDateRangePicker({ startDate, endDate, onApply }: UseDateRange
     return pendingStart.isAfter(pendingEnd, 'day');
   }, [pendingStart, pendingEnd]);
 
-  const activePreset = useMemo<DateRangePreset>(() => {
+  const presetItems = useMemo<DateRangePresetItem[]>(
+    () =>
+      presets
+        ? presets.map((preset, index) => ({ key: customKey(index), label: preset.label }))
+        : DATE_RANGE_PRESETS.map((key) => ({ key })),
+    [presets]
+  );
+
+  const activePreset = useMemo<string>(() => {
     if (!pendingStart || !pendingEnd) return 'custom';
+    if (presets) {
+      const index = presets.findIndex(
+        (preset) => pendingStart.isSame(preset.start, 'day') && pendingEnd.isSame(preset.end, 'day')
+      );
+      return index === -1 ? 'custom' : customKey(index);
+    }
     return detectPreset(pendingStart, pendingEnd);
-  }, [pendingStart, pendingEnd]);
+  }, [pendingStart, pendingEnd, presets]);
 
   const onOpen = useCallback(() => setOpen(true), []);
   const onClose = useCallback(() => setOpen(false), []);
 
-  const onApplyPreset = useCallback((preset: Exclude<DateRangePreset, 'custom'>) => {
-    const range = presetToRange(preset);
-    setPendingStart(range.start);
-    setPendingEnd(range.end);
-    setHoveredDay(null);
-  }, []);
+  const onApplyPreset = useCallback(
+    (key: string) => {
+      const custom = presets?.find((_, index) => customKey(index) === key);
+      const range = custom
+        ? { start: dayjs(custom.start), end: dayjs(custom.end) }
+        : presetToRange(key as Exclude<DateRangePreset, 'custom'>);
+      setPendingStart(range.start);
+      setPendingEnd(range.end);
+      setHoveredDay(null);
+    },
+    [presets]
+  );
 
   const onDayClick = useCallback(
     (day: Dayjs | null) => {
@@ -144,6 +178,7 @@ export function useDateRangePicker({ startDate, endDate, onApply }: UseDateRange
     hoveredDay,
     error,
     activePreset,
+    presetItems,
     onOpen,
     onClose,
     onChangeStart: setPendingStart,
