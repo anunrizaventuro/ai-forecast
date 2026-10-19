@@ -2,9 +2,10 @@
 
 ## Variabel environment
 
-Satu-satunya tempat env dibaca adalah `src/shared/config/index.ts` (divalidasi
-zod saat module load — nilai yang salah bentuk **menggagalkan boot** dengan
-pesan jelas). Kode lain memakai `CONFIG`, bukan `import.meta.env`.
+Satu-satunya tempat env dibaca adalah `src/shared/config/index.ts`; skemanya
+(`src/shared/config/env-schema.ts`, zod) juga dijalankan `vite.config.ts`, jadi
+nilai yang salah bentuk **menggagalkan `yarn build` / `docker compose build`**
+dengan pesan jelas. Kode lain memakai `CONFIG`, bukan `import.meta.env`.
 
 | Var | Wajib? | Isi |
 |---|---|---|

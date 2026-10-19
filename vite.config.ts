@@ -1,7 +1,9 @@
 import path from 'path';
 import checker from 'vite-plugin-checker';
-import { defineConfig } from 'vite';
+import { loadEnv, defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+
+import { parseEnv } from './src/shared/config/env-schema';
 
 // ----------------------------------------------------------------------
 
@@ -21,7 +23,12 @@ function manualChunks(id: string): string | undefined {
   return undefined;
 }
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Env salah (mis. VITE_FORECAST_SOURCE=api tanpa VITE_SERVER_URL) menggagalkan
+  // dev/build di sini — tanpa ini bundle tetap jadi lalu crash (layar kosong) di browser.
+  parseEnv(loadEnv(mode, process.cwd(), 'VITE_'));
+
+  return {
   plugins: [
     react(),
     checker({
@@ -64,4 +71,5 @@ export default defineConfig({
       },
     },
   },
+};
 });

@@ -82,4 +82,4 @@ The skeleton's own pattern docs remain useful for new features: [docs/CONVENTION
 - **Path alias:** import internal modules as `src/...` (Vite alias + TS `baseUrl`). ESLint `perfectionist/sort-imports` is error-level with custom groups — run `yarn lint:fix` rather than hand-sorting.
 - `import type` for type-only imports; files kebab-case; barrel `index.ts` per directory.
 - Prettier: single quotes, semicolons, `printWidth: 100`, `trailingComma: es5`.
-- Env: only read in [src/shared/config/index.ts](src/shared/config/index.ts) (zod-validated); copy `.env.example` to `.env`. The dashboard is internal: `index.html` sets `robots: noindex` and `public/robots.txt` disallows everything.
+- Env: only read in [src/shared/config/index.ts](src/shared/config/index.ts); the zod schema in `env-schema.ts` also runs in `vite.config.ts`, so a bad env fails the build; copy `.env.example` to `.env`. The dashboard is internal: `index.html` sets `robots: noindex` and `public/robots.txt` disallows everything.
