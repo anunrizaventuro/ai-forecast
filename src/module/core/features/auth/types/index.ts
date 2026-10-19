@@ -1,9 +1,4 @@
-export type ApiEnvelope<T> = {
-  data: T | null;
-  message: string;
-  meta: unknown | null;
-  errors: string | null;
-};
+export type { ApiEnvelope } from 'src/shared/api';
 
 export type User = {
   id: string;

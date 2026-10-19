@@ -1,4 +1,5 @@
 import type { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import type { ApiError } from 'src/shared/api';
 
 import axios from 'axios';
 
@@ -43,6 +44,10 @@ export function configureAxiosAuth(opts: {
 }
 
 axiosInstance.interceptors.request.use((config) => {
+  // Tenant header — hanya dikirim bila dikonfigurasi (header kosong ditolak backend).
+  if (CONFIG.companySlug && !config.headers['X-Company-Slug']) {
+    config.headers['X-Company-Slug'] = CONFIG.companySlug;
+  }
   const token = getAccessTokenFn();
   if (token && !config.headers.Authorization) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -91,13 +96,23 @@ axiosInstance.interceptors.response.use(
 );
 
 function normalizeError(error: unknown): Error {
+  // Pembatalan (AbortController) bukan kegagalan — teruskan apa adanya supaya
+  // pemanggil bisa mengenalinya lewat axios.isCancel().
+  if (axios.isCancel(error)) return error as Error;
   if (axios.isAxiosError(error)) {
     const payload = error.response?.data as
-      | { message?: string; errors?: string | null }
+      | { message?: string; errors?: string | Record<string, string[]> | null }
       | undefined;
-    const detail = payload?.errors || payload?.message || error.message || 'Something went wrong!';
-    const wrapped = new Error(detail);
-    (wrapped as Error & { status?: number }).status = error.response?.status;
+    const fieldErrors =
+      payload?.errors && typeof payload.errors === 'object' ? payload.errors : undefined;
+    const detail =
+      (typeof payload?.errors === 'string' && payload.errors) ||
+      payload?.message ||
+      error.message ||
+      'Something went wrong!';
+    const wrapped = new Error(detail) as ApiError;
+    wrapped.status = error.response?.status;
+    if (fieldErrors) wrapped.errors = fieldErrors;
     return wrapped;
   }
   if (error instanceof Error) return error;

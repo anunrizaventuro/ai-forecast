@@ -1,7 +1,6 @@
 import type {
   TokenPair,
   MeResponse,
-  ApiEnvelope,
   SignInParams,
   SignUpParams,
   SignInResponse,
@@ -12,16 +11,8 @@ import type {
   SwitchCompanyResponse,
 } from '../types';
 
+import { unwrap } from 'src/shared/api';
 import axios, { endpoints, withoutAuthRefresh } from 'src/shared/lib/axios';
-
-async function unwrap<T>(promise: Promise<{ data: ApiEnvelope<T> }>): Promise<T> {
-  const res = await promise;
-  const payload = res.data;
-  if (payload.data === null || payload.data === undefined) {
-    throw new Error(payload.errors || payload.message || 'Empty response');
-  }
-  return payload.data;
-}
 
 export function signIn(params: SignInParams) {
   return unwrap<SignInResponse>(axios.post(endpoints.auth.signIn, params));
