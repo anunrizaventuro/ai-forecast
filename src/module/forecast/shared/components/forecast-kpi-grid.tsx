@@ -60,7 +60,7 @@ export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
           title="Estimasi terjual"
           value={fNumber(summary.estSold)}
           unit="pcs"
-          caption={`${fPercent(summary.sellThrough)} dari kiriman sebelumnya laku`}
+          caption={`${fPercent(summary.sellThrough)} dari stok tersedia laku`}
           icon="carbon:chart-average"
           accentColor={colors.estSold}
           spark={sparks.estSold}
@@ -71,7 +71,7 @@ export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
           title="Retur (BS)"
           value={fNumber(summary.bs)}
           unit="pcs"
-          caption={`Rasio retur ${fPercent(summary.returnRate)} dari kiriman sebelumnya`}
+          caption={`BS ${fPercent(summary.returnRate)} dari stok tersedia`}
           icon="carbon:arrow-down"
           accentColor={colors.bs}
           spark={sparks.bs}

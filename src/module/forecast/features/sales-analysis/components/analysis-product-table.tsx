@@ -61,7 +61,7 @@ export function AnalysisProductTable({ rows }: Props) {
     <Card>
       <CardHeader
         title="Kinerja per produk"
-        subheader="Rasio retur dan sell-through dihitung terhadap kiriman kunjungan sebelumnya (rumus B)"
+        subheader="Rasio BS dan sell-through dihitung terhadap stok tersedia (sisa + kiriman kunjungan sebelumnya)"
       />
       <TableContainer sx={{ mt: 2 }}>
         <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 900 }}>

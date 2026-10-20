@@ -4,18 +4,19 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 
-import { fDateTime, DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
-import {
-  IS_API,
-  useForecastMeta,
-  useForecastStores,
-  useForecastSettings,
-} from 'src/module/forecast/shared/hooks';
+import { fDateTime } from 'src/module/forecast/shared/utils';
 import {
   ForecastDataState,
   ForecastPageHeader,
   ForecastSimulationAlert,
 } from 'src/module/forecast/shared/components';
+import {
+  IS_API,
+  useForecastMeta,
+  useForecastStores,
+  useForecastFilters,
+  useForecastSettings,
+} from 'src/module/forecast/shared/hooks';
 
 import { SettingsForm } from '../components/settings-form';
 import { SettingsHistory } from '../components/settings-history';
@@ -25,7 +26,8 @@ import { SettingsHistory } from '../components/settings-history';
 export function SettingsView() {
   const settings = useForecastSettings();
   const meta = useForecastMeta();
-  const stores = useForecastStores(DEFAULT_FILTERS);
+  const [filters] = useForecastFilters();
+  const stores = useForecastStores(filters);
 
   // Rata-rata jarak kunjungan semua toko di data — pembanding interval.
   const observedInterval = useMemo(() => {

@@ -1,14 +1,15 @@
-import type { Granularity, ForecastFilters } from 'src/module/forecast/shared/types';
+import type { Granularity } from 'src/module/forecast/shared/types';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
-import { EMPTY_SUMMARY, DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
+import { EMPTY_SUMMARY } from 'src/module/forecast/shared/utils';
 import {
   useForecastSeries,
   useForecastSummary,
+  useForecastFilters,
   useForecastProducts,
   useForecastRecommendations,
 } from 'src/module/forecast/shared/hooks';
@@ -31,13 +32,8 @@ import { DashboardRecommendationSummary } from '../components/dashboard-recommen
 // bawahnya; ringkasan rekomendasi memakai data s.d. tanggal akhir.
 
 export function DashboardView() {
-  const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
+  const [filters, handleChange] = useForecastFilters();
   const [granularity, setGranularity] = useState<Granularity>('harian');
-
-  const handleChange = useCallback(
-    (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
-    []
-  );
 
   const summary = useForecastSummary(filters);
   const series = useForecastSeries(filters, granularity);

@@ -31,7 +31,7 @@ export const FIELD_META: Record<ScalarKey, FieldMeta> = {
   },
   method: {
     label: 'Metode perkiraan penjualan',
-    help: 'Rata-rata: semua kunjungan dihitung sama. Median: nilai tengah, tidak terpengaruh satu kunjungan yang sangat tinggi/rendah.',
+    help: 'Rata-rata: total roti terjual dibagi total hari. Median: nilai tengah penjualan per hari tiap kunjungan, tidak terpengaruh satu kunjungan yang sangat tinggi/rendah.',
   },
   stockUsablePct: {
     label: 'Sisa stok yang dianggap masih terjual',

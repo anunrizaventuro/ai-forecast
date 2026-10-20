@@ -1,8 +1,11 @@
 import type {
+  VisitRow,
   KecSummary,
+  PairDetail,
   CellSummary,
   ForecastMeta,
   StoreSummary,
+  PairAnalysis,
   SettingsState,
   ProductSummary,
   Recommendation,
@@ -39,6 +42,9 @@ const summaryShape = {
   sales_value: z.number(),
   visits: z.number(),
   stores: z.number(),
+  cells_complete: z.number(),
+  cells_insufficient: z.number(),
+  cells_check: z.number(),
 };
 
 type RawSummary = z.infer<z.ZodObject<typeof summaryShape>>;
@@ -54,6 +60,9 @@ const toSummary = (raw: RawSummary): CellSummary => ({
   salesValue: raw.sales_value,
   visits: raw.visits,
   stores: raw.stores,
+  cellsComplete: raw.cells_complete,
+  cellsInsufficient: raw.cells_insufficient,
+  cellsCheck: raw.cells_check,
 });
 
 const productSchema = z
@@ -249,3 +258,105 @@ export const toRawSettings = (p: ForecastSettings) => ({
   shelf_life_days: p.shelfLifeDays,
   product_shelf_life: p.productShelfLife,
 });
+
+// ---------------------------------------------------------------------- Analisis
+
+const cellStatus = z.enum(['lengkap', 'belum-cukup', 'perlu-diperiksa']);
+const cellReason = z.enum([
+  '',
+  'kunjungan-pertama',
+  'kiriman-sebelumnya-tidak-tercatat',
+  'sisa-sebelumnya-tidak-tercatat',
+  'sisa-tidak-tercatat',
+  'bs-tidak-tercatat',
+  'hasil-negatif',
+  'kiriman-sebelumnya-pencilan',
+]);
+
+const pairAnalysisSchema = z
+  .object({
+    nit: z.string(),
+    product: productCode,
+    observations: z.number(),
+    checks: z.number(),
+    insufficient: z.number(),
+    data_from: z.string().nullable(),
+    data_to: z.string().nullable(),
+    last_visit: z.string(),
+    last_kirim: z.number(),
+    last_stock: z.number(),
+    last_bs: z.number(),
+    avg_kirim: z.number(),
+    sold_per_day: z.number().nullable(),
+    sold_per_visit: z.number().nullable(),
+    avg_stock: z.number().nullable(),
+    bs_rate: z.number().nullable(),
+    trend: z.enum(['naik', 'turun', 'stabil', 'belum-bisa-dinilai']),
+    risk: z.enum(['kelebihan', 'kekurangan', 'wajar', 'belum-cukup']),
+    risk_reason: z.string(),
+  })
+  .transform(
+    (r): PairAnalysis => ({
+      nit: r.nit,
+      product: r.product,
+      observations: r.observations,
+      checks: r.checks,
+      insufficient: r.insufficient,
+      dataFrom: r.data_from,
+      dataTo: r.data_to,
+      lastVisit: r.last_visit,
+      lastKirim: r.last_kirim,
+      lastStock: r.last_stock,
+      lastBs: r.last_bs,
+      avgKirim: r.avg_kirim,
+      soldPerDay: r.sold_per_day,
+      soldPerVisit: r.sold_per_visit,
+      avgStock: r.avg_stock,
+      bsRate: r.bs_rate,
+      trend: r.trend,
+      risk: r.risk,
+      riskReason: r.risk_reason,
+    })
+  );
+
+export const forecastAnalysisSchema = list(pairAnalysisSchema);
+
+const visitRowSchema = z
+  .object({
+    tgl: z.string(),
+    prev_tgl: z.string().nullable(),
+    days: z.number(),
+    stock_start: z.number().nullable(),
+    prev_kirim: z.number().nullable(),
+    kirim: z.number(),
+    stock: z.number(),
+    bs: z.number(),
+    est_sold: z.number().nullable(),
+    per_day: z.number().nullable(),
+    status: cellStatus,
+    reason: cellReason,
+    used: z.boolean(),
+    nik: z.string(),
+  })
+  .transform(
+    (r): VisitRow => ({
+      tgl: r.tgl,
+      prevTgl: r.prev_tgl,
+      days: r.days,
+      stockStart: r.stock_start,
+      prevKirim: r.prev_kirim,
+      kirim: r.kirim,
+      stock: r.stock,
+      bs: r.bs,
+      estSold: r.est_sold,
+      perDay: r.per_day,
+      status: r.status,
+      reason: r.reason,
+      used: r.used,
+      nik: r.nik,
+    })
+  );
+
+export const forecastPairDetailSchema = z
+  .object({ analysis: pairAnalysisSchema, history: list(visitRowSchema) })
+  .transform((d): PairDetail => ({ analysis: d.analysis, history: d.history }));

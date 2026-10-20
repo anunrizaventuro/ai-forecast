@@ -1,7 +1,7 @@
 import type { TableHeadCellProps } from 'src/shared/ui/table';
-import type { ProductSummary, ForecastFilters } from 'src/module/forecast/shared/utils';
+import type { ProductSummary } from 'src/module/forecast/shared/utils';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -20,18 +20,18 @@ import { Label } from 'src/shared/ui/label';
 import { Iconify } from 'src/shared/ui/iconify';
 import { useTable, TableHeadCustom } from 'src/shared/ui/table';
 import {
-  useForecastMeta,
-  useForecastProducts,
-  useForecastSettings,
-} from 'src/module/forecast/shared/hooks';
-import {
   fNumber,
   fPercent,
   fCurrency,
   productGroup,
-  DEFAULT_FILTERS,
   isExcludedProduct,
 } from 'src/module/forecast/shared/utils';
+import {
+  useForecastMeta,
+  useForecastFilters,
+  useForecastProducts,
+  useForecastSettings,
+} from 'src/module/forecast/shared/hooks';
 import {
   SERIES,
   sortRows,
@@ -96,7 +96,7 @@ const getSortValue = (row: ProductSummary, id: ColumnId) => {
 const FIELD_SX = { minWidth: { xs: 1, sm: 160 }, flex: { xs: '1 1 100%', sm: '0 1 auto' } };
 
 export function ProductListView() {
-  const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
+  const [filters, handleChange] = useForecastFilters();
   const [group, setGroup] = useState('all');
   const [status, setStatus] = useState<'all' | 'otomatis' | 'dikecualikan'>('all');
 
@@ -109,13 +109,8 @@ export function ProductListView() {
   const orderBy = table.orderBy as ColumnId;
   const theme = useTheme();
 
-  const handleChange = useCallback(
-    (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
-    []
-  );
-
   const { meta } = useForecastMeta();
-  // Batas risiko BS dari Pengaturan (rasio BS ÷ kiriman sebelumnya).
+  // Batas risiko BS dari Pengaturan (rasio BS ÷ stok tersedia).
   const { settings } = useForecastSettings();
   const returnThreshold = settings.bsRiskPct / 100;
   const groups = useMemo(() => [...new Set(meta.products.map(productGroup))], [meta.products]);

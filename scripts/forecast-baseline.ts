@@ -10,8 +10,10 @@ import {
   filterCells,
   groupByStore,
   forecastCells,
+  analyzePairs,
   groupByProduct,
   DEFAULT_FILTERS,
+  DEFAULT_SETTINGS,
   DEFAULT_REC_PARAMS,
   computeRecommendations,
   summarizeRecommendations,
@@ -19,6 +21,12 @@ import {
 
 const cells = filterCells(forecastCells, DEFAULT_FILTERS);
 const recs = computeRecommendations(forecastCells, PERIOD.end, DEFAULT_REC_PARAMS);
+const pairs = analyzePairs(cells, DEFAULT_FILTERS.to, DEFAULT_SETTINGS);
+const countBy = (key: 'risk' | 'trend') =>
+  pairs.reduce<Record<string, number>>(
+    (acc, p) => ({ ...acc, [p[key]]: (acc[p[key]] ?? 0) + 1 }),
+    {}
+  );
 
 const result = {
   summary: summarize(cells),
@@ -28,6 +36,12 @@ const result = {
   series: {
     harian: timeSeries(cells, DEFAULT_FILTERS.from, DEFAULT_FILTERS.to, 'harian'),
     mingguan: timeSeries(cells, DEFAULT_FILTERS.from, DEFAULT_FILTERS.to, 'mingguan'),
+  },
+  analysis: {
+    total: pairs.length,
+    risk: countBy('risk'),
+    trend: countBy('trend'),
+    first20: pairs.slice(0, 20),
   },
   recommendations: {
     total: recs.length,

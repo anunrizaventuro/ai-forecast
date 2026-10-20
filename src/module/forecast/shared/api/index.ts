@@ -10,8 +10,10 @@ import {
   forecastSeriesSchema,
   forecastSummarySchema,
   forecastSettingsSchema,
+  forecastAnalysisSchema,
   forecastStoreRowsSchema,
   forecastRegionRowsSchema,
+  forecastPairDetailSchema,
   forecastProductRowsSchema,
   forecastSettingsHistorySchema,
   forecastRecommendationsSchema,
@@ -54,6 +56,11 @@ export const forecastKeys = {
   products: (p: ForecastRangeParams) => [...forecastKeys.all, 'products', rangeKey(p)] as const,
   regions: (p: ForecastRangeParams) => [...forecastKeys.all, 'regions', rangeKey(p)] as const,
   stores: (p: ForecastRangeParams) => [...forecastKeys.all, 'stores', rangeKey(p)] as const,
+  // Hasil analisis bergantung pada versi pengaturan aktif → ikut key.
+  analysis: (p: ForecastRangeParams, settingsVersion: number) =>
+    [...forecastKeys.all, 'analysis', rangeKey(p), settingsVersion] as const,
+  analysisDetail: (p: ForecastRangeParams, settingsVersion: number) =>
+    [...forecastKeys.all, 'analysis-detail', rangeKey(p), settingsVersion] as const,
   recommendations: (p: ForecastRecommendationParams) =>
     [
       ...forecastKeys.all,
@@ -134,6 +141,18 @@ export async function getForecastRecommendations(
       clean({ as_of: p.asOf, nit: p.nit, product: p.product }),
       options
     )
+  );
+}
+
+export async function getForecastAnalysis(p: ForecastRangeParams, options: FetchOptions = {}) {
+  return forecastAnalysisSchema.parse(
+    await get(forecastEndpoints.analysis, rangeParams(p), options)
+  );
+}
+
+export async function getForecastPairDetail(p: ForecastRangeParams, options: FetchOptions = {}) {
+  return forecastPairDetailSchema.parse(
+    await get(forecastEndpoints.analysisDetail, rangeParams(p), options)
   );
 }
 

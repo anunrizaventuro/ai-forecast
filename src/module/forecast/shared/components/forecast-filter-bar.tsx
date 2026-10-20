@@ -12,9 +12,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { Iconify } from 'src/shared/ui/iconify';
+import { addDays } from 'src/module/forecast/shared/utils';
 import { DateRangePicker } from 'src/shared/ui/date-range-picker';
-import { useForecastMeta } from 'src/module/forecast/shared/hooks';
-import { PERIOD, addDays, DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
+import { useDataPeriod, useForecastMeta } from 'src/module/forecast/shared/hooks';
 
 import { SECTION_GAP } from './forecast-layout';
 
@@ -35,16 +35,21 @@ type Props = {
 };
 
 // Preset terikat periode data (bukan dihitung dari hari ini).
-const PRESETS = [
-  { label: 'Periode inti', start: PERIOD.start, end: PERIOD.end },
-  { label: '14 hari terakhir', start: addDays(PERIOD.end, -13), end: PERIOD.end },
-  { label: '7 hari terakhir', start: addDays(PERIOD.end, -6), end: PERIOD.end },
-  { label: 'September 2026', start: '2026-09-01', end: PERIOD.end },
-  { label: 'Agustus 2026 (19–31)', start: PERIOD.start, end: '2026-08-31' },
-];
-
-const MIN_DATE = dayjs(PERIOD.start);
-const MAX_DATE = dayjs(PERIOD.end);
+function presetsFor(period: { start: string; end: string }) {
+  const clamp = (tgl: string) => (tgl < period.start ? period.start : tgl);
+  const monthStart = dayjs(period.end).startOf('month').format('YYYY-MM-DD');
+  return [
+    { label: 'Seluruh data', start: period.start, end: period.end },
+    { label: '30 hari terakhir', start: clamp(addDays(period.end, -29)), end: period.end },
+    { label: '14 hari terakhir', start: clamp(addDays(period.end, -13)), end: period.end },
+    { label: '7 hari terakhir', start: clamp(addDays(period.end, -6)), end: period.end },
+    {
+      label: dayjs(period.end).locale('id').format('MMMM YYYY'),
+      start: clamp(monthStart),
+      end: period.end,
+    },
+  ];
+}
 
 const toValue = (value: Dayjs | null) =>
   value && value.isValid() ? value.format('YYYY-MM-DD') : null;
@@ -60,11 +65,12 @@ export function ForecastFilterBar({
   children,
 }: Props) {
   const { meta, storeMap } = useForecastMeta();
+  const period = useDataPeriod();
 
   const isDirty =
     filters.nit !== null ||
     filters.product !== null ||
-    (dateMode !== 'none' && (filters.from !== PERIOD.start || filters.to !== PERIOD.end));
+    (dateMode !== 'none' && (filters.from !== period.start || filters.to !== period.end));
 
   return (
     <Card sx={{ p: 2, mb: SECTION_GAP }}>
@@ -75,9 +81,9 @@ export function ForecastFilterBar({
               fullWidth
               startDate={filters.from}
               endDate={filters.to}
-              presets={PRESETS}
-              minDate={PERIOD.start}
-              maxDate={PERIOD.end}
+              presets={presetsFor(period)}
+              minDate={period.start}
+              maxDate={period.end}
               onApply={({ start, end }) => onChange({ from: start, to: end })}
             />
           </Box>
@@ -87,8 +93,8 @@ export function ForecastFilterBar({
           <DatePicker
             label="Data s.d. tanggal"
             value={dayjs(filters.to)}
-            minDate={MIN_DATE}
-            maxDate={MAX_DATE}
+            minDate={dayjs(period.start)}
+            maxDate={dayjs(period.end)}
             format="D MMM YYYY"
             onChange={(value) => {
               const next = toValue(value);
@@ -153,7 +159,7 @@ export function ForecastFilterBar({
               onChange({
                 nit: null,
                 product: null,
-                ...(dateMode !== 'none' && { from: DEFAULT_FILTERS.from, to: DEFAULT_FILTERS.to }),
+                ...(dateMode !== 'none' && { from: period.start, to: period.end }),
               })
             }
             startIcon={<Iconify icon="solar:restart-bold" width={18} />}

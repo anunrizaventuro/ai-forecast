@@ -74,6 +74,17 @@ export type KirimanRow = TransactionRow & {
  * Satu sel (toko × produk × kunjungan) hasil gabungan KIRIMAN/BS/STOCK pada
  * kunci (tgl, nit) — `nik` hanya atribut (dokumen analisis §6.1).
  */
+export type CellStatus = 'lengkap' | 'belum-cukup' | 'perlu-diperiksa';
+
+export type CellReason =
+  | 'kunjungan-pertama'
+  | 'kiriman-sebelumnya-tidak-tercatat'
+  | 'sisa-sebelumnya-tidak-tercatat'
+  | 'sisa-tidak-tercatat'
+  | 'bs-tidak-tercatat'
+  | 'hasil-negatif'
+  | 'kiriman-sebelumnya-pencilan';
+
 export type VisitCell = {
   tgl: string;
   nit: string;
@@ -84,10 +95,20 @@ export type VisitCell = {
   stock: number;
   /** Kiriman produk ini pada kunjungan sebelumnya ke toko yang sama. */
   prevKirim: number | null;
+  /** Sisa stok pada kunjungan sebelumnya (= stok awal periode). */
+  prevStock: number | null;
   prevTgl: string | null;
-  /** Estimasi terjual rumus B: kirim(t−1) − bs(t). Null bila tak ada t−1. */
+  /** Hari sejak kunjungan sebelumnya (0 bila tidak ada). */
+  days: number;
+  /**
+   * Estimasi terjual rumus stok: sisa(t−1) + kirim(t−1) − sisa(t) − bs(t).
+   * Null bila data tidak cukup; bisa negatif (status perlu-diperiksa).
+   */
   estSold: number | null;
-  /** true bila estSold layak dipakai (kiriman sebelumnya > 0 dan bukan pencilan). */
+  status: CellStatus;
+  /** Alasan status belum-cukup / perlu-diperiksa (kosong bila lengkap). */
+  reason: CellReason | '';
+  /** status === 'lengkap' — satu-satunya sel yang masuk total & rasio. */
   reliable: boolean;
   /** Kiriman sel ini terdeteksi pencilan (kemungkinan salah input). */
   outlier: boolean;
@@ -208,9 +229,9 @@ export type CellSummary = {
   kirim: number;
   bs: number;
   stock: number;
-  /** Σ estimasi terjual pada sel yang layak (reliable). */
+  /** Σ estimasi terjual pada sel berstatus lengkap. */
   estSold: number;
-  /** Σ kiriman sebelumnya pada sel yang sama — penyebut rasio. */
+  /** Σ stok tersedia (sisa + kiriman kunjungan sebelumnya) pada sel yang sama — penyebut rasio. */
   basis: number;
   returnRate: number | null;
   sellThrough: number | null;
@@ -218,7 +239,59 @@ export type CellSummary = {
   salesValue: number;
   visits: number;
   stores: number;
+  /** Jumlah sel per status kecukupan data. */
+  cellsComplete: number;
+  cellsInsufficient: number;
+  cellsCheck: number;
 };
+
+// ---------------------------------------------------------------------- Analisis toko × roti
+// Cermin PairAnalysis / VisitRow di ai-forecast-be (internal/forecast/analysis.go).
+
+export type Trend = 'naik' | 'turun' | 'stabil' | 'belum-bisa-dinilai';
+export type StockRisk = 'kelebihan' | 'kekurangan' | 'wajar' | 'belum-cukup';
+
+export type PairAnalysis = {
+  nit: string;
+  product: ProductCode;
+  observations: number;
+  checks: number;
+  insufficient: number;
+  dataFrom: string | null;
+  dataTo: string | null;
+  lastVisit: string;
+  lastKirim: number;
+  lastStock: number;
+  lastBs: number;
+  avgKirim: number;
+  soldPerDay: number | null;
+  soldPerVisit: number | null;
+  avgStock: number | null;
+  bsRate: number | null;
+  trend: Trend;
+  risk: StockRisk;
+  riskReason: string;
+};
+
+export type VisitRow = {
+  tgl: string;
+  prevTgl: string | null;
+  days: number;
+  stockStart: number | null;
+  prevKirim: number | null;
+  kirim: number;
+  stock: number;
+  bs: number;
+  estSold: number | null;
+  perDay: number | null;
+  status: CellStatus;
+  reason: CellReason | '';
+  /** Dipakai sebagai observasi analisis. */
+  used: boolean;
+  nik: string;
+};
+
+export type PairDetail = { analysis: PairAnalysis; history: VisitRow[] };
 
 export type SeriesPoint = {
   key: string;

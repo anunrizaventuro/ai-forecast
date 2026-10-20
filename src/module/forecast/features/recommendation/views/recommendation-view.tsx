@@ -1,8 +1,7 @@
 import type { RecStatus } from 'src/module/forecast/shared/components';
-import type { ForecastFilters } from 'src/module/forecast/shared/utils';
 import type { Confidence, MasterStore, Recommendation } from 'src/module/forecast/shared/types';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -15,18 +14,18 @@ import Typography from '@mui/material/Typography';
 
 import { Iconify } from 'src/shared/ui/iconify';
 import {
-  IS_API,
-  useStoreSales,
-  useForecastMeta,
-  useForecastRecommendations,
-} from 'src/module/forecast/shared/hooks';
-import {
   fDate,
   fNumber,
-  DEFAULT_FILTERS,
   CONFIDENCE_LABEL,
   summarizeRecommendations,
 } from 'src/module/forecast/shared/utils';
+import {
+  IS_API,
+  useStoreSales,
+  useForecastMeta,
+  useForecastFilters,
+  useForecastRecommendations,
+} from 'src/module/forecast/shared/hooks';
 import {
   SECTION_GAP,
   RecommendationMix,
@@ -121,15 +120,10 @@ function downloadCsv(
 }
 
 export function RecommendationView() {
-  const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
+  const [filters, handleChange] = useForecastFilters();
   const [status, setStatus] = useState<Status>('all');
   const [confidence, setConfidence] = useState<Confidence | 'all'>('all');
   const [pov, setPov] = useState<Pov>('toko');
-
-  const handleChange = useCallback(
-    (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
-    []
-  );
 
   const { storeMap } = useForecastMeta();
   const query = useForecastRecommendations({

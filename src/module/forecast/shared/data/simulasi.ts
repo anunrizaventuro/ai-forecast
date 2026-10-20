@@ -202,6 +202,7 @@ function generateTransactions(stores: MasterStore[]) {
     ) as Record<ProductCode, number>;
 
     let prevKirim: ProductQuantities | null = null;
+    let prevStock: ProductQuantities | null = null;
     let prevDay = 0;
 
     while (day < PERIOD_DAYS) {
@@ -225,7 +226,8 @@ function generateTransactions(stores: MasterStore[]) {
 
         if (prevKirim) {
           const demand = poisson(lambda[code] * (sim.demand + 0.12) * gapFactor);
-          const leftover = Math.max(0, before - demand);
+          // Stok tersedia = sisa kunjungan lalu + kiriman lalu (rumus stok).
+          const leftover = Math.max(0, (prevStock?.[code] ?? 0) + before - demand);
           soldOut = leftover === 0;
           if (leftover > 0) {
             rowBs[code] = Math.round(leftover * (0.15 + random() * 0.3));
@@ -257,6 +259,7 @@ function generateTransactions(stores: MasterStore[]) {
       stock.push({ ...base, id: 0, qty: rowStock });
 
       prevKirim = rowKirim;
+      prevStock = rowStock;
       prevDay = day;
       day += pick([4, 5, 6, 6, 7, 7, 7, 7, 8, 9, 12]);
     }

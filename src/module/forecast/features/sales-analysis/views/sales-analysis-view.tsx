@@ -1,29 +1,29 @@
 import type { IconifyName } from 'src/shared/ui/iconify';
-import type { Granularity, ForecastFilters } from 'src/module/forecast/shared/utils';
+import type { Granularity } from 'src/module/forecast/shared/utils';
+import type { PairAnalysis } from 'src/module/forecast/shared/types';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
+import Alert from '@mui/material/Alert';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 
 import { Iconify } from 'src/shared/ui/iconify';
 import { ChartCard } from 'src/shared/ui/dashboard-card';
-import {
-  fNumber,
-  fPercent,
-  EMPTY_SUMMARY,
-  DEFAULT_FILTERS,
-} from 'src/module/forecast/shared/utils';
+import { fNumber, fPercent, historyFrom, EMPTY_SUMMARY } from 'src/module/forecast/shared/utils';
 import {
   useForecastSeries,
   useForecastRegions,
   useForecastSummary,
+  useForecastFilters,
+  useForecastAnalysis,
   useForecastProducts,
+  useForecastSettings,
 } from 'src/module/forecast/shared/hooks';
 import {
   SECTION_GAP,
@@ -36,6 +36,8 @@ import {
   ForecastSimulationAlert,
 } from 'src/module/forecast/shared/components';
 
+import { PairDetailDrawer } from '../components/pair-detail-drawer';
+import { PairAnalysisTable } from '../components/pair-analysis-table';
 import { AnalysisProductTable } from '../components/analysis-product-table';
 
 // ----------------------------------------------------------------------
@@ -45,8 +47,8 @@ import { AnalysisProductTable } from '../components/analysis-product-table';
 const METHOD_NOTES: { icon: IconifyName; title: string; text: string }[] = [
   {
     icon: 'carbon:chart-average',
-    title: 'Estimasi terjual = kiriman sebelumnya − BS hari ini',
-    text: 'Rumus B dari studi kelayakan. Dicatat pada tanggal penarikan retur.',
+    title: 'Estimasi terjual = sisa awal + kiriman − sisa akhir − BS',
+    text: 'Dihitung per periode antar dua kunjungan. Sisa awal & kiriman dari kunjungan sebelumnya; sisa akhir & BS dari kunjungan ini. Dicatat pada tanggal kunjungan ini.',
   },
   {
     icon: 'solar:info-circle-outline',
@@ -56,25 +58,25 @@ const METHOD_NOTES: { icon: IconifyName; title: string; text: string }[] = [
   {
     icon: 'solar:filter-outline',
     title: 'Yang tidak dihitung',
-    text: 'Kunjungan pertama tiap toko (belum ada pembanding) dan kiriman pencilan.',
+    text: 'Kunjungan yang datanya belum cukup (kunjungan pertama, sisa atau BS tidak tercatat) dan hasil yang perlu diperiksa (negatif atau kiriman pencilan). Umur roti tidak dicatat, jadi stok kedaluwarsa tidak dihitung.',
   },
 ];
 
 export function SalesAnalysisView() {
-  const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
+  const [filters, handleChange] = useForecastFilters();
   const [granularity, setGranularity] = useState<Granularity>('mingguan');
-
-  const handleChange = useCallback(
-    (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
-    []
-  );
+  const [selected, setSelected] = useState<PairAnalysis | null>(null);
+  const { settings } = useForecastSettings();
 
   const summary = useForecastSummary(filters);
+  const analysis = useForecastAnalysis(filters);
   const series = useForecastSeries(filters, granularity);
   const productRows = useForecastProducts(filters);
   const regions = useForecastRegions(filters);
 
-  const states = [summary, series, productRows, regions];
+  const states = [summary, series, productRows, regions, analysis];
+  const sum = summary.data ?? EMPTY_SUMMARY;
+  const totalCells = sum.cellsComplete + sum.cellsInsufficient + sum.cellsCheck;
   const points = series.data ?? [];
 
   const kecItems = (regions.data ?? [])
@@ -105,7 +107,20 @@ export function SalesAnalysisView() {
         onRetry={() => states.forEach((s) => s.refetch())}
       />
 
-      <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} points={points} />
+      {totalCells > 0 && (
+        <Alert
+          severity={sum.cellsComplete / totalCells >= 0.8 ? 'info' : 'warning'}
+          variant="outlined"
+          sx={{ mb: SECTION_GAP }}
+        >
+          <strong>Kelengkapan data:</strong> {fPercent(sum.cellsComplete / totalCells)} catatan toko
+          × roti bisa dihitung ({fNumber(sum.cellsComplete)} lengkap,{' '}
+          {fNumber(sum.cellsInsufficient)} belum cukup, {fNumber(sum.cellsCheck)} perlu diperiksa).
+          Hanya yang lengkap masuk estimasi terjual dan rasio BS.
+        </Alert>
+      )}
+
+      <ForecastKpiGrid summary={sum} points={points} />
 
       <Grid container rowSpacing={SECTION_GAP} columnSpacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
@@ -147,7 +162,7 @@ export function SalesAnalysisView() {
           <Card sx={{ height: 1 }}>
             <CardHeader
               title="Cara membaca angka ini"
-              subheader="Rumus akhir menunggu konfirmasi arti BS dan STOCK dari klien"
+              subheader="Asumsi: sisa dicatat terpisah dari BS dan mencakup seluruh stok di toko"
             />
             <CardContent>
               <Box component="ul" sx={{ gap: 2.5, display: 'flex', flexDirection: 'column' }}>
@@ -182,9 +197,19 @@ export function SalesAnalysisView() {
         </Grid>
 
         <Grid size={12}>
+          <PairAnalysisTable
+            rows={analysis.data ?? []}
+            historyFrom={historyFrom(filters.to, settings)}
+            onSelect={setSelected}
+          />
+        </Grid>
+
+        <Grid size={12}>
           <AnalysisProductTable rows={productRows.data ?? []} />
         </Grid>
       </Grid>
+
+      <PairDetailDrawer pair={selected} filters={filters} onClose={() => setSelected(null)} />
     </Box>
   );
 }

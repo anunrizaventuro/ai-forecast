@@ -1,7 +1,10 @@
 import 'dayjs/locale/id';
 
 import type {
+  VisitRow,
   VisitCell,
+  CellReason,
+  CellStatus,
   KecSummary,
   Confidence,
   AdjustUnit,
@@ -10,11 +13,13 @@ import type {
   SeriesPoint,
   ProductCode,
   MasterStore,
+  PairAnalysis,
   StoreSummary,
   MasterProduct,
   ProductSummary,
   Recommendation,
   ForecastFilters,
+  ForecastSettings,
   ProductQuantities,
   RecommendationParams,
   RecommendationSignal,
@@ -47,7 +52,8 @@ export type {
 // ----------------------------------------------------------------------
 // Lapisan olah data dashboard (sementara di client, di atas data simulasi).
 // Definisi metrik mengikuti ai-forecast-be/docs/forecast-feasibility.md:
-// - Estimasi terjual = rumus B: kirim(t−1) − bs(t) (§3.1) — selalu berlabel
+// - Estimasi terjual = rumus stok: sisa(t−1) + kirim(t−1) − sisa(t) − bs(t)
+//   (docs/superpowers/specs/2026-10-20-analisis-stok-design.md) — selalu berlabel
 //   "estimasi".
 // - Rekomendasi = aturan baseline §4.2 dengan parameter CONTOH yang belum
 //   di-backtest. Saat backend siap, fungsi ini pindah ke server.
@@ -120,6 +126,8 @@ type DayRow = {
   kirim: ProductQuantities;
   bs: ProductQuantities;
   stock: ProductQuantities;
+  /** Baris tabel ada untuk (tgl, nit). Nol tercatat ≠ tidak dicatat. */
+  has: { kirim: boolean; bs: boolean; stock: boolean };
 };
 
 function buildCells(): VisitCell[] {
@@ -132,7 +140,13 @@ function buildCells(): VisitCell[] {
     let row = days.get(key);
     if (!row) {
       const zero = () => Object.fromEntries(PRODUCT_CODES.map((c) => [c, 0])) as ProductQuantities;
-      row = { nik: new Set(), kirim: zero(), bs: zero(), stock: zero() };
+      row = {
+        nik: new Set(),
+        kirim: zero(),
+        bs: zero(),
+        stock: zero(),
+        has: { kirim: false, bs: false, stock: false },
+      };
       days.set(key, row);
     }
     return row;
@@ -145,6 +159,7 @@ function buildCells(): VisitCell[] {
     rows.forEach((row) => {
       const day = ensure(row.tgl, row.nit);
       day.nik.add(row.nik);
+      day.has[field] = true;
       PRODUCT_CODES.forEach((code) => {
         day[field][code] += row.qty[code];
       });
@@ -181,11 +196,30 @@ function buildCells(): VisitCell[] {
         const bs = row.bs[product];
         const stock = row.stock[product];
         const prevKirim = prev ? prev.row.kirim[product] : null;
-
-        if (!kirim && !bs && !stock && !prevKirim) return;
-
+        const prevStock = prev ? prev.row.stock[product] : null;
         const limit = outlierLimit.get(product)!;
-        const prevOutlier = (prevKirim ?? 0) > limit;
+
+        // Rumus stok + status — sama dengan buildCells di backend (dataset.go).
+        let estSold: number | null = null;
+        let status: CellStatus = 'belum-cukup';
+        let reason: CellReason | '' = '';
+        if (!prev) reason = 'kunjungan-pertama';
+        else if (!prev.row.has.kirim) reason = 'kiriman-sebelumnya-tidak-tercatat';
+        else if (!prev.row.has.stock) reason = 'sisa-sebelumnya-tidak-tercatat';
+        else if (!row.has.stock) reason = 'sisa-tidak-tercatat';
+        else if (!row.has.bs) reason = 'bs-tidak-tercatat';
+        else {
+          estSold = prevStock! + prevKirim! - stock - bs;
+          if (prevKirim! > limit) {
+            status = 'perlu-diperiksa';
+            reason = 'kiriman-sebelumnya-pencilan';
+          } else if (estSold < 0) {
+            status = 'perlu-diperiksa';
+            reason = 'hasil-negatif';
+          } else status = 'lengkap';
+        }
+
+        if (!kirim && !bs && !stock && !(prevKirim ?? 0) && !(prevStock ?? 0)) return;
 
         cells.push({
           tgl,
@@ -196,9 +230,13 @@ function buildCells(): VisitCell[] {
           bs,
           stock,
           prevKirim,
+          prevStock,
           prevTgl: prev?.tgl ?? null,
-          estSold: prevKirim === null ? null : prevKirim - bs,
-          reliable: prevKirim !== null && prevKirim > 0 && !prevOutlier,
+          days: prev ? dayjs(tgl).diff(dayjs(prev.tgl), 'day') : 0,
+          estSold,
+          status,
+          reason,
+          reliable: status === 'lengkap',
           outlier: kirim > limit,
         });
       });
@@ -209,6 +247,9 @@ function buildCells(): VisitCell[] {
 }
 
 export const forecastCells = buildCells();
+
+/** Stok tersedia setelah kunjungan sebelumnya: sisa(t−1) + kirim(t−1). */
+export const available = (cell: VisitCell) => (cell.prevKirim ?? 0) + (cell.prevStock ?? 0);
 
 // ---------------------------------------------------------------------- Filter
 
@@ -241,6 +282,9 @@ export function summarize(cells: VisitCell[]): CellSummary {
   let basis = 0;
   let reliableBs = 0;
   let salesValue = 0;
+  let cellsComplete = 0;
+  let cellsInsufficient = 0;
+  let cellsCheck = 0;
 
   cells.forEach((cell) => {
     visits.add(`${cell.tgl}|${cell.nit}`);
@@ -248,9 +292,12 @@ export function summarize(cells: VisitCell[]): CellSummary {
     if (!cell.outlier) kirim += cell.kirim;
     bs += cell.bs;
     stock += cell.stock;
+    if (cell.status === 'lengkap') cellsComplete += 1;
+    else if (cell.status === 'perlu-diperiksa') cellsCheck += 1;
+    else cellsInsufficient += 1;
     if (cell.reliable && cell.estSold !== null) {
       estSold += cell.estSold;
-      basis += cell.prevKirim!;
+      basis += available(cell);
       reliableBs += cell.bs;
       salesValue += cell.estSold * (productMap.get(cell.product)?.hargaJual ?? 0);
     }
@@ -267,6 +314,9 @@ export function summarize(cells: VisitCell[]): CellSummary {
     salesValue,
     visits: visits.size,
     stores: storeSet.size,
+    cellsComplete,
+    cellsInsufficient,
+    cellsCheck,
   };
 }
 
@@ -369,7 +419,7 @@ export function groupByStore(cells: VisitCell[]): StoreSummary[] {
 const returnStreakOk = (retObs: VisitCell[], params: RecommendationParams) =>
   params.returnStreak <= 1 ||
   (retObs.length >= params.returnStreak &&
-    retObs.slice(-params.returnStreak).every((c) => c.bs / c.prevKirim! > params.returnThreshold));
+    retObs.slice(-params.returnStreak).every((c) => c.bs / available(c) > params.returnThreshold));
 
 /**
  * Besar perubahan: pcs apa adanya, atau persen dari dasar dibulatkan ke ATAS
@@ -458,7 +508,7 @@ export function computeRecommendations(
     const allObs = reliableObs(pairCells);
     const obs = allObs.slice(-params.window);
     const retObs = allObs.slice(-params.returnWindow);
-    const obsBasis = sum(retObs.map((c) => c.prevKirim!));
+    const obsBasis = sum(retObs.map(available));
     const returnRate = obsBasis ? sum(retObs.map((c) => c.bs)) / obsBasis : null;
     const refKirim = [...delivered].reverse().find((c) => !c.outlier)?.kirim ?? lastDelivered.kirim;
 
@@ -612,3 +662,172 @@ export function signalLabel(signal: RecommendationSignal, params: Recommendation
     return `Retur tinggi (−${fAdjust(params.returnCutUnit, params.returnCut)})`;
   return SIGNAL_LABEL[signal];
 }
+
+// ---------------------------------------------------------------------- Analisis toko × roti
+// Sama dengan internal/forecast/analysis.go di backend — ubah keduanya bersamaan.
+
+const mean = (values: number[]) => (values.length ? sum(values) / values.length : null);
+
+const perDay = (cell: VisitCell) => cell.estSold! / Math.max(1, cell.days);
+
+/** 1 desimal, koma desimal, tanpa desimal bila bulat — sama dengan num() backend. */
+const fNum = (value: number) => {
+  const rounded = Math.round(value * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1).replace('.', ',');
+};
+
+const soldOut = (cell: VisitCell) => cell.stock === 0 && cell.bs === 0;
+
+/** Awal jendela data historis: `historyDays` hari sampai `asOf` (inklusif). */
+export const historyFrom = (asOf: string, s: ForecastSettings) =>
+  addDays(asOf, -(s.historyDays - 1));
+
+function analyzePair(
+  nit: string,
+  product: ProductCode,
+  pc: VisitCell[],
+  asOf: string,
+  s: ForecastSettings
+): { analysis: PairAnalysis; used: Set<string> } {
+  const used = new Set<string>();
+  const last = pc[pc.length - 1];
+  const a: PairAnalysis = {
+    nit,
+    product,
+    observations: 0,
+    checks: 0,
+    insufficient: 0,
+    dataFrom: null,
+    dataTo: null,
+    lastVisit: last?.tgl ?? '',
+    lastKirim: last?.kirim ?? 0,
+    lastStock: last?.stock ?? 0,
+    lastBs: last?.bs ?? 0,
+    avgKirim: 0,
+    soldPerDay: null,
+    soldPerVisit: null,
+    avgStock: null,
+    bsRate: null,
+    trend: 'belum-bisa-dinilai',
+    risk: 'belum-cukup',
+    riskReason: '',
+  };
+  if (!last) return { analysis: a, used };
+
+  const from = historyFrom(asOf, s);
+  const window = pc.filter((c) => c.tgl >= from && c.tgl <= asOf);
+  let obs = window.filter((c) => c.status === 'lengkap');
+  a.checks = window.filter((c) => c.status === 'perlu-diperiksa').length;
+  a.insufficient = window.filter((c) => c.status === 'belum-cukup').length;
+  if (obs.length > s.historyVisits) obs = obs.slice(-s.historyVisits);
+  if (window.length) a.avgKirim = sum(window.map((c) => c.kirim)) / window.length;
+
+  a.observations = obs.length;
+  if (obs.length) {
+    a.dataFrom = obs[0]!.tgl;
+    a.dataTo = obs[obs.length - 1]!.tgl;
+  }
+  obs.forEach((c) => used.add(c.tgl));
+  if (obs.length < s.minObservations || !obs.length) {
+    a.riskReason = `Baru ${obs.length} kunjungan berdata lengkap; minimal ${s.minObservations}.`;
+    return { analysis: a, used };
+  }
+
+  const rates = obs.map(perDay);
+  // Rata-rata = total terjual ÷ total hari (tahan terhadap jarak kunjungan pendek);
+  // median = nilai tengah terjual/hari per kunjungan.
+  const totalDays = sum(obs.map((c) => Math.max(1, c.days)));
+  const rate = s.method === 'median' ? median(rates)! : sum(obs.map((c) => c.estSold!)) / totalDays;
+  const avail = sum(obs.map(available));
+  const avgStock = sum(obs.map((c) => c.stock)) / obs.length;
+  a.soldPerDay = rate;
+  a.soldPerVisit = sum(obs.map((c) => c.estSold!)) / obs.length;
+  a.avgStock = avgStock;
+  if (avail > 0) a.bsRate = sum(obs.map((c) => c.bs)) / avail;
+
+  const n = rates.length;
+  if (n >= 4) {
+    const older = mean(rates.slice(0, Math.floor(n / 2)))!;
+    const recent = mean(rates.slice(n - Math.floor(n / 2)))!;
+    if (older === 0) a.trend = recent > 0 ? 'naik' : 'stabil';
+    else if (recent > older * 1.2) a.trend = 'naik';
+    else if (recent < older * 0.8) a.trend = 'turun';
+    else a.trend = 'stabil';
+  }
+
+  const need = rate * s.visitIntervalDays;
+  if (a.bsRate !== null && a.bsRate * 100 > s.bsRiskPct) {
+    a.risk = 'kelebihan';
+    a.riskReason = `BS ${fNum(a.bsRate * 100)}% dari stok tersedia, di atas batas ${s.bsRiskPct}%.`;
+  } else if (avgStock > need && avgStock >= 1) {
+    a.risk = 'kelebihan';
+    a.riskReason = `Sisa stok rata-rata ${fNum(avgStock)} pcs, lebih dari perkiraan penjualan ${s.visitIntervalDays} hari (${fNum(need)} pcs).`;
+  } else if (obs.length >= 2 && soldOut(obs[obs.length - 1]!) && soldOut(obs[obs.length - 2]!)) {
+    a.risk = 'kekurangan';
+    a.riskReason =
+      'Stok habis (sisa 0 dan BS 0) di 2 kunjungan terakhir — permintaan mungkin lebih besar dari kiriman.';
+  } else {
+    a.risk = 'wajar';
+  }
+  return { analysis: a, used };
+}
+
+/** Analisis tiap pasangan toko × roti di `cells` (sudah difilter rentang); asOf = akhir rentang. */
+export function analyzePairs(
+  cells: VisitCell[],
+  asOf: string,
+  s: ForecastSettings
+): PairAnalysis[] {
+  const pairs = new Map<string, VisitCell[]>();
+  cells.forEach((cell) => {
+    const key = `${cell.nit}|${cell.product}`;
+    pairs.set(key, [...(pairs.get(key) ?? []), cell]);
+  });
+  return [...pairs.entries()]
+    .map(([key, pc]) => {
+      const [nit, product] = key.split('|') as [string, ProductCode];
+      return analyzePair(nit, product, pc, asOf, s).analysis;
+    })
+    .sort((x, y) => x.nit.localeCompare(y.nit) || x.product.localeCompare(y.product));
+}
+
+/** Analisis + riwayat kunjungan satu pasangan. */
+export function analyzePairDetail(
+  cells: VisitCell[],
+  nit: string,
+  product: ProductCode,
+  asOf: string,
+  s: ForecastSettings
+): { analysis: PairAnalysis; history: VisitRow[] } {
+  const pc = cells.filter((c) => c.nit === nit && c.product === product);
+  const { analysis, used } = analyzePair(nit, product, pc, asOf, s);
+  return {
+    analysis,
+    history: pc.map((c) => ({
+      tgl: c.tgl,
+      prevTgl: c.prevTgl,
+      days: c.days,
+      stockStart: c.prevStock,
+      prevKirim: c.prevKirim,
+      kirim: c.kirim,
+      stock: c.stock,
+      bs: c.bs,
+      estSold: c.estSold,
+      perDay: c.estSold === null ? null : perDay(c),
+      status: c.status,
+      reason: c.reason,
+      used: used.has(c.tgl),
+      nik: c.nik,
+    })),
+  };
+}
+
+export const CELL_REASON_LABEL: Record<CellReason, string> = {
+  'kunjungan-pertama': 'Kunjungan pertama — belum ada stok awal',
+  'kiriman-sebelumnya-tidak-tercatat': 'Kiriman kunjungan sebelumnya tidak tercatat',
+  'sisa-sebelumnya-tidak-tercatat': 'Sisa stok kunjungan sebelumnya tidak tercatat',
+  'sisa-tidak-tercatat': 'Sisa stok kunjungan ini tidak tercatat',
+  'bs-tidak-tercatat': 'BS kunjungan ini tidak tercatat',
+  'hasil-negatif': 'Hasil negatif — sisa + BS melebihi stok tersedia',
+  'kiriman-sebelumnya-pencilan': 'Kiriman sebelumnya tidak wajar (kemungkinan salah input)',
+};

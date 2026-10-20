@@ -1,11 +1,13 @@
 import type {
   KecSummary,
+  PairDetail,
   CellSummary,
   Granularity,
   MasterStore,
   SeriesPoint,
   ForecastMeta,
   StoreSummary,
+  PairAnalysis,
   MasterProduct,
   ProductSummary,
   Recommendation,
@@ -21,7 +23,9 @@ import {
   getForecastStores,
   getForecastRegions,
   getForecastSummary,
+  getForecastAnalysis,
   getForecastProducts,
+  getForecastPairDetail,
   getForecastTimeseries,
   getForecastRecommendations,
 } from 'src/module/forecast/shared/api';
@@ -36,13 +40,16 @@ import {
   filterCells,
   seriesLabel,
   groupByStore,
+  analyzePairs,
   forecastCells,
   groupByProduct,
+  analyzePairDetail,
   DEFAULT_REC_PARAMS,
   computeRecommendations,
 } from 'src/module/forecast/shared/utils';
 
 import { useForecastQuery } from './use-forecast-query';
+import { useForecastSettings } from './use-forecast-settings';
 
 // ----------------------------------------------------------------------
 // Satu antarmuka data untuk semua halaman dashboard, dua sumber:
@@ -267,5 +274,42 @@ export function useForecastRecommendations(
         DEFAULT_REC_PARAMS
       ),
     enabled
+  );
+}
+
+// ---------------------------------------------------------------------- Analisis toko × roti
+
+/** Analisis semua pasangan toko × roti di rentang filter (pengaturan versi aktif). */
+export function useForecastAnalysis(filters: ForecastFilters) {
+  const { settings, version, loading } = useForecastSettings();
+  return useForecastSource<PairAnalysis[]>(
+    // Simulasi: params ikut key agar dihitung ulang saat pengaturan berubah.
+    IS_API
+      ? forecastKeys.analysis(filters, version)
+      : [...forecastKeys.analysis(filters, version), settings],
+    (signal) => getForecastAnalysis(filters, { signal }),
+    () => analyzePairs(filterCells(forecastCells, filters), filters.to, settings),
+    !loading
+  );
+}
+
+/** Analisis + riwayat satu pasangan; nonaktif sampai toko & roti dipilih. */
+export function useForecastPairDetail(filters: ForecastFilters) {
+  const { settings, version, loading } = useForecastSettings();
+  const ready = !!filters.nit && !!filters.product && !loading;
+  return useForecastSource<PairDetail>(
+    IS_API
+      ? forecastKeys.analysisDetail(filters, version)
+      : [...forecastKeys.analysisDetail(filters, version), settings],
+    (signal) => getForecastPairDetail(filters, { signal }),
+    () =>
+      analyzePairDetail(
+        filterCells(forecastCells, filters),
+        filters.nit!,
+        filters.product!,
+        filters.to,
+        settings
+      ),
+    ready
   );
 }

@@ -1,7 +1,7 @@
 import type { TableHeadCellProps } from 'src/shared/ui/table';
-import type { StoreSummary, ForecastFilters } from 'src/module/forecast/shared/utils';
+import type { StoreSummary } from 'src/module/forecast/shared/utils';
 
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -19,11 +19,12 @@ import TableContainer from '@mui/material/TableContainer';
 import { Label } from 'src/shared/ui/label';
 import { Iconify } from 'src/shared/ui/iconify';
 import { useTable, TableHeadCustom } from 'src/shared/ui/table';
-import { fDate, fNumber, fPercent, DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
+import { fDate, fNumber, fPercent } from 'src/module/forecast/shared/utils';
 import {
   IS_API,
   useForecastMeta,
   useForecastStores,
+  useForecastFilters,
   useForecastSettings,
 } from 'src/module/forecast/shared/hooks';
 import {
@@ -81,8 +82,8 @@ const getSortValue = (row: StoreSummary, id: ColumnId) => {
 const FIELD_SX = { minWidth: { xs: 1, sm: 140 }, flex: { xs: '1 1 100%', sm: '0 1 auto' } };
 
 export function StoreListView() {
-  const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
-  // Batas risiko BS dari Pengaturan (rasio BS ÷ kiriman sebelumnya).
+  const [filters, handleChange] = useForecastFilters();
+  // Batas risiko BS dari Pengaturan (rasio BS ÷ stok tersedia).
   const { settings } = useForecastSettings();
   const returnThreshold = settings.bsRiskPct / 100;
   const [query, setQuery] = useState('');
@@ -99,11 +100,6 @@ export function StoreListView() {
   });
   const orderBy = table.orderBy as ColumnId;
   const { onResetPage: resetPage } = table;
-
-  const handleChange = useCallback(
-    (patch: Partial<ForecastFilters>) => setFilters((prev) => ({ ...prev, ...patch })),
-    []
-  );
 
   const { meta } = useForecastMeta();
   const storeQuery = useForecastStores(filters);

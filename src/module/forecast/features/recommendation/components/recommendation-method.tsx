@@ -19,9 +19,9 @@ import { fAdjust, fPercent, DEFAULT_REC_PARAMS } from 'src/module/forecast/share
 // lewat backtest dan belum mengikuti halaman Pengaturan.
 
 const steps = (p: RecommendationParams) => [
-  `Dasar: median estimasi terjual (rumus B: kiriman kunjungan sebelumnya − BS hari ini) dari ${p.window} kunjungan terakhir.`,
+  `Dasar: median estimasi terjual (sisa kunjungan sebelumnya + kiriman sebelumnya − sisa hari ini − BS hari ini) dari ${p.window} kunjungan terakhir berdata lengkap.`,
   `Riwayat < ${p.minObservations} observasi → fallback ke median produk di wilayah (kec) yang sama, lalu median semua wilayah. Kepercayaan rendah.`,
-  'Penurunan karena BS otomatis lewat dasar: estimasi terjual = kiriman − BS, jadi bila BS konsisten 2%, rekomendasi ikut turun ±2%.',
+  'Penurunan karena BS dan sisa stok otomatis lewat dasar: BS dan sisa mengurangi estimasi terjual.',
   p.stockoutEnabled
     ? `Stok habis: BS = 0 dan STOCK = 0 pada ${p.stockoutStreak} kunjungan terakhir berturut-turut → +${fAdjust(p.stockoutBonusUnit, p.stockoutBonus)}${p.stockoutBonusUnit === 'persen' ? ' dari dasar (dibulatkan ke atas, min. 1 pcs)' : ''} untuk menguji permintaan yang tersensor.`
     : 'Penambahan karena stok habis: nonaktif.',
