@@ -20,7 +20,7 @@ const COPY =
         title: 'Data asli — rekomendasi belum divalidasi.',
         short: 'Pakai sebagai bahan diskusi, bukan keputusan operasional.',
         detail:
-          'Angka berasal dari database sumber (read-only, periode inti 19 Agt – 30 Sep 2026). Rekomendasi masih aturan baseline dengan parameter contoh. Backtest awal belum mengalahkan praktik "kebiasaan" pada galat, dan arti BS/STOCK belum dikonfirmasi klien.',
+          'Angka berasal dari database kerja backend: salinan data klien (periode inti mulai 19 Agt 2026) ditambah data yang diimpor lewat menu Import Data. Rekomendasi masih aturan baseline dengan parameter contoh. Backtest awal belum mengalahkan praktik "kebiasaan" pada galat.',
       }
     : {
         severity: 'warning' as const,

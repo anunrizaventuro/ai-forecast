@@ -21,6 +21,7 @@ const ICONS = {
   salesAnalysis: icon('ic-analytics'),
   stores: icon('ic-ecommerce'),
   products: icon('ic-product'),
+  dataImport: icon('ic-file'),
   settings: icon('ic-params'),
 };
 
@@ -86,6 +87,7 @@ export function useNavData(): NavSectionProps['data'] {
           },
           { title: 'Data Toko', path: paths.dashboard.stores, icon: ICONS.stores },
           { title: 'Data Produk', path: paths.dashboard.products, icon: ICONS.products },
+          { title: 'Import Data', path: paths.dashboard.dataImport, icon: ICONS.dataImport },
           { title: 'Pengaturan', path: paths.dashboard.settings, icon: ICONS.settings },
         ],
       },

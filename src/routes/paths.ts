@@ -19,6 +19,7 @@ export const paths = {
     salesAnalysis: '/analisis-penjualan',
     stores: '/toko',
     products: '/produk',
+    dataImport: '/import-data',
     settings: '/pengaturan',
   },
   /**
