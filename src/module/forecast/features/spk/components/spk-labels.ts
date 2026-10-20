@@ -23,6 +23,12 @@ export function explainLine(line: SpkLine, s: ForecastSettings): string[] {
   const c = line.calc;
   if (!c) return ['Ditambahkan manual — tidak ada saran sistem untuk roti ini di toko ini.'];
   const last = `kiriman terakhir ${c.lastKirim} pcs (${fDate(c.lastVisit)})`;
+  if (c.status === 'perlu-diperiksa') {
+    return [
+      `Kiriman terakhir ${c.lastKirim} pcs (${fDate(c.lastVisit)}) jauh di atas kebiasaan — kemungkinan salah input. Sistem tidak memberi angka karena batas perubahan dan perkiraan sisa dihitung dari kiriman terakhir.`,
+      'Periksa data kiriman itu, lalu isi jumlah manual.',
+    ];
+  }
   if (c.status === 'belum-cukup' || c.soldPerDay === null) {
     return [
       `Baru ${c.observations} kunjungan berdata lengkap; minimal ${s.minObservations}. Sistem tidak memberi angka — isi manual.`,

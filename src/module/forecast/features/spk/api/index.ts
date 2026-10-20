@@ -38,7 +38,7 @@ const list = <T extends z.ZodTypeAny>(item: T) =>
 
 const calcSchema = z
   .object({
-    status: z.enum(['otomatis', 'belum-cukup']),
+    status: z.enum(['otomatis', 'belum-cukup', 'perlu-diperiksa']),
     observations: z.number(),
     last_visit: z.string(),
     last_kirim: z.number(),

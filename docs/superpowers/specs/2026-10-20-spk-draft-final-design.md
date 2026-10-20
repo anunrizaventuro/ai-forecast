@@ -32,6 +32,9 @@ kiriman terakhir + langkah]`, bawah ≥ 0. Bila BS ÷ stok tersedia > `bs_risk_p
 Baris yang dibuat: setiap roti yang pernah dikirim (> 0) ke toko itu dalam jendela `history_days`.
 Data belum cukup (`r` tidak ada) → **tanpa angka otomatis**; jumlah kosong dan wajib diisi admin
 sebelum finalisasi (tombol "isi kosong dengan kiriman terakhir" membantu, tetap aksi sadar).
+Kiriman terakhir pencilan (> max(250, 30 × median), kemungkinan salah input) → status
+`perlu-diperiksa`, juga tanpa angka dan tidak diisi otomatis (ditemukan saat uji Tahap 6: batas
+perubahan dari 750 pcs menghasilkan saran 375).
 **[keputusan pembuat]** Tidak ada pengecualian produk volume kecil (itu aturan baseline lama).
 Logika ada di BE (`internal/forecast/spk.go`) dan FE (`suggestSpk` di forecast-utils) dan harus
 identik pada data simulasi.

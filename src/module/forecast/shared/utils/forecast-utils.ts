@@ -891,7 +891,12 @@ export function roundQty(value: number, unit: number, mode: ForecastSettings['ro
   return Math.max(0, r);
 }
 
-function suggestPair(a: PairAnalysis, tgl: string, s: ForecastSettings): SpkSuggestion {
+function suggestPair(
+  a: PairAnalysis,
+  outlier: boolean,
+  tgl: string,
+  s: ForecastSettings
+): SpkSuggestion {
   const calc: SpkCalc = {
     status: 'belum-cukup',
     observations: a.observations,
@@ -911,7 +916,10 @@ function suggestPair(a: PairAnalysis, tgl: string, s: ForecastSettings): SpkSugg
     capped: false,
     risk: a.risk,
   };
-  if (a.soldPerDay === null) return { nit: a.nit, product: a.product, suggested: null, calc };
+  if (outlier) calc.status = 'perlu-diperiksa';
+  if (a.soldPerDay === null || outlier) {
+    return { nit: a.nit, product: a.product, suggested: null, calc };
+  }
 
   const r = a.soldPerDay;
   const need = r * s.visitIntervalDays;
@@ -960,7 +968,8 @@ export function suggestSpk(
     SPK_FILE_ORDER.flatMap((product) => {
       const pc = pairs.get(`${nit}|${product}`) ?? [];
       if (!pc.some((c) => c.tgl >= from && c.kirim > 0)) return [];
-      return [suggestPair(analyzePair(nit, product, pc, asOf, s).analysis, tgl, s)];
+      const { analysis } = analyzePair(nit, product, pc, asOf, s);
+      return [suggestPair(analysis, pc[pc.length - 1]!.outlier, tgl, s)];
     })
   );
 }

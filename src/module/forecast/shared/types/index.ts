@@ -329,7 +329,8 @@ export type ForecastMeta = {
 // ---------------------------------------------------------------------- SPK
 // Cermin internal/forecast/spk.go & internal/spk di ai-forecast-be.
 
-export type SpkCalcStatus = 'otomatis' | 'belum-cukup';
+/** perlu-diperiksa = kiriman terakhir pencilan (kemungkinan salah input), tanpa angka. */
+export type SpkCalcStatus = 'otomatis' | 'belum-cukup' | 'perlu-diperiksa';
 
 /** Rincian hitungan saran satu toko × roti. */
 export type SpkCalc = {

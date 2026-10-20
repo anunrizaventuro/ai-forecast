@@ -104,7 +104,12 @@ function SpkEditor({ spk }: { spk: SpkDetail }) {
   });
   const noteChanged = note.trim() !== spk.note;
   const dirty = pending.length > 0 || noteChanged;
-  const emptyCount = spk.lines.filter((l) => valueOf(cellKey(l.nit, l.product)) === '').length;
+  // Kiriman terakhir pencilan tidak dipakai mengisi otomatis — wajib diisi manual.
+  const fillable = spk.lines.filter(
+    (l) =>
+      valueOf(cellKey(l.nit, l.product)) === '' && l.calc && l.calc.status !== 'perlu-diperiksa'
+  );
+  const storesWithoutLines = spk.stores.filter((nit) => !spk.lines.some((l) => l.nit === nit));
 
   const run = async (task: () => Promise<unknown>, success: string) => {
     setBusy(true);
@@ -129,11 +134,15 @@ function SpkEditor({ spk }: { spk: SpkDetail }) {
 
   const fillEmpty = () => {
     const next = new Map(edits);
-    spk.lines.forEach((line) => {
-      const key = cellKey(line.nit, line.product);
-      if (valueOf(key) === '' && line.calc) next.set(key, String(line.calc.lastKirim));
-    });
+    fillable.forEach((line) =>
+      next.set(cellKey(line.nit, line.product), String(line.calc!.lastKirim))
+    );
     setEdits(next);
+  };
+
+  const productLabel = (code: ProductCode) => {
+    const nama = productMap.get(code)?.nama;
+    return nama && nama.toLowerCase() !== code ? `${code} · ${nama}` : code;
   };
 
   const selectedLine = selected ? lines.get(selected) : undefined;
@@ -153,6 +162,18 @@ function SpkEditor({ spk }: { spk: SpkDetail }) {
           {spk.settingsVersion > 0 ? `versi #${spk.settingsVersion}` : 'default'}, sedangkan versi
           aktif sekarang {activeVersion > 0 ? `#${activeVersion}` : 'default'}. Untuk memakai
           pengaturan baru, hapus draf ini lalu buat ulang.
+        </Alert>
+      )}
+
+      {editable && storesWithoutLines.length > 0 && (
+        <Alert severity="info" variant="outlined">
+          {storesWithoutLines.length} toko tidak punya kiriman dalam {spk.settings.historyDays} hari
+          sebelum {fDate(spk.dataAsOf)}, jadi tidak ada saran untuknya (
+          {storesWithoutLines
+            .slice(0, 5)
+            .map((nit) => storeMap.get(nit)?.nama ?? nit)
+            .join(', ')}
+          {storesWithoutLines.length > 5 ? ', …' : ''}). Isi manual bila roti perlu dibawa.
         </Alert>
       )}
 
@@ -190,15 +211,15 @@ function SpkEditor({ spk }: { spk: SpkDetail }) {
             >
               Simpan perubahan{pending.length ? ` (${pending.length})` : ''}
             </Button>
-            <Button variant="outlined" disabled={!emptyCount || busy} onClick={fillEmpty}>
-              Isi {emptyCount} kosong dengan kiriman terakhir
+            <Button variant="outlined" disabled={!fillable.length || busy} onClick={fillEmpty}>
+              Isi {fillable.length} kosong dengan kiriman terakhir
             </Button>
             <Autocomplete
               size="small"
               options={SPK_FILE_ORDER.filter((code) => !products.includes(code))}
               value={null}
               onChange={(_, code) => code && setExtraProducts([...extraProducts, code])}
-              getOptionLabel={(code) => `${code} · ${productMap.get(code)?.nama ?? ''}`}
+              getOptionLabel={productLabel}
               sx={{ minWidth: 200 }}
               renderInput={(params) => <TextField {...params} label="Tambah kolom roti" />}
             />
@@ -264,7 +285,7 @@ function SpkEditor({ spk }: { spk: SpkDetail }) {
               title="Cara menghitung"
               subheader={
                 selNit && selProduct
-                  ? `${storeMap.get(selNit)?.nama ?? selNit} · ${selProduct} ${productMap.get(selProduct)?.nama ?? ''}`
+                  ? `${storeMap.get(selNit)?.nama ?? selNit} · ${productLabel(selProduct)}`
                   : 'Klik sel di tabel.'
               }
             />
