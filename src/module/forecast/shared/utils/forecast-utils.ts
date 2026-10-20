@@ -1,7 +1,9 @@
 import 'dayjs/locale/id';
 
 import type {
+  SpkCalc,
   VisitRow,
+  SpkDetail,
   VisitCell,
   CellReason,
   CellStatus,
@@ -15,6 +17,7 @@ import type {
   MasterStore,
   PairAnalysis,
   StoreSummary,
+  SpkSuggestion,
   MasterProduct,
   ProductSummary,
   Recommendation,
@@ -831,3 +834,167 @@ export const CELL_REASON_LABEL: Record<CellReason, string> = {
   'hasil-negatif': 'Hasil negatif — sisa + BS melebihi stok tersedia',
   'kiriman-sebelumnya-pencilan': 'Kiriman sebelumnya tidak wajar (kemungkinan salah input)',
 };
+
+// ---------------------------------------------------------------------- Saran SPK
+// Sama dengan internal/forecast/spk.go di backend — ubah keduanya bersamaan.
+// Spec: docs/superpowers/specs/2026-10-20-spk-draft-final-design.md.
+
+/** Urutan kolom roti di file Spk_*.csv aplikasi klien. */
+export const SPK_FILE_ORDER: ProductCode[] = [
+  'mps',
+  'mpc',
+  'mpkt',
+  'mpkh',
+  'jasuke',
+  'nc',
+  'np',
+  'ncp',
+  'nck',
+  'ncs',
+  'cocang',
+  'ncb',
+  'sukemi',
+  'sc',
+  'ss',
+  'sk',
+  'sb',
+  'sisir3',
+  'sisir2',
+  'tm',
+  'tf',
+];
+
+/** Singkatan header di file Spk_*.csv. */
+export const SPK_FILE_ALIAS: Partial<Record<ProductCode, string>> = {
+  jasuke: 'jske',
+  cocang: 'cang',
+  sukemi: 'skmi',
+  sisir3: 'ssr3',
+  sisir2: 'ssr2',
+};
+
+/** Tanggal data acuan SPK = min(akhir data, tgl − 1). */
+export const spkAsOf = (tgl: string, dataEnd: string) => {
+  const prev = addDays(tgl, -1);
+  return prev < dataEnd ? prev : dataEnd;
+};
+
+/** Bulatkan ke kelipatan `unit` dengan arah `mode` (sama dengan exampleCalculation). */
+export function roundQty(value: number, unit: number, mode: ForecastSettings['roundMode']) {
+  const u = Math.max(1, unit);
+  const r =
+    mode === 'atas'
+      ? Math.ceil(value / u - 1e-9) * u
+      : mode === 'bawah'
+        ? Math.floor(value / u + 1e-9) * u
+        : Math.floor(value / u + 0.5) * u;
+  return Math.max(0, r);
+}
+
+function suggestPair(a: PairAnalysis, tgl: string, s: ForecastSettings): SpkSuggestion {
+  const calc: SpkCalc = {
+    status: 'belum-cukup',
+    observations: a.observations,
+    lastVisit: a.lastVisit,
+    lastKirim: a.lastKirim,
+    lastStock: a.lastStock,
+    daysSince: Math.max(0, a.lastVisit ? dayjs(tgl).diff(dayjs(a.lastVisit), 'day') : 0),
+    soldPerDay: a.soldPerDay,
+    need: null,
+    remaining: null,
+    usable: null,
+    raw: null,
+    step: Math.max(2, Math.ceil((a.lastKirim * s.maxChangePct) / 100)),
+    bsCapped: false,
+    bsRate: a.bsRate,
+    limited: null,
+    capped: false,
+    risk: a.risk,
+  };
+  if (a.soldPerDay === null) return { nit: a.nit, product: a.product, suggested: null, calc };
+
+  const r = a.soldPerDay;
+  const need = r * s.visitIntervalDays;
+  const remaining = Math.max(0, a.lastStock + a.lastKirim - r * calc.daysSince);
+  const usable = (remaining * s.stockUsablePct) / 100;
+  const raw = Math.max(0, need - usable);
+  let hi = a.lastKirim + calc.step;
+  if (a.bsRate !== null && a.bsRate * 100 > s.bsRiskPct) {
+    calc.bsCapped = true;
+    hi = a.lastKirim;
+  }
+  const lo = Math.max(0, a.lastKirim - calc.step);
+  const limited = Math.min(hi, Math.max(lo, raw));
+
+  Object.assign(calc, { status: 'otomatis', need, remaining, usable, raw, limited });
+  calc.capped = limited !== raw;
+  return {
+    nit: a.nit,
+    product: a.product,
+    suggested: roundQty(limited, s.roundTo, s.roundMode),
+    calc,
+  };
+}
+
+/**
+ * Saran SPK untuk toko `nits` (urutan dipertahankan) pada tanggal `tgl` dengan
+ * sel s.d. `asOf`. Roti per toko = yang pernah dikirim (> 0) dalam jendela
+ * `historyDays`, urut SPK_FILE_ORDER.
+ */
+export function suggestSpk(
+  cells: VisitCell[],
+  nits: string[],
+  tgl: string,
+  asOf: string,
+  s: ForecastSettings
+): SpkSuggestion[] {
+  const wanted = new Set(nits);
+  const pairs = new Map<string, VisitCell[]>();
+  cells.forEach((cell) => {
+    if (cell.tgl > asOf || !wanted.has(cell.nit)) return;
+    const key = `${cell.nit}|${cell.product}`;
+    pairs.set(key, [...(pairs.get(key) ?? []), cell]);
+  });
+  const from = historyFrom(asOf, s);
+  return nits.flatMap((nit) =>
+    SPK_FILE_ORDER.flatMap((product) => {
+      const pc = pairs.get(`${nit}|${product}`) ?? [];
+      if (!pc.some((c) => c.tgl >= from && c.kirim > 0)) return [];
+      return [suggestPair(analyzePair(nit, product, pc, asOf, s).analysis, tgl, s)];
+    })
+  );
+}
+
+/** Nama file SPK: Spk_<kurir>_<dd-mm-yyyy>.csv (sama dengan SPKFileName backend). */
+export function spkFileName(kurir: string, tgl: string) {
+  const k = kurir.replace(/[^A-Za-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'kurir';
+  return `Spk_${k}_${dayjs(tgl).format('DD-MM-YYYY')}.csv`;
+}
+
+/** Isi CSV format file Spk klien (dipakai mode simulasi; mode api memakai /export). */
+export function spkCsv(
+  spk: SpkDetail,
+  storeName: (nit: string) => string,
+  price: (code: ProductCode) => number | undefined
+) {
+  const header = SPK_FILE_ORDER.map((code) => SPK_FILE_ALIAS[code] ?? code);
+  const pad = ['', '', '', '', ''];
+  const qty = new Map(spk.lines.map((l) => [`${l.nit}|${l.product}`, l.qty ?? 0]));
+  const tgl = dayjs(spk.tgl).format('DD/MM/YYYY');
+  const cellText = (v: string) => (/[;"\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  const rows = [
+    [...pad, ...header],
+    [...pad, ...SPK_FILE_ORDER.map((code) => String(price(code) ?? ''))],
+    [...pad, ...header.map(() => '')],
+    ['urut', 'nit', 'nama', 'kurir', 'tanggal', ...header],
+    ...spk.stores.map((nit, i) => [
+      String(i + 1),
+      nit,
+      storeName(nit),
+      spk.kurir,
+      tgl,
+      ...SPK_FILE_ORDER.map((code) => String(qty.get(`${nit}|${code}`) ?? 0)),
+    ]),
+  ];
+  return rows.map((row) => row.map(cellText).join(';')).join('\r\n') + '\r\n';
+}

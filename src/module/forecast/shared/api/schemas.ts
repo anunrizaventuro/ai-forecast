@@ -29,7 +29,7 @@ const list = <T extends z.ZodTypeAny>(item: T) =>
     .nullish()
     .transform((value) => (value ?? []) as z.output<T>[]);
 
-const productCode = z.enum(PRODUCT_CODES);
+export const productCode = z.enum(PRODUCT_CODES);
 
 const summaryShape = {
   kirim: z.number(),
@@ -176,7 +176,7 @@ export const forecastRecommendationsSchema = list(
     )
 );
 
-const settingsParamsSchema = z
+export const settingsParamsSchema = z
   .object({
     visit_interval_days: z.number(),
     history_days: z.number(),

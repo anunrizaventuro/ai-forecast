@@ -325,3 +325,71 @@ export type ForecastMeta = {
   stores: MasterStore[];
   sales: string[];
 };
+
+// ---------------------------------------------------------------------- SPK
+// Cermin internal/forecast/spk.go & internal/spk di ai-forecast-be.
+
+export type SpkCalcStatus = 'otomatis' | 'belum-cukup';
+
+/** Rincian hitungan saran satu toko × roti. */
+export type SpkCalc = {
+  status: SpkCalcStatus;
+  observations: number;
+  lastVisit: string;
+  lastKirim: number;
+  lastStock: number;
+  daysSince: number;
+  soldPerDay: number | null;
+  need: number | null;
+  remaining: number | null;
+  usable: number | null;
+  raw: number | null;
+  step: number;
+  /** BS di atas batas → saran tidak dinaikkan dari kiriman terakhir. */
+  bsCapped: boolean;
+  bsRate: number | null;
+  /** Nilai setelah dibatasi, sebelum pembulatan. */
+  limited: number | null;
+  capped: boolean;
+  risk: StockRisk;
+};
+
+export type SpkSuggestion = {
+  nit: string;
+  product: ProductCode;
+  /** null = data belum cukup (tanpa angka otomatis). */
+  suggested: number | null;
+  calc: SpkCalc;
+};
+
+export type SpkLine = {
+  nit: string;
+  product: ProductCode;
+  suggested: number | null;
+  qty: number | null;
+  /** null = ditambah manual. */
+  calc: SpkCalc | null;
+};
+
+export type SpkStatus = 'draft' | 'final';
+
+export type SpkHeader = {
+  id: number;
+  tgl: string;
+  kurir: string;
+  status: SpkStatus;
+  settingsVersion: number;
+  dataAsOf: string;
+  /** nit berurutan = urut kunjungan. */
+  stores: string[];
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+  finalizedAt: string | null;
+};
+
+export type SpkSummary = SpkHeader & { lineCount: number; emptyCount: number; totalQty: number };
+
+export type SpkDetail = SpkHeader & { lines: SpkLine[]; settings: ForecastSettings };
+
+export type SpkEdit = { nit: string; product: ProductCode; qty: number | null };

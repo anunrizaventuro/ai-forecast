@@ -19,6 +19,8 @@ const RecommendationPage = lazy(() => import('src/module/forecast/features/recom
 const SalesAnalysisPage = lazy(() => import('src/module/forecast/features/sales-analysis/pages'));
 const StoresPage = lazy(() => import('src/module/forecast/features/stores/pages'));
 const ProductsPage = lazy(() => import('src/module/forecast/features/products/pages'));
+const SpkPage = lazy(() => import('src/module/forecast/features/spk/pages'));
+const SpkDetailPage = lazy(() => import('src/module/forecast/features/spk/pages/detail'));
 const DataImportPage = lazy(() => import('src/module/forecast/features/data-import/pages'));
 const SettingsPage = lazy(() => import('src/module/forecast/features/settings/pages'));
 
@@ -77,6 +79,8 @@ export const dashboardRoutes: RouteObject[] = [
       { path: 'analisis-penjualan', element: <SalesAnalysisPage /> },
       { path: 'toko', element: <StoresPage /> },
       { path: 'produk', element: <ProductsPage /> },
+      { path: 'spk', element: <SpkPage /> },
+      { path: 'spk/:id', element: <SpkDetailPage /> },
       { path: 'import-data', element: <DataImportPage /> },
       { path: 'pengaturan', element: <SettingsPage /> },
       ...coreRoutes,
