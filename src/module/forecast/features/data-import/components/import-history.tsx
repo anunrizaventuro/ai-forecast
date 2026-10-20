@@ -11,10 +11,8 @@ import TableHead from '@mui/material/TableHead';
 import CardHeader from '@mui/material/CardHeader';
 import TableContainer from '@mui/material/TableContainer';
 
-import { fDate, fNumber } from 'src/module/forecast/shared/utils';
+import { fDate, fNumber, fDateTime } from 'src/module/forecast/shared/utils';
 import { TableEmptyRow, ForecastTablePagination } from 'src/module/forecast/shared/components';
-
-import { fDateTimeId } from './import-labels';
 
 // ----------------------------------------------------------------------
 
@@ -43,7 +41,7 @@ export function ImportHistory({ history }: { history: ImportBatch[] }) {
             {history.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((b) => (
               <TableRow key={b.id}>
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                  {b.committedAt ? fDateTimeId(b.committedAt) : '—'}
+                  {b.committedAt ? fDateTime(b.committedAt) : '—'}
                 </TableCell>
                 <TableCell>{b.kindLabel}</TableCell>
                 <TableCell sx={{ wordBreak: 'break-all' }}>{b.fileName}</TableCell>

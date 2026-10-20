@@ -153,12 +153,45 @@ export type RecommendationParams = {
   minStep: number;
 };
 
-export type RecommendationSettings = {
-  params: RecommendationParams;
-  defaults: RecommendationParams;
-  /** ISO; null = belum pernah disimpan (memakai default). */
-  updatedAt: string | null;
+// ---------------------------------------------------------------------- Pengaturan
+// Cermin forecast.Settings di ai-forecast-be (disimpan berversi).
+
+export type CalcMethod = 'rata-rata' | 'median';
+export type RoundMode = 'atas' | 'terdekat' | 'bawah';
+
+export type ForecastSettings = {
+  /** Perkiraan jarak ke kunjungan berikutnya (hari). */
+  visitIntervalDays: number;
+  /** Hanya kunjungan dalam N hari terakhir yang dipakai. */
+  historyDays: number;
+  /** Maksimum kunjungan (data lengkap) terakhir yang dipakai. */
+  historyVisits: number;
+  /** Kurang dari ini → "data belum cukup". */
+  minObservations: number;
+  method: CalcMethod;
+  /** Porsi perkiraan sisa stok yang dihitung masih bisa terjual (0–100). */
+  stockUsablePct: number;
+  /** Batas BS ÷ stok tersedia (%) untuk indikator risiko BS. */
+  bsRiskPct: number;
+  /** Batas naik/turun terhadap kiriman terakhir (%). */
+  maxChangePct: number;
+  roundTo: number;
+  roundMode: RoundMode;
+  /** Masa kedaluwarsa (hari) — informasi produk saja, tidak dipakai menghitung. */
+  shelfLifeDays: number;
+  productShelfLife: Partial<Record<ProductCode, number>>;
 };
+
+export type SettingsVersion = {
+  /** 0 = belum pernah disimpan (default). */
+  version: number;
+  params: ForecastSettings;
+  note: string;
+  /** ISO; null untuk default. */
+  createdAt: string | null;
+};
+
+export type SettingsState = SettingsVersion & { defaults: ForecastSettings };
 
 // ---------------------------------------------------------------------- Dashboard
 // Bentuk data yang dikonsumsi UI — sama untuk sumber simulasi maupun API

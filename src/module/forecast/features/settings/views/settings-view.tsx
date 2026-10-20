@@ -2,63 +2,75 @@ import { useMemo } from 'react';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
-import { apiErrorStatus } from 'src/shared/api';
-import { DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
-import { useForecastStores, useRecommendationParams } from 'src/module/forecast/shared/hooks';
+import { fDateTime, DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
+import {
+  IS_API,
+  useForecastMeta,
+  useForecastStores,
+  useForecastSettings,
+} from 'src/module/forecast/shared/hooks';
 import {
   ForecastDataState,
   ForecastPageHeader,
   ForecastSimulationAlert,
 } from 'src/module/forecast/shared/components';
 
-import { SettingsParamsForm } from '../components/settings-params-form';
+import { SettingsForm } from '../components/settings-form';
+import { SettingsHistory } from '../components/settings-history';
 
 // ----------------------------------------------------------------------
 
 export function SettingsView() {
-  const settings = useRecommendationParams();
+  const settings = useForecastSettings();
+  const meta = useForecastMeta();
   const stores = useForecastStores(DEFAULT_FILTERS);
 
-  // Rata-rata interval kunjungan semua toko — untuk perkiraan hari di form.
-  const avgInterval = useMemo(() => {
+  // Rata-rata jarak kunjungan semua toko di data — pembanding interval.
+  const observedInterval = useMemo(() => {
     const values = (stores.data ?? [])
       .map((row) => row.avgInterval)
       .filter((value): value is number => value !== null);
     return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
   }, [stores.data]);
 
-  // Backend lama belum punya endpoint pengaturan → 404.
-  const unsupported = apiErrorStatus(settings.error) === 404;
-
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       <ForecastPageHeader
-        title="Pengaturan Rekomendasi"
-        description="Atur kapan dan seberapa besar rekomendasi stok diturunkan (retur/BS) atau ditambah (stok habis)."
+        title="Pengaturan Perhitungan"
+        description="Atur cara sistem memperkirakan penjualan dan menyarankan jumlah kiriman, tanpa mengubah program. Nilai awal masih perlu dikonfirmasi — bukan aturan final."
       />
 
       <ForecastSimulationAlert />
 
-      {unsupported ? (
-        <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>
-          Backend AI Forecast belum mendukung pengaturan rekomendasi. Rekomendasi saat ini memakai
-          parameter default server.
-        </Alert>
-      ) : (
-        <ForecastDataState error={settings.error} />
-      )}
+      <ForecastDataState error={settings.error} />
 
-      {!settings.loading && !settings.error && (
-        <SettingsParamsForm
-          params={settings.params}
-          defaults={settings.defaults}
-          updatedAt={settings.updatedAt}
-          avgInterval={avgInterval}
-          saving={settings.saving}
-          onSave={settings.save}
-        />
-      )}
+      <Stack spacing={3}>
+        <Alert severity="info" variant="outlined">
+          {settings.version > 0
+            ? `Versi aktif #${settings.version}, disimpan ${settings.updatedAt ? fDateTime(settings.updatedAt) : ''}${settings.note ? ` — "${settings.note}"` : ''}.`
+            : 'Belum pernah disimpan — semua parameter memakai nilai default.'}{' '}
+          {IS_API
+            ? 'Berlaku untuk semua pengguna.'
+            : 'Mode simulasi: tersimpan di browser ini saja.'}{' '}
+          Pengaturan ini dipakai perhitungan analisis dan rekomendasi SPK yang baru; halaman
+          Rekomendasi Stok saat ini masih memakai aturan lama dengan parameter tetap.
+        </Alert>
+
+        {!settings.loading && !settings.error && (
+          <SettingsForm
+            settings={settings.settings}
+            defaults={settings.defaults}
+            products={meta.data?.products ?? []}
+            observedInterval={observedInterval}
+            saving={settings.saving}
+            onSave={settings.save}
+          />
+        )}
+
+        <SettingsHistory history={settings.history} />
+      </Stack>
     </Box>
   );
 }

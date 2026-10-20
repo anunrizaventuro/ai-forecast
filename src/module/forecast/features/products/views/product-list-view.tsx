@@ -22,7 +22,7 @@ import { useTable, TableHeadCustom } from 'src/shared/ui/table';
 import {
   useForecastMeta,
   useForecastProducts,
-  useRecommendationParams,
+  useForecastSettings,
 } from 'src/module/forecast/shared/hooks';
 import {
   fNumber,
@@ -115,7 +115,9 @@ export function ProductListView() {
   );
 
   const { meta } = useForecastMeta();
-  const { params: recParams } = useRecommendationParams();
+  // Batas risiko BS dari Pengaturan (rasio BS ÷ kiriman sebelumnya).
+  const { settings } = useForecastSettings();
+  const returnThreshold = settings.bsRiskPct / 100;
   const groups = useMemo(() => [...new Set(meta.products.map(productGroup))], [meta.products]);
   const productQuery = useForecastProducts(filters);
   const productRows = useMemo(() => productQuery.data ?? [], [productQuery.data]);
@@ -286,10 +288,7 @@ export function ProductListView() {
                       <InlineBarCell value={row.estSold} max={stats.maxEstSold} series="estSold" />
                     </TableCell>
                     <TableCell align="right">
-                      <ReturnRateCell
-                        value={row.returnRate}
-                        threshold={recParams.returnThreshold}
-                      />
+                      <ReturnRateCell value={row.returnRate} threshold={returnThreshold} />
                     </TableCell>
                     <TableCell>
                       <Label

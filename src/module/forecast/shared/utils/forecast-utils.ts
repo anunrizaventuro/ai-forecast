@@ -86,6 +86,8 @@ export const DEFAULT_REC_PARAMS: RecommendationParams = {
 // ---------------------------------------------------------------------- Tanggal
 
 export const fDate = (tgl: string) => dayjs(tgl).locale('id').format('D MMM YYYY');
+/** Waktu ISO (simpan impor/pengaturan) → "20 Okt 2026, 15:41". */
+export const fDateTime = (iso: string) => dayjs(iso).locale('id').format('D MMM YYYY, HH:mm');
 export const fDateShort = (tgl: string) => dayjs(tgl).locale('id').format('D MMM');
 export const fWeekday = (tgl: string) => dayjs(tgl).locale('id').format('dddd');
 

@@ -11,13 +11,12 @@ import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
 import { Iconify } from 'src/shared/ui/iconify';
-import { fAdjust, fPercent } from 'src/module/forecast/shared/utils';
-import { useRecommendationParams } from 'src/module/forecast/shared/hooks';
+import { fAdjust, fPercent, DEFAULT_REC_PARAMS } from 'src/module/forecast/shared/utils';
 
 // ----------------------------------------------------------------------
 // Penjelasan aturan baseline (studi kelayakan §4.2) agar rekomendasi bisa
-// dijelaskan ke sales. Angka = pengaturan aktif (halaman Pengaturan) — belum
-// dioptimasi lewat backtest.
+// dijelaskan ke sales. Parameter tetap (DEFAULT_REC_PARAMS) — belum dioptimasi
+// lewat backtest dan belum mengikuti halaman Pengaturan.
 
 const steps = (p: RecommendationParams) => [
   `Dasar: median estimasi terjual (rumus B: kiriman kunjungan sebelumnya − BS hari ini) dari ${p.window} kunjungan terakhir.`,
@@ -38,7 +37,7 @@ const steps = (p: RecommendationParams) => [
 ];
 
 export function RecommendationMethod() {
-  const { params } = useRecommendationParams();
+  const params = DEFAULT_REC_PARAMS;
 
   return (
     <Accordion
@@ -69,8 +68,10 @@ export function RecommendationMethod() {
           ))}
         </Box>
         <Typography variant="caption" sx={{ mt: 2, display: 'block', color: 'text.disabled' }}>
-          Aturan baseline mengikuti studi kelayakan §4.2. Parameternya contoh dan belum dioptimasi
-          (hasil backtest awal ada di README ai-forecast-be); ubah di{' '}
+          Aturan baseline mengikuti studi kelayakan §4.2 dengan parameter contoh yang belum
+          dioptimasi (hasil backtest awal ada di README ai-forecast-be). Aturan ini akan diganti
+          perhitungan baru (rata-rata penjualan per hari × interval kunjungan − sisa stok) yang
+          memakai{' '}
           <Link
             component={RouterLink}
             href={paths.dashboard.settings}
@@ -79,7 +80,7 @@ export function RecommendationMethod() {
           >
             Pengaturan
           </Link>
-          . Arti BS dan STOCK juga belum dikonfirmasi klien.
+          .
         </Typography>
       </AccordionDetails>
     </Accordion>

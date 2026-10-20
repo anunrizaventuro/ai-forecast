@@ -15,9 +15,13 @@ import AccordionSummary, { accordionSummaryClasses } from '@mui/material/Accordi
 
 import { Iconify } from 'src/shared/ui/iconify';
 import { TableHeadCustom } from 'src/shared/ui/table';
+import { useForecastMeta } from 'src/module/forecast/shared/hooks';
 import { RecommendationDelta } from 'src/module/forecast/shared/components';
-import { fNumber, summarizeRecommendations } from 'src/module/forecast/shared/utils';
-import { useForecastMeta, useRecommendationParams } from 'src/module/forecast/shared/hooks';
+import {
+  fNumber,
+  DEFAULT_REC_PARAMS,
+  summarizeRecommendations,
+} from 'src/module/forecast/shared/utils';
 
 import {
   ReturnCell,
@@ -157,7 +161,7 @@ type RowsProps = Pick<Props, 'rows' | 'rowLabel'> & { showNextVisit: boolean };
  */
 function RecommendationGroupRows({ rows, rowLabel, showNextVisit }: RowsProps) {
   const { storeMap, productMap } = useForecastMeta();
-  const { params } = useRecommendationParams();
+  const params = DEFAULT_REC_PARAMS;
 
   return (
     <TableBody>

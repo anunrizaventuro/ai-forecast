@@ -6,8 +6,7 @@ import Typography from '@mui/material/Typography';
 import CardActionArea from '@mui/material/CardActionArea';
 
 import { Iconify } from 'src/shared/ui/iconify';
-
-import { fDateTimeId } from './import-labels';
+import { fDateTime } from 'src/module/forecast/shared/utils';
 
 // ----------------------------------------------------------------------
 // Kartu jenis data, dikelompokkan dan bernomor sesuai urutan impor yang
@@ -96,7 +95,7 @@ export function ImportKindPicker({ kinds, history, selected, onSelect }: Props) 
                       >
                         {last && <Iconify icon="solar:check-circle-bold" width={14} />}
                         {last?.committedAt
-                          ? `Terakhir diimpor ${fDateTimeId(last.committedAt)}`
+                          ? `Terakhir diimpor ${fDateTime(last.committedAt)}`
                           : 'Belum pernah diimpor'}
                       </Typography>
                     </Box>

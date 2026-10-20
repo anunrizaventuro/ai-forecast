@@ -11,4 +11,5 @@ export const forecastEndpoints = {
   stores: '/api/v1/forecast/stores',
   recommendations: '/api/v1/forecast/recommendations',
   settings: '/api/v1/forecast/settings',
+  settingsHistory: '/api/v1/forecast/settings/history',
 } as const;

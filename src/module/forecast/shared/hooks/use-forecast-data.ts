@@ -38,11 +38,11 @@ import {
   groupByStore,
   forecastCells,
   groupByProduct,
+  DEFAULT_REC_PARAMS,
   computeRecommendations,
 } from 'src/module/forecast/shared/utils';
 
 import { useForecastQuery } from './use-forecast-query';
-import { useRecommendationParams } from './use-recommendation-params';
 
 // ----------------------------------------------------------------------
 // Satu antarmuka data untuk semua halaman dashboard, dua sumber:
@@ -252,14 +252,10 @@ export function useForecastRecommendations(
   params: { asOf: string; nit?: string | null; product?: string | null },
   enabled = true
 ) {
-  const { params: recParams } = useRecommendationParams();
-
+  // Aturan baseline lama memakai parameter tetap (DEFAULT_REC_PARAMS = DefaultParams
+  // server) sampai rumus baru memakai Pengaturan berversi.
   return useForecastSource<Recommendation[]>(
-    // Mode simulasi: params aturan ikut key agar hasil dihitung ulang saat
-    // pengaturan berubah. Mode api: server memakai params tersimpan.
-    IS_API
-      ? forecastKeys.recommendations(params)
-      : [...forecastKeys.recommendations(params), recParams],
+    forecastKeys.recommendations(params),
     (signal) => getForecastRecommendations(params, { signal }),
     () =>
       computeRecommendations(
@@ -268,7 +264,7 @@ export function useForecastRecommendations(
           product: (params.product ?? null) as ForecastFilters['product'],
         }),
         params.asOf,
-        recParams
+        DEFAULT_REC_PARAMS
       ),
     enabled
   );

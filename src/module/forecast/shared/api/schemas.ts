@@ -3,10 +3,11 @@ import type {
   CellSummary,
   ForecastMeta,
   StoreSummary,
+  SettingsState,
   ProductSummary,
   Recommendation,
-  RecommendationParams,
-  RecommendationSettings,
+  SettingsVersion,
+  ForecastSettings,
 } from 'src/module/forecast/shared/types';
 
 import { z } from 'zod';
@@ -166,65 +167,85 @@ export const forecastRecommendationsSchema = list(
     )
 );
 
-const recParamsSchema = z
+const settingsParamsSchema = z
   .object({
-    window: z.number(),
+    visit_interval_days: z.number(),
+    history_days: z.number(),
+    history_visits: z.number(),
     min_observations: z.number(),
-    return_signal_enabled: z.boolean(),
-    return_threshold: z.number(),
-    return_window: z.number(),
-    return_streak: z.number(),
-    return_cut_unit: z.enum(['pcs', 'persen']),
-    return_cut: z.number(),
-    stockout_enabled: z.boolean(),
-    stockout_streak: z.number(),
-    stockout_bonus_unit: z.enum(['pcs', 'persen']),
-    stockout_bonus: z.number(),
-    max_step_ratio: z.number(),
-    min_step: z.number(),
+    method: z.enum(['rata-rata', 'median']),
+    stock_usable_pct: z.number(),
+    bs_risk_pct: z.number(),
+    max_change_pct: z.number(),
+    round_to: z.number(),
+    round_mode: z.enum(['atas', 'terdekat', 'bawah']),
+    shelf_life_days: z.number(),
+    product_shelf_life: z.partialRecord(productCode, z.number()).nullish(),
   })
   .transform(
-    (p): RecommendationParams => ({
-      window: p.window,
+    (p): ForecastSettings => ({
+      visitIntervalDays: p.visit_interval_days,
+      historyDays: p.history_days,
+      historyVisits: p.history_visits,
       minObservations: p.min_observations,
-      returnSignalEnabled: p.return_signal_enabled,
-      returnThreshold: p.return_threshold,
-      returnWindow: p.return_window,
-      returnStreak: p.return_streak,
-      returnCutUnit: p.return_cut_unit,
-      returnCut: p.return_cut,
-      stockoutEnabled: p.stockout_enabled,
-      stockoutStreak: p.stockout_streak,
-      stockoutBonusUnit: p.stockout_bonus_unit,
-      stockoutBonus: p.stockout_bonus,
-      maxStepRatio: p.max_step_ratio,
-      minStep: p.min_step,
+      method: p.method,
+      stockUsablePct: p.stock_usable_pct,
+      bsRiskPct: p.bs_risk_pct,
+      maxChangePct: p.max_change_pct,
+      roundTo: p.round_to,
+      roundMode: p.round_mode,
+      shelfLifeDays: p.shelf_life_days,
+      productShelfLife: p.product_shelf_life ?? {},
     })
   );
+
+const settingsVersionShape = {
+  version: z.number(),
+  params: settingsParamsSchema,
+  note: z.string(),
+  created_at: z.string().nullable(),
+};
 
 export const forecastSettingsSchema = z
-  .object({ params: recParamsSchema, defaults: recParamsSchema, updated_at: z.string().nullable() })
+  .object({
+    version: z.number(),
+    params: settingsParamsSchema,
+    defaults: settingsParamsSchema,
+    note: z.string(),
+    updated_at: z.string().nullable(),
+  })
   .transform(
-    (s): RecommendationSettings => ({
+    (s): SettingsState => ({
+      version: s.version,
       params: s.params,
       defaults: s.defaults,
-      updatedAt: s.updated_at,
+      note: s.note,
+      createdAt: s.updated_at,
     })
   );
 
-export const toRawParams = (p: RecommendationParams) => ({
-  window: p.window,
+export const forecastSettingsHistorySchema = list(
+  z.object(settingsVersionShape).transform(
+    (s): SettingsVersion => ({
+      version: s.version,
+      params: s.params,
+      note: s.note,
+      createdAt: s.created_at,
+    })
+  )
+);
+
+export const toRawSettings = (p: ForecastSettings) => ({
+  visit_interval_days: p.visitIntervalDays,
+  history_days: p.historyDays,
+  history_visits: p.historyVisits,
   min_observations: p.minObservations,
-  return_signal_enabled: p.returnSignalEnabled,
-  return_threshold: p.returnThreshold,
-  return_window: p.returnWindow,
-  return_streak: p.returnStreak,
-  return_cut_unit: p.returnCutUnit,
-  return_cut: p.returnCut,
-  stockout_enabled: p.stockoutEnabled,
-  stockout_streak: p.stockoutStreak,
-  stockout_bonus_unit: p.stockoutBonusUnit,
-  stockout_bonus: p.stockoutBonus,
-  max_step_ratio: p.maxStepRatio,
-  min_step: p.minStep,
+  method: p.method,
+  stock_usable_pct: p.stockUsablePct,
+  bs_risk_pct: p.bsRiskPct,
+  max_change_pct: p.maxChangePct,
+  round_to: p.roundTo,
+  round_mode: p.roundMode,
+  shelf_life_days: p.shelfLifeDays,
+  product_shelf_life: p.productShelfLife,
 });

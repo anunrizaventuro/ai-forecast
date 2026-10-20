@@ -1,8 +1,6 @@
 import type { ImportOp, ImportIssue } from '../api';
 import type { LabelColor } from 'src/shared/ui/label';
 
-import dayjs from 'dayjs';
-
 // ----------------------------------------------------------------------
 // Label tampilan untuk istilah backend (nama tabel klien, status, tingkat).
 
@@ -27,5 +25,3 @@ export const LEVEL_LABEL: Record<ImportIssue['level'], { text: string; color: La
   error: { text: 'Error', color: 'error' },
   peringatan: { text: 'Peringatan', color: 'warning' },
 };
-
-export const fDateTimeId = (iso: string) => dayjs(iso).locale('id').format('D MMM YYYY, HH:mm');

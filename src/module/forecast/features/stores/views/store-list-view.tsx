@@ -24,7 +24,7 @@ import {
   IS_API,
   useForecastMeta,
   useForecastStores,
-  useRecommendationParams,
+  useForecastSettings,
 } from 'src/module/forecast/shared/hooks';
 import {
   SERIES,
@@ -82,7 +82,9 @@ const FIELD_SX = { minWidth: { xs: 1, sm: 140 }, flex: { xs: '1 1 100%', sm: '0 
 
 export function StoreListView() {
   const [filters, setFilters] = useState<ForecastFilters>(DEFAULT_FILTERS);
-  const { params: recParams } = useRecommendationParams();
+  // Batas risiko BS dari Pengaturan (rasio BS ÷ kiriman sebelumnya).
+  const { settings } = useForecastSettings();
+  const returnThreshold = settings.bsRiskPct / 100;
   const [query, setQuery] = useState('');
   const [kec, setKec] = useState<number | 'all'>('all');
   const [sales, setSales] = useState('all');
@@ -133,11 +135,10 @@ export function StoreListView() {
       interval: intervals.length
         ? intervals.reduce((acc, value) => acc + value, 0) / intervals.length
         : null,
-      highReturn: rows.filter(
-        (row) => row.returnRate !== null && row.returnRate > recParams.returnThreshold
-      ).length,
+      highReturn: rows.filter((row) => row.returnRate !== null && row.returnRate > returnThreshold)
+        .length,
     };
-  }, [rows, recParams.returnThreshold]);
+  }, [rows, returnThreshold]);
 
   useEffect(() => {
     resetPage();
@@ -241,7 +242,7 @@ export function StoreListView() {
           {
             label: 'Toko retur tinggi',
             value: fNumber(stats.highReturn),
-            caption: `Rasio retur > ${fPercent(recParams.returnThreshold, 0)}`,
+            caption: `Rasio retur > ${fPercent(returnThreshold, 0)}`,
             icon: 'solar:info-circle-outline',
             color: theme.vars.palette.error.main,
           },
@@ -300,7 +301,7 @@ export function StoreListView() {
                     <InlineBarCell value={row.kirim} max={stats.maxKirim} />
                   </TableCell>
                   <TableCell align="right">
-                    <ReturnRateCell value={row.returnRate} threshold={recParams.returnThreshold} />
+                    <ReturnRateCell value={row.returnRate} threshold={returnThreshold} />
                   </TableCell>
                 </TableRow>
               ))}

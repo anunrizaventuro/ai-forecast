@@ -1,11 +1,11 @@
-import type { RecommendationParams } from 'src/module/forecast/shared/types';
+import type { ForecastSettings } from 'src/module/forecast/shared/types';
 
 import axios from 'src/shared/lib/axios';
 import { unwrapNullable } from 'src/shared/api';
 
 import { forecastEndpoints } from './endpoints';
 import {
-  toRawParams,
+  toRawSettings,
   forecastMetaSchema,
   forecastSeriesSchema,
   forecastSummarySchema,
@@ -13,6 +13,7 @@ import {
   forecastStoreRowsSchema,
   forecastRegionRowsSchema,
   forecastProductRowsSchema,
+  forecastSettingsHistorySchema,
   forecastRecommendationsSchema,
 } from './schemas';
 
@@ -46,6 +47,7 @@ export const forecastKeys = {
   all: ['forecast'] as const,
   meta: ['forecast', 'meta'] as const,
   settings: ['forecast', 'settings'] as const,
+  settingsHistory: ['forecast', 'settings', 'history'] as const,
   summary: (p: ForecastRangeParams) => [...forecastKeys.all, 'summary', rangeKey(p)] as const,
   timeseries: (p: ForecastRangeParams, granularity: string) =>
     [...forecastKeys.all, 'timeseries', rangeKey(p), granularity] as const,
@@ -139,10 +141,20 @@ export async function getForecastSettings(options: FetchOptions = {}) {
   return forecastSettingsSchema.parse(await get(forecastEndpoints.settings, {}, options));
 }
 
-/** PUT params lengkap; 422 → ApiError.errors per field (snake_case). */
-export async function updateForecastSettings(params: RecommendationParams) {
+export async function getForecastSettingsHistory(options: FetchOptions = {}) {
+  return forecastSettingsHistorySchema.parse(
+    await get(forecastEndpoints.settingsHistory, {}, options)
+  );
+}
+
+/** PUT → versi baru; 422 → ApiError.errors per field (snake_case). */
+export async function updateForecastSettings(params: ForecastSettings, note: string) {
   const data = await unwrapNullable<unknown>(
-    axios.put(forecastEndpoints.settings, toRawParams(params), { timeout: TIMEOUT })
+    axios.put(
+      forecastEndpoints.settings,
+      { params: toRawSettings(params), note },
+      { timeout: TIMEOUT }
+    )
   );
   return forecastSettingsSchema.parse(data);
 }
