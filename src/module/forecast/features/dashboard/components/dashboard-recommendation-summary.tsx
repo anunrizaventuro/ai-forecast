@@ -2,6 +2,7 @@ import type { CardProps } from '@mui/material/Card';
 import type { Recommendation } from 'src/module/forecast/shared/types';
 
 import { useMemo } from 'react';
+import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -57,7 +58,7 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
       recommendations
         .filter((r) => !r.excluded && r.delta && !r.signals.includes('pencilan'))
         .sort((a, b) => Math.abs(b.delta ?? 0) - Math.abs(a.delta ?? 0))
-        .slice(0, 6),
+        .slice(0, 5),
     [recommendations]
   );
 
@@ -74,7 +75,7 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
       }
       {...other}
     >
-      <Grid container spacing={{ xs: 3, md: 4 }} sx={{ p: 3 }}>
+      <Grid container spacing={{ xs: 4, md: 6 }} sx={{ p: 3, pt: 2 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <SectionTitle>Total roti yang dibawa</SectionTitle>
           <Box sx={{ gap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -143,7 +144,7 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
         <Grid size={{ xs: 12, md: 6 }}>
           <SectionTitle>Perubahan terbesar dibanding kiriman terakhir</SectionTitle>
 
-          <Box component="ul" sx={{ gap: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box component="ul">
             {biggestChanges.map((row) => {
               const store = storeMap.get(row.nit);
               const up = (row.delta ?? 0) > 0;
@@ -152,14 +153,15 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
                 <Box
                   component="li"
                   key={`${row.nit}-${row.product}`}
-                  sx={{
-                    p: 1.5,
-                    gap: 1.5,
+                  sx={(t) => ({
+                    py: 1.5,
+                    gap: 2,
                     display: 'flex',
-                    borderRadius: 1.5,
                     alignItems: 'center',
-                    bgcolor: 'background.neutral',
-                  }}
+                    '&:not(:last-of-type)': {
+                      borderBottom: `1px dashed ${t.vars.palette.divider}`,
+                    },
+                  })}
                 >
                   <Box
                     sx={{
@@ -172,8 +174,9 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
                       alignItems: 'center',
                       justifyContent: 'center',
                       typography: 'subtitle2',
-                      color: up ? 'success.dark' : 'warning.dark',
-                      bgcolor: 'background.paper',
+                      color: up ? 'success.main' : 'warning.main',
+                      bgcolor: (t) =>
+                        varAlpha(t.vars.palette[up ? 'success' : 'warning'].mainChannel, 0.12),
                     }}
                   >
                     {row.product}
@@ -216,7 +219,7 @@ export function DashboardRecommendationSummary({ recommendations, asOf, ...other
             )}
           </Box>
 
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               component={RouterLink}
               href={paths.dashboard.recommendation}

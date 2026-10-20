@@ -13,6 +13,7 @@ import {
   useForecastRecommendations,
 } from 'src/module/forecast/shared/hooks';
 import {
+  SECTION_GAP,
   ForecastKpiGrid,
   ForecastTrendCard,
   ForecastFilterBar,
@@ -73,11 +74,11 @@ export function DashboardView() {
         hideSalesValue
       />
 
-      <Grid container spacing={3}>
+      <Grid container rowSpacing={SECTION_GAP} columnSpacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <ForecastTrendCard
             title="Tren kiriman & estimasi terjual"
-            subheader="Estimasi terjual dicatat pada tanggal penarikan retur; kunjungan pertama tiap toko belum punya pembanding"
+            subheader="Estimasi terjual dicatat pada tanggal penarikan retur"
             points={series.data ?? []}
             seriesKeys={['kirim', 'estSold']}
             granularity={granularity}

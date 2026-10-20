@@ -44,7 +44,7 @@ export function ForecastSegmentBar<K extends string>({
   const visible = segments.filter((s) => s.value > 0);
 
   return (
-    <Box>
+    <Box sx={{ containerType: 'inline-size' }}>
       <Box
         role="img"
         aria-label={segments.map((s) => `${s.label} ${fNumber(s.value)}`).join(', ')}
@@ -78,6 +78,14 @@ export function ForecastSegmentBar<K extends string>({
             gap: 1,
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            // Jumlah genap (mis. 4 status): 2×2 bila sempit, satu baris bila lebar —
+            // jangan sampai satu item tersisa sendirian di baris kedua.
+            ...(segments.length % 2 === 0 && {
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              '@container (min-width: 640px)': {
+                gridTemplateColumns: `repeat(${segments.length}, 1fr)`,
+              },
+            }),
           }}
         >
           {segments.map((s) => {

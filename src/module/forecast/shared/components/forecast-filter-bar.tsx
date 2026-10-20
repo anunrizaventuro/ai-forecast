@@ -16,6 +16,8 @@ import { DateRangePicker } from 'src/shared/ui/date-range-picker';
 import { useForecastMeta } from 'src/module/forecast/shared/hooks';
 import { PERIOD, addDays, DEFAULT_FILTERS } from 'src/module/forecast/shared/utils';
 
+import { SECTION_GAP } from './forecast-layout';
+
 // ----------------------------------------------------------------------
 // Satu baris filter di atas konten yang dicakupnya. Mode tanggal:
 // - 'range' → DateRangePicker skeleton dengan preset terikat periode data
@@ -65,7 +67,7 @@ export function ForecastFilterBar({
     (dateMode !== 'none' && (filters.from !== PERIOD.start || filters.to !== PERIOD.end));
 
   return (
-    <Card sx={{ p: 2, mb: 3 }}>
+    <Card sx={{ p: 2, mb: SECTION_GAP }}>
       <Box sx={{ gap: 2, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
         {dateMode === 'range' && (
           <Box sx={{ ...FIELD_SX, flex: { xs: '1 1 100%', sm: '2 1 260px' } }}>

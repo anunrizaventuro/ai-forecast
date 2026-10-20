@@ -2,6 +2,8 @@ export * from './forecast-table';
 
 export * from './forecast-cells';
 
+export * from './forecast-layout';
+
 export * from './forecast-bar-list';
 
 export * from './forecast-kpi-grid';

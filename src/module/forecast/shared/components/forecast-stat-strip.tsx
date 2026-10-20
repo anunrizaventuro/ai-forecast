@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 
 import { Iconify } from 'src/shared/ui/iconify';
 
+import { SECTION_GAP } from './forecast-layout';
 import { tint, chartColorVars } from './forecast-chart-colors';
 
 // ----------------------------------------------------------------------
@@ -30,7 +31,7 @@ export function ForecastStatStrip({ items }: Props) {
     <Card
       sx={(theme) => ({
         ...chartColorVars(theme),
-        mb: 3,
+        mb: SECTION_GAP,
         display: 'grid',
         gridTemplateColumns: {
           xs: '1fr',

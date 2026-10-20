@@ -41,7 +41,8 @@ export function ForecastSimulationAlert({ children }: Props) {
   return (
     <Alert
       severity={COPY.severity}
-      sx={{ mb: 3, alignItems: 'center', '& .MuiAlert-message': { flex: 1 } }}
+      variant="outlined"
+      sx={{ mb: 3, py: 0.25, alignItems: 'center', '& .MuiAlert-message': { flex: 1 } }}
       action={
         <Button
           size="small"

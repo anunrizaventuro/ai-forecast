@@ -28,6 +28,7 @@ import {
   summarizeRecommendations,
 } from 'src/module/forecast/shared/utils';
 import {
+  SECTION_GAP,
   RecommendationMix,
   ForecastFilterBar,
   ForecastDataState,
@@ -208,7 +209,7 @@ export function RecommendationView() {
 
       <ForecastDataState error={query.error} fetching={query.fetching} onRetry={query.refetch} />
 
-      <Card sx={{ p: 3, mb: 3 }}>
+      <Card sx={{ p: 3, mb: SECTION_GAP }}>
         <Box
           sx={{
             mb: 2.5,

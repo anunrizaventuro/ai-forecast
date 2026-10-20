@@ -10,6 +10,7 @@ import { Label } from 'src/shared/ui/label';
 import { KpiCard } from 'src/shared/ui/dashboard-card';
 import { fNumber, fPercent, fShortCurrency } from 'src/module/forecast/shared/utils';
 
+import { SECTION_GAP } from './forecast-layout';
 import { useSeriesColors } from './forecast-chart-colors';
 
 // ----------------------------------------------------------------------
@@ -41,7 +42,7 @@ export function ForecastKpiGrid({ summary, points, hideSalesValue }: Props) {
   const size = { xs: 12, sm: 6, lg: hideSalesValue ? 4 : 3 };
 
   return (
-    <Grid container spacing={3} sx={{ mb: 3 }}>
+    <Grid container spacing={3} sx={{ mb: SECTION_GAP }}>
       <Grid size={size}>
         <KpiCard
           title="Total kiriman"

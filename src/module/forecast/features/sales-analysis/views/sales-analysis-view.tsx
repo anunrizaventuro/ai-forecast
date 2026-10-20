@@ -26,6 +26,7 @@ import {
   useForecastProducts,
 } from 'src/module/forecast/shared/hooks';
 import {
+  SECTION_GAP,
   ForecastKpiGrid,
   ForecastBarList,
   ForecastTrendCard,
@@ -106,11 +107,11 @@ export function SalesAnalysisView() {
 
       <ForecastKpiGrid summary={summary.data ?? EMPTY_SUMMARY} points={points} />
 
-      <Grid container spacing={3}>
+      <Grid container rowSpacing={SECTION_GAP} columnSpacing={3}>
         <Grid size={{ xs: 12, lg: 8 }}>
           <ForecastTrendCard
             title="Kiriman vs estimasi terjual"
-            subheader="Selisih keduanya ≈ retur + sisa stok. Mode mingguan hanya menampilkan minggu penuh (Senin–Sabtu)."
+            subheader="Selisih keduanya ≈ retur + sisa stok; mode mingguan hanya minggu penuh"
             points={points}
             seriesKeys={['kirim', 'estSold']}
             granularity={granularity}
