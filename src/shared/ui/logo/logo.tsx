@@ -64,7 +64,7 @@ export function Logo({
             typography: 'h6',
             lineHeight: 1,
             whiteSpace: 'nowrap',
-            color: 'text.primary',
+            color: 'inherit',
           }}
         >
           {CONFIG.appName}
@@ -76,9 +76,9 @@ export function Logo({
 
 // ----------------------------------------------------------------------
 
-const LogoRoot = styled(Link)(() => ({
+const LogoRoot = styled(Link)(({ theme }) => ({
   flexShrink: 0,
-  color: 'inherit',
+  color: theme.vars.palette.text.primary,
   display: 'inline-flex',
   alignItems: 'center',
   verticalAlign: 'middle',

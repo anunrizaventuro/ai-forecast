@@ -10,8 +10,8 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary, { accordionSummaryClasses } from '@mui/material/AccordionSummary';
 
 import { Iconify } from 'src/shared/ui/iconify';
 import { TableHeadCustom } from 'src/shared/ui/table';
@@ -73,12 +73,11 @@ export function RecommendationGroup({ title, subtitle, meta, rows, rowLabel }: P
         bgcolor: 'transparent',
         '&::before': { display: 'none' },
         '&:not(:last-of-type)': { borderBottom: `dashed 1px ${theme.vars.palette.divider}` },
+        // Varian `disableGutters` tema meng-nol-kan padding summary; pasang lagi di sini.
+        [`& .${accordionSummaryClasses.root}`]: { px: { xs: 2, md: 3 } },
       })}
     >
-      <AccordionSummary
-        expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}
-        sx={{ px: { xs: 2, md: 3 } }}
-      >
+      <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>
         <Box
           sx={{
             py: 0.5,

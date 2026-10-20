@@ -1,7 +1,7 @@
 {
   "name": "@venturo/ai-forecast-web",
   "author": "Venturo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AI Forecast — dashboard distribusi roti & rekomendasi stok",
   "private": true,
   "type": "module",

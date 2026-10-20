@@ -68,7 +68,22 @@ export function KpiCard({
   return (
     <Card
       sx={[
-        { p: 3, height: 1, display: 'flex', flexDirection: 'column' },
+        {
+          p: 3,
+          height: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          // Garis aksen = warna seri yang sama dengan grafik (Kiriman / Estimasi / Retur).
+          '&::before': {
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 4,
+            content: '""',
+            position: 'absolute',
+            bgcolor: accent,
+          },
+        },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
       {...other}

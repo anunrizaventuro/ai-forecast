@@ -134,6 +134,7 @@ const ItemRoot = styled(ButtonBase, { shouldForwardProp })<StyledState>(({
     ...(active && {
       color: 'var(--nav-item-root-active-color)',
       backgroundColor: 'var(--nav-item-root-active-bg)',
+      boxShadow: 'var(--nav-item-root-active-shadow, none)',
       '&:hover': { backgroundColor: 'var(--nav-item-root-active-hover-bg)' },
       ...theme.applyStyles('dark', {
         color: 'var(--nav-item-root-active-color-on-dark)',

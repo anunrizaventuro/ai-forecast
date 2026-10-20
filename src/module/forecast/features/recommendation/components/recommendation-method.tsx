@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary, { accordionSummaryClasses } from '@mui/material/AccordionSummary';
+import AccordionDetails, { accordionDetailsClasses } from '@mui/material/AccordionDetails';
 
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
@@ -46,8 +46,12 @@ export function RecommendationMethod() {
       sx={(theme) => ({
         mb: 3,
         borderRadius: 2,
+        bgcolor: 'background.paper',
         boxShadow: theme.vars.customShadows.card,
         '&::before': { display: 'none' },
+        // Varian `disableGutters` tema meng-nol-kan padding; kartu ini butuh tepi dalam.
+        [`& .${accordionSummaryClasses.root}`]: { px: 3 },
+        [`& .${accordionDetailsClasses.root}`]: { px: 3, pb: 3 },
       })}
     >
       <AccordionSummary expandIcon={<Iconify icon="eva:arrow-ios-downward-fill" />}>

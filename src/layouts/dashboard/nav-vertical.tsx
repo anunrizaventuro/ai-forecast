@@ -44,7 +44,7 @@ export function NavVertical({
     <>
       {slots?.topArea ?? (
         <Box sx={{ pl: 3.5, pt: 2.5, pb: 2 }}>
-          <BrandLogo />
+          <BrandLogo sx={{ color: 'var(--layout-nav-text-primary-color)' }} />
         </Box>
       )}
 
@@ -144,6 +144,7 @@ const NavRoot = styled('div', {
     flexDirection: 'column',
     zIndex: 'var(--layout-nav-zIndex)',
     backgroundColor: 'var(--layout-nav-bg)',
+    backgroundImage: 'var(--layout-nav-bg-image, none)',
     width: isNavMini ? 'var(--layout-nav-mini-width)' : 'var(--layout-nav-vertical-width)',
     borderRight: `1px solid var(--layout-nav-border-color, ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)})`,
     transition: theme.transitions.create(['width'], {

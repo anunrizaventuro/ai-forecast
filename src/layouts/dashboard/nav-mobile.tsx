@@ -55,6 +55,7 @@ export function NavMobile({
             {
               overflow: 'unset',
               bgcolor: 'var(--layout-nav-bg)',
+              backgroundImage: 'var(--layout-nav-bg-image, none)',
               width: 'var(--layout-nav-mobile-width)',
             },
             ...(Array.isArray(sx) ? sx : [sx]),
@@ -64,7 +65,7 @@ export function NavMobile({
     >
       {slots?.topArea ?? (
         <Box sx={{ pl: 3.5, pt: 2.5, pb: 3 }}>
-          <BrandLogo />
+          <BrandLogo sx={{ color: 'var(--layout-nav-text-primary-color)' }} />
         </Box>
       )}
 
