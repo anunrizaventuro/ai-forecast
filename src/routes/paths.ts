@@ -19,6 +19,7 @@ export const paths = {
     salesAnalysis: '/analisis-penjualan',
     stores: '/toko',
     products: '/produk',
+    salespeople: '/sales',
     spk: '/spk',
     spkDetail: (id: number) => `/spk/${id}`,
     dataImport: '/import-data',

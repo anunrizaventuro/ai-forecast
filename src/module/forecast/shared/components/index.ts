@@ -30,4 +30,6 @@ export * from './recommendation-delta';
 
 export * from './forecast-chart-colors';
 
+export * from './recommendation-spk-note';
+
 export * from './forecast-simulation-alert';

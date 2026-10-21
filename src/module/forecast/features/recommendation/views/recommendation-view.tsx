@@ -32,6 +32,7 @@ import {
   ForecastFilterBar,
   ForecastDataState,
   ForecastPageHeader,
+  RecommendationSpkNote,
   ForecastSimulationAlert,
 } from 'src/module/forecast/shared/components';
 
@@ -165,6 +166,8 @@ export function RecommendationView() {
       />
 
       <ForecastSimulationAlert />
+
+      <RecommendationSpkNote page="recommendation" />
 
       <RecommendationMethod />
 

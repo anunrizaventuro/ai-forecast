@@ -22,6 +22,7 @@ import {
   TableEmptyRow,
   ForecastDataState,
   ForecastPageHeader,
+  RecommendationSpkNote,
   ForecastSimulationAlert,
 } from 'src/module/forecast/shared/components';
 
@@ -56,6 +57,8 @@ export function SpkListView() {
       />
 
       <ForecastSimulationAlert />
+
+      <RecommendationSpkNote page="spk" />
 
       <ForecastDataState error={list.error ?? meta.error} onRetry={list.refetch} />
 

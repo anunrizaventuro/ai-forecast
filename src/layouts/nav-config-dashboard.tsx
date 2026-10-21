@@ -21,6 +21,7 @@ const ICONS = {
   salesAnalysis: icon('ic-analytics'),
   stores: icon('ic-ecommerce'),
   products: icon('ic-product'),
+  salespeople: icon('ic-user'),
   spk: icon('ic-invoice'),
   dataImport: icon('ic-file'),
   settings: icon('ic-params'),
@@ -71,24 +72,42 @@ export function useNavData(): NavSectionProps['data'] {
   const { can, canAny } = usePermission();
 
   return useMemo(() => {
+    // Label forecast ditulis langsung (Bahasa Indonesia saja, tanpa i18n).
+    // Dikelompokkan per fungsi: ringkasan → kerja harian → data master → administrasi.
     const sections: NavSectionProps['data'] = [
       {
-        // Label forecast ditulis langsung (Bahasa Indonesia saja, tanpa i18n).
+        subheader: 'Ringkasan',
         items: [
           { title: 'Dashboard', path: paths.dashboard.root, icon: ICONS.dashboard },
-          {
-            title: 'Rekomendasi Stok',
-            path: paths.dashboard.recommendation,
-            icon: ICONS.recommendation,
-          },
           {
             title: 'Analisis Penjualan',
             path: paths.dashboard.salesAnalysis,
             icon: ICONS.salesAnalysis,
           },
+        ],
+      },
+      {
+        subheader: 'Perencanaan Kiriman',
+        items: [
+          {
+            title: 'Rekomendasi Stok',
+            path: paths.dashboard.recommendation,
+            icon: ICONS.recommendation,
+          },
           { title: 'SPK', path: paths.dashboard.spk, icon: ICONS.spk },
+        ],
+      },
+      {
+        subheader: 'Data Master',
+        items: [
           { title: 'Data Toko', path: paths.dashboard.stores, icon: ICONS.stores },
           { title: 'Data Produk', path: paths.dashboard.products, icon: ICONS.products },
+          { title: 'Data Sales', path: paths.dashboard.salespeople, icon: ICONS.salespeople },
+        ],
+      },
+      {
+        subheader: 'Administrasi',
+        items: [
           { title: 'Import Data', path: paths.dashboard.dataImport, icon: ICONS.dataImport },
           { title: 'Pengaturan', path: paths.dashboard.settings, icon: ICONS.settings },
         ],
