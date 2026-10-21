@@ -41,7 +41,14 @@ const kindSchema = z.object({
   formats: z.string(),
 });
 
+// sheet: hanya diisi untuk file berisi beberapa sheet (ekspor database).
+const sheetName = z
+  .string()
+  .nullish()
+  .transform((value) => value ?? '');
+
 const issueSchema = z.object({
+  sheet: sheetName,
   row: z.number(),
   level: z.enum(['error', 'peringatan']),
   column: z.string(),
@@ -49,6 +56,7 @@ const issueSchema = z.object({
 });
 
 const opSchema = z.object({
+  sheet: sheetName,
   row: z.number(),
   table: z.string(),
   key: list(z.string()),
@@ -67,6 +75,7 @@ const batchSchema = z
     kind_label: z.string(),
     file_name: z.string(),
     status: z.enum(['preview', 'selesai']),
+    detected: z.boolean().nullish(),
     total_rows: z.number(),
     valid_rows: z.number(),
     error_rows: z.number(),
@@ -91,6 +100,8 @@ const batchSchema = z
     kindLabel: raw.kind_label,
     fileName: raw.file_name,
     status: raw.status,
+    /** Jenis data ditebak backend dari isi file (hanya di respons preview). */
+    detected: raw.detected ?? false,
     totalRows: raw.total_rows,
     validRows: raw.valid_rows,
     errorRows: raw.error_rows,
@@ -137,14 +148,17 @@ export async function getImportHistory({ signal }: FetchOptions = {}) {
   return list(batchSchema).parse(data);
 }
 
-/** Unggah file → batch preview. File ditolak → ApiError 422 (`errors.file` / `errors.kind`). */
+/**
+ * Unggah file → batch preview. `kind` null = backend menebak jenis data dari
+ * isi file. File ditolak / tidak dikenali → ApiError 422 (`errors.file` / `errors.kind`).
+ */
 export async function previewImport(
-  kind: string,
+  kind: string | null,
   file: File,
   onProgress?: (percent: number) => void
 ) {
   const form = new FormData();
-  form.append('kind', kind);
+  if (kind) form.append('kind', kind);
   form.append('file', file);
   const data = await unwrapNullable<unknown>(
     axios.post(importEndpoints.preview, form, {

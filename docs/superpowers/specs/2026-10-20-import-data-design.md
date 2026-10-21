@@ -91,9 +91,18 @@ Commit kedua untuk batch yang sama → 409. Tanpa autentikasi (sama seperti API 
 ## Frontend
 
 - Halaman baru `/import-data` (menu "Import Data"), `features/data-import`.
-- Langkah: kartu jenis data (urutan disarankan + impor terakhir) → unggah (drag & drop /
-  pilih file) → preview (ringkasan angka, tabel masalah, contoh baris + status) → konfirmasi
-  (dialog) → ringkasan hasil. Di bawahnya riwayat impor.
+- Langkah: unggah (drag & drop / pilih file) → preview (ringkasan angka, tabel masalah, contoh
+  baris + status) → konfirmasi (dialog) → ringkasan hasil. Di bawahnya riwayat impor.
+- **Revisi 2026-10-21 — satu dropzone, jenis dikenali otomatis.** Klien hanya mengirim tiga
+  macam file (database/ekspor Excel, LPK, SPK), sedangkan 7 kartu jenis data membingungkan.
+  Pengguna sekarang langsung menjatuhkan file; backend menebak jenisnya dari judul kolom
+  (`internal/importer/detect.go`, aturan di `docs/api.md` § Impor data) dan preview menampilkan
+  label "Dikenali otomatis" + "Bukan jenis ini? Pilih manual". Jenis baru `ekspor` membaca semua
+  sheet Excel ekspor database (MToko, MRoti, KIRIMAN, STOCK, BS) dalam satu batch — master
+  dulu, jadi toko baru langsung dikenali sheet transaksi; masalah & contoh baris menyebut sheet
+  asal (`sheet`, migrasi 4). Kartu jenis data tetap ada di bagian terlipat "Pilih jenis data
+  manual" (tanpa nomor urut) untuk file yang tidak dikenali, mis. CSV transaksi tanpa kata
+  kiriman/sisa/bs di namanya.
 - Mode `simulasi`: halaman menampilkan pemberitahuan bahwa impor butuh backend.
 
 ## Verifikasi

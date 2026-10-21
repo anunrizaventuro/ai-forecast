@@ -9,15 +9,19 @@ import LinearProgress from '@mui/material/LinearProgress';
 import { Label } from 'src/shared/ui/label';
 import { Iconify } from 'src/shared/ui/iconify';
 
+import { AUTO_FORMATS } from './import-labels';
+
 // ----------------------------------------------------------------------
-// Area unggah (seret-lepas atau pilih file) + format yang diharapkan untuk
-// jenis data terpilih. Validasi isi file dilakukan backend.
+// Area unggah (seret-lepas atau pilih file). Tanpa jenis data (kind null)
+// backend mengenali file dari isinya; daftar file yang dikenali ditampilkan.
+// Dengan jenis manual, format & kolom jenis itu yang ditampilkan. Validasi
+// isi file dilakukan backend.
 
 const ACCEPT = '.xlsx,.csv';
 const MAX_MB = 10;
 
 type Props = {
-  kind: ImportKind;
+  kind: ImportKind | null;
   uploading: boolean;
   progress: number;
   onFile: (file: File) => void;
@@ -48,7 +52,7 @@ export function ImportDropzone({ kind, uploading, progress, onFile }: Props) {
       <Box
         role="button"
         tabIndex={0}
-        aria-label={`Unggah file ${kind.label}`}
+        aria-label={kind ? `Unggah file ${kind.label}` : 'Unggah file dari klien'}
         aria-disabled={uploading}
         onClick={() => !uploading && inputRef.current?.click()}
         onKeyDown={(event) => {
@@ -85,7 +89,7 @@ export function ImportDropzone({ kind, uploading, progress, onFile }: Props) {
       >
         <Iconify icon="eva:cloud-upload-fill" width={40} sx={{ color: 'primary.main' }} />
         <Typography variant="subtitle1">
-          {uploading ? 'Memeriksa file…' : `Seret file ${kind.label} ke sini`}
+          {uploading ? 'Memeriksa file…' : `Seret file ${kind ? kind.label : 'dari klien'} ke sini`}
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           atau{' '}
@@ -119,10 +123,49 @@ export function ImportDropzone({ kind, uploading, progress, onFile }: Props) {
         </Typography>
       )}
 
-      <Box sx={{ mt: 2, gap: 1, display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          <strong>Format:</strong> {kind.formats}
-        </Typography>
+      {kind ? <KindFormat kind={kind} /> : <AutoFormats />}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------
+
+function AutoFormats() {
+  return (
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary' }}>
+        Jenis data dikenali otomatis dari isi file:
+      </Typography>
+      <Box
+        sx={{
+          gap: 1.5,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+        }}
+      >
+        {AUTO_FORMATS.map((item) => (
+          <Box key={item.label} sx={{ gap: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+            <Iconify icon={item.icon} width={22} sx={{ mt: 0.25, color: 'primary.main' }} />
+            <div>
+              <Typography variant="subtitle2">{item.label}</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {item.hint}
+              </Typography>
+            </div>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function KindFormat({ kind }: { kind: ImportKind }) {
+  return (
+    <Box sx={{ mt: 2, gap: 1, display: 'flex', flexDirection: 'column' }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        <strong>Format:</strong> {kind.formats}
+      </Typography>
+      {kind.required.length > 0 && (
         <Box sx={{ gap: 0.75, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
           <Typography variant="caption" sx={{ color: 'text.secondary', mr: 0.5 }}>
             Kolom wajib:
@@ -145,7 +188,7 @@ export function ImportDropzone({ kind, uploading, progress, onFile }: Props) {
             </>
           )}
         </Box>
-      </Box>
-    </div>
+      )}
+    </Box>
   );
 }

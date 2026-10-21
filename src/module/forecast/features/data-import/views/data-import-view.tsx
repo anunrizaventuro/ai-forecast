@@ -9,6 +9,7 @@ import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Stepper from '@mui/material/Stepper';
+import Collapse from '@mui/material/Collapse';
 import StepLabel from '@mui/material/StepLabel';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -18,6 +19,8 @@ import DialogContent from '@mui/material/DialogContent';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
+import { Label } from 'src/shared/ui/label';
+import { Iconify } from 'src/shared/ui/iconify';
 import { fNumber } from 'src/module/forecast/shared/utils';
 import { IS_API, invalidateForecast } from 'src/module/forecast/shared/hooks';
 import { ForecastDataState, ForecastPageHeader } from 'src/module/forecast/shared/components';
@@ -30,17 +33,20 @@ import { ImportDropzone } from '../components/import-dropzone';
 import { ImportKindPicker } from '../components/import-kind-picker';
 
 // ----------------------------------------------------------------------
-// Alur: pilih jenis → unggah (backend membaca & memvalidasi → preview) →
-// periksa → konfirmasi simpan → ringkasan. Tidak ada data yang ditulis
-// sebelum pengguna menekan "Simpan".
+// Alur: unggah file apa pun dari klien (backend mengenali jenisnya, membaca &
+// memvalidasi → preview) → periksa → konfirmasi simpan → ringkasan. Jenis
+// data bisa dipilih manual bila deteksi tidak cocok. Tidak ada data yang
+// ditulis sebelum pengguna menekan "Simpan".
 
-const STEPS = ['Pilih jenis data', 'Unggah file', 'Periksa & simpan'];
+const STEPS = ['Unggah file', 'Periksa & simpan'];
 
 export function DataImportView() {
   const kinds = useImportKinds();
   const history = useImportHistory();
 
+  // null = jenis data dikenali otomatis oleh backend.
   const [kind, setKind] = useState<ImportKind | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
   const [batch, setBatch] = useState<ImportBatch | null>(null);
   const [result, setResult] = useState<ImportBatch | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -49,7 +55,7 @@ export function DataImportView() {
   const [confirming, setConfirming] = useState(false);
   const [committing, setCommitting] = useState(false);
 
-  const step = batch ? 2 : kind ? 1 : 0;
+  const step = batch ? 1 : 0;
 
   const reset = (next: ImportKind | null = null) => {
     setKind(next);
@@ -59,13 +65,12 @@ export function DataImportView() {
   };
 
   const handleFile = async (file: File) => {
-    if (!kind) return;
     setUploading(true);
     setProgress(0);
     setError(null);
     setResult(null);
     try {
-      setBatch(await previewImport(kind.id, file, setProgress));
+      setBatch(await previewImport(kind?.id ?? null, file, setProgress));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'File gagal diperiksa.');
     } finally {
@@ -94,7 +99,7 @@ export function DataImportView() {
     <Box sx={{ p: { xs: 2, md: 3 } }}>
       <ForecastPageHeader
         title="Import Data"
-        description="Masukkan data toko, produk, laporan kunjungan kurir, dan SPK dari file Excel atau CSV. Data diperiksa dulu sebelum disimpan."
+        description="Unggah file dari klien — laporan kunjungan kurir (LPK), SPK, atau Excel ekspor database. Jenis data dikenali otomatis dan diperiksa dulu sebelum disimpan."
       />
 
       {!IS_API ? (
@@ -146,31 +151,63 @@ export function DataImportView() {
               ))}
             </Stepper>
 
-            {step < 2 && (
+            {step === 0 && (
               <>
-                <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-                  Impor sesuai urutan nomor: data toko dan produk lebih dulu, karena laporan
-                  kunjungan dan SPK hanya diterima untuk toko yang sudah terdaftar. Mengimpor file
-                  yang sama dua kali aman — data yang sudah ada tidak digandakan.
-                </Typography>
-                <ImportKindPicker
-                  kinds={kinds.data ?? []}
-                  history={history.data ?? []}
-                  selected={kind?.id ?? null}
-                  onSelect={(next) => reset(next)}
-                />
-              </>
-            )}
-
-            {step === 1 && kind && (
-              <Box sx={{ mt: 4 }}>
                 <ImportDropzone
                   kind={kind}
                   uploading={uploading}
                   progress={progress}
                   onFile={handleFile}
                 />
-              </Box>
+
+                <Box
+                  sx={{ mt: 3, gap: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}
+                >
+                  {kind ? (
+                    <>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Jenis data dipilih manual: <strong>{kind.label}</strong>.
+                      </Typography>
+                      <Button size="small" onClick={() => reset(null)} disabled={uploading}>
+                        Kembali ke deteksi otomatis
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="small"
+                      color="inherit"
+                      onClick={() => setManualOpen((open) => !open)}
+                      aria-expanded={manualOpen}
+                      endIcon={
+                        <Iconify
+                          icon={
+                            manualOpen ? 'eva:arrow-ios-upward-fill' : 'eva:arrow-ios-downward-fill'
+                          }
+                        />
+                      }
+                    >
+                      Pilih jenis data manual
+                    </Button>
+                  )}
+                </Box>
+
+                <Collapse in={manualOpen || !!kind} unmountOnExit>
+                  <Box sx={{ pt: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                      Pakai ini bila file tidak dikenali, misalnya data kiriman/sisa/BS terpisah
+                      yang nama file-nya tidak menyebut jenisnya. Toko baru diimpor lebih dulu —
+                      laporan kunjungan dan SPK hanya diterima untuk toko yang sudah terdaftar.
+                      Mengimpor file yang sama dua kali aman — data yang sudah ada tidak digandakan.
+                    </Typography>
+                    <ImportKindPicker
+                      kinds={kinds.data ?? []}
+                      history={history.data ?? []}
+                      selected={kind?.id ?? null}
+                      onSelect={(next) => reset(next.id === kind?.id ? null : next)}
+                    />
+                  </Box>
+                </Collapse>
+              </>
             )}
 
             {error && (
@@ -179,11 +216,33 @@ export function DataImportView() {
               </Alert>
             )}
 
-            {step === 2 && batch && (
+            {step === 1 && batch && (
               <>
-                <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                  {batch.kindLabel} · {batch.fileName}
-                </Typography>
+                <Box
+                  sx={{ mb: 2, gap: 1, display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}
+                >
+                  <Typography variant="subtitle1">
+                    {batch.kindLabel} · {batch.fileName}
+                  </Typography>
+                  {batch.detected && (
+                    <>
+                      <Label color="info" variant="soft">
+                        Dikenali otomatis
+                      </Label>
+                      <Button
+                        size="small"
+                        color="inherit"
+                        onClick={() => {
+                          reset(null);
+                          setManualOpen(true);
+                        }}
+                        disabled={committing}
+                      >
+                        Bukan jenis ini? Pilih manual
+                      </Button>
+                    </>
+                  )}
+                </Box>
                 <ImportPreview
                   batch={batch}
                   committing={committing}

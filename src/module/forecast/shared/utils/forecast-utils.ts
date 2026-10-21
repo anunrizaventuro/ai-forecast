@@ -94,18 +94,22 @@ export const DEFAULT_REC_PARAMS: RecommendationParams = {
 
 // ---------------------------------------------------------------------- Tanggal
 
-export const fDate = (tgl: string) => dayjs(tgl).locale('id').format('D MMM YYYY');
+// Tanggal kosong (mode api sebelum data apa pun diimpor: meta.period = "") → "–".
+const fDayjs = (value: string, template: string) =>
+  value ? dayjs(value).locale('id').format(template) : '–';
+
+export const fDate = (tgl: string) => fDayjs(tgl, 'D MMM YYYY');
 /** Waktu ISO (simpan impor/pengaturan) → "20 Okt 2026, 15:41". */
-export const fDateTime = (iso: string) => dayjs(iso).locale('id').format('D MMM YYYY, HH:mm');
-export const fDateShort = (tgl: string) => dayjs(tgl).locale('id').format('D MMM');
-export const fWeekday = (tgl: string) => dayjs(tgl).locale('id').format('dddd');
+export const fDateTime = (iso: string) => fDayjs(iso, 'D MMM YYYY, HH:mm');
+export const fDateShort = (tgl: string) => fDayjs(tgl, 'D MMM');
+export const fWeekday = (tgl: string) => fDayjs(tgl, 'dddd');
 
 /** Label sumbu X: tanggal (harian) atau "Mg <Senin>" (mingguan). */
 export const seriesLabel = (key: string, granularity: Granularity) =>
   granularity === 'harian' ? fDateShort(key) : `Mg ${fDateShort(key)}`;
 
 export const addDays = (tgl: string, days: number) =>
-  dayjs(tgl).add(days, 'day').format('YYYY-MM-DD');
+  tgl ? dayjs(tgl).add(days, 'day').format('YYYY-MM-DD') : '';
 
 /** Tambah hari lalu geser ke Senin bila jatuh di hari Minggu (tidak ada kunjungan). */
 const addVisitDays = (tgl: string, days: number) => {

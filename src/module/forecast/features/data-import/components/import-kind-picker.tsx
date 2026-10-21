@@ -9,8 +9,8 @@ import { Iconify } from 'src/shared/ui/iconify';
 import { fDateTime } from 'src/module/forecast/shared/utils';
 
 // ----------------------------------------------------------------------
-// Kartu jenis data, dikelompokkan dan bernomor sesuai urutan impor yang
-// disarankan backend (data master dulu, lalu data harian).
+// Kartu jenis data untuk pilihan manual (bila deteksi otomatis tidak cocok),
+// dikelompokkan sesuai urutan dari backend.
 
 type Props = {
   kinds: ImportKind[];
@@ -61,23 +61,6 @@ export function ImportKindPicker({ kinds, history, selected, onSelect }: Props) 
                     aria-pressed={active}
                     sx={{ p: 2, height: 1, display: 'flex', alignItems: 'flex-start' }}
                   >
-                    <Box
-                      sx={{
-                        mr: 1.5,
-                        width: 28,
-                        height: 28,
-                        flexShrink: 0,
-                        display: 'flex',
-                        borderRadius: '50%',
-                        typography: 'subtitle2',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: active ? 'primary.main' : 'background.neutral',
-                        color: active ? 'primary.contrastText' : 'text.secondary',
-                      }}
-                    >
-                      {kind.order}
-                    </Box>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography variant="subtitle2">{kind.label}</Typography>
                       <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>

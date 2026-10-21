@@ -26,7 +26,7 @@ import {
   ForecastTablePagination,
 } from 'src/module/forecast/shared/components';
 
-import { tableLabel, LEVEL_LABEL, STATUS_LABEL } from './import-labels';
+import { rowLabel, tableLabel, LEVEL_LABEL, TABLE_LABEL, STATUS_LABEL } from './import-labels';
 
 // ----------------------------------------------------------------------
 // Hasil pemeriksaan file sebelum disimpan: ringkasan angka, catatan asumsi,
@@ -43,7 +43,11 @@ type Props = {
 export function ImportPreview({ batch, committing, onCommit, onCancel }: Props) {
   const theme = useTheme();
   const toSave = batch.inserted + batch.updated;
-  const tables = Object.entries(batch.tables);
+  // Urutan alur data (master → transaksi), bukan abjad kunci JSON.
+  const tableOrder = Object.keys(TABLE_LABEL);
+  const tables = Object.entries(batch.tables).sort(
+    ([a], [b]) => tableOrder.indexOf(a) - tableOrder.indexOf(b)
+  );
 
   return (
     <Box sx={{ gap: 3, display: 'flex', flexDirection: 'column' }}>
@@ -169,7 +173,7 @@ function IssueTable({ batch }: { batch: ImportBatch }) {
         <Table size="small" sx={{ minWidth: 640 }}>
           <TableHead>
             <TableRow>
-              <TableCell width={80}>Baris</TableCell>
+              <TableCell width={110}>Baris</TableCell>
               <TableCell width={120}>Tingkat</TableCell>
               <TableCell width={120}>Kolom</TableCell>
               <TableCell>Keterangan</TableCell>
@@ -177,8 +181,8 @@ function IssueTable({ batch }: { batch: ImportBatch }) {
           </TableHead>
           <TableBody>
             {rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((issue, index) => (
-              <TableRow key={`${issue.row}-${issue.column}-${index}`}>
-                <TableCell>{issue.row || 'File'}</TableCell>
+              <TableRow key={`${issue.sheet}-${issue.row}-${issue.column}-${index}`}>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>{rowLabel(issue)}</TableCell>
                 <TableCell>
                   <Label color={LEVEL_LABEL[issue.level].color} variant="soft">
                     {LEVEL_LABEL[issue.level].text}
@@ -223,7 +227,7 @@ function OpTable({ batch }: { batch: ImportBatch }) {
         title="Contoh data yang dibaca"
         subheader={
           batch.opsTotal > batch.ops.length
-            ? `${fNumber(batch.ops.length)} baris pertama dari ${fNumber(batch.opsTotal)}.`
+            ? `${fNumber(batch.ops.length)} contoh dari ${fNumber(batch.opsTotal)} baris — baris baru & diperbarui didahulukan.`
             : `${fNumber(batch.opsTotal)} baris.`
         }
       />
@@ -259,7 +263,7 @@ function OpTable({ batch }: { batch: ImportBatch }) {
           <TableBody>
             {rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map((op) => (
               <TableRow key={`${op.table}-${op.key.join('|')}`}>
-                <TableCell>{op.row}</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>{rowLabel(op)}</TableCell>
                 <TableCell>{tableLabel(op.table)}</TableCell>
                 <TableCell>{op.label}</TableCell>
                 {hasTotal && <TableCell align="right">{fNumber(op.total ?? 0)}</TableCell>}
